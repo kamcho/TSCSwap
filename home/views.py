@@ -143,8 +143,8 @@ def create_mysubject(request):
     # Handle level form submission
     if request.method == "POST" and 'set_level' in request.POST:
         if not profile:
-            from users.models import Profile
-            profile = Profile.objects.create(user=user)
+            from users.models import PersonalProfile
+            profile = PersonalProfile.objects.create(user=user)
         
         level_id = request.POST.get('level')
         if level_id:
