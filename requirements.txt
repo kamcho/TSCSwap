@@ -1,0 +1,4 @@
+Django>=4.2.0,<5.0.0
+openai>=1.0.0
+python-dotenv>=1.0.0
+# Add other project dependencies here

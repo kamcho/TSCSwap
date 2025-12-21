@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     'home',
     'users',
     'payments',
+    'chat',
 ]
 
 MIDDLEWARE = [

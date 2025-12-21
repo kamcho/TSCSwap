@@ -1,0 +1,68 @@
+{% load static %}
+
+<!-- Chat Toggle Button -->
+<button id="chat-toggle" class="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-br from-blue-500 to-teal-500 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 z-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+    <i class="fas fa-comment-dots text-xl"></i>
+</button>
+
+<!-- Chat Container -->
+<div id="chat-container" class="fixed bottom-28 right-8 w-96 max-h-[80vh] bg-gray-800 rounded-xl shadow-2xl flex flex-col border border-gray-700 overflow-hidden transition-all duration-300 transform translate-y-4 opacity-0 invisible z-50">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-teal-600 px-4 py-3 flex items-center justify-between">
+        <h3 class="text-white font-semibold text-lg">TSC Swap Assistant</h3>
+        <div class="flex items-center space-x-2">
+            <button id="expand-chat" class="text-gray-200 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors" aria-label="Toggle fullscreen">
+                <i class="fas fa-expand text-sm"></i>
+            </button>
+            <button id="close-chat" class="text-gray-200 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Messages -->
+    <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900" style="max-height: 60vh; min-height: 200px;">
+        <!-- Welcome message -->
+        <div class="flex">
+            <div class="max-w-[80%] bg-gray-700 text-gray-100 px-4 py-3 rounded-lg rounded-tl-none shadow">
+                <p>Hello! I'm your TSC Swap assistant. How can I help you with teacher swaps today?</p>
+                <div class="text-xs text-gray-400 mt-1 text-right">TSC Assistant • Just now</div>
+            </div>
+        </div>
+        
+        <!-- Typing indicator (initially hidden) -->
+        <div id="typing-indicator" class="flex items-center space-x-1 px-4 py-2 bg-gray-800 rounded-lg w-16 hidden">
+            <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+            <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+        </div>
+    </div>
+    
+    <!-- Input Area -->
+    <div class="border-t border-gray-700 bg-gray-800 p-4">
+        <form id="chat-form" class="flex items-center space-x-2">
+            {% csrf_token %}
+            <input 
+                type="text" 
+                id="user-input" 
+                placeholder="Ask about TSC swaps..." 
+                class="flex-1 bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                autocomplete="off"
+                aria-label="Type your message"
+                autofocus>
+            <button 
+                type="submit" 
+                id="send-button" 
+                class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg p-2 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                aria-label="Send message">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Include Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Include JS -->
+<script src="{% static 'chat/js/chat.js' %}" defer></script>

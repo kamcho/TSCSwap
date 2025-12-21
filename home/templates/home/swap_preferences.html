@@ -1,0 +1,253 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}My Swap Preferences - TSC Swap{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div class="p-6 bg-gradient-to-r from-teal-600 to-blue-600 text-white">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold">My Swap Preferences</h1>
+                    <p class="mt-1 text-blue-100">Set your preferred location for teacher swaps</p>
+                </div>
+                {% if form.instance.pk %}
+                <div class="bg-teal-500/20 border border-teal-400/30 rounded-lg p-3">
+                    <p class="text-sm text-teal-100 flex items-center">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Preferences saved
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="p-6 bg-gray-800 text-gray-100">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 p-4 rounded-md {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post" id="preferencesForm" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if form.instance.pk %}
+                <div class="bg-gray-700/50 border-l-4 border-teal-500 rounded-r-md p-4 mb-6">
+                    <h3 class="text-sm font-medium text-gray-300 mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Current Preferences
+                    </h3>
+                    <div class="mt-2 text-sm text-gray-300 space-y-1.5">
+                        <p class="flex items-center">
+                            <span class="w-2 h-2 rounded-full bg-teal-400 mr-2"></span>
+                            <span class="font-medium">County:</span> 
+                            <span class="ml-1">{{ form.instance.desired_county|default:"Not specified" }}</span>
+                        </p>
+                        <p class="flex items-center">
+                            <span class="w-2 h-2 rounded-full bg-teal-400 mr-2"></span>
+                            <span class="font-medium">Constituency:</span> 
+                            <span class="ml-1">{{ form.instance.desired_constituency|default:"Not specified" }}</span>
+                        </p>
+                        <p class="flex items-center">
+                            <span class="w-2 h-2 rounded-full bg-teal-400 mr-2"></span>
+                            <span class="font-medium">Ward:</span> 
+                            <span class="ml-1">{{ form.instance.desired_ward|default:"Not specified" }}</span>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-5">
+                    <h3 class="text-md font-medium text-gray-200 mb-4">Update Preferences</h3>
+                    
+                    <!-- County Field -->
+                    <div class="mb-5">
+                        <label for="id_county" class="block text-sm font-medium text-gray-300 mb-2">
+                            Preferred County <span class="text-red-400">*</span>
+                        </label>
+                        <select name="county" id="id_county" required
+                                class="mt-1 block w-full pl-3 pr-10 py-2.5 text-base bg-gray-700 border border-gray-600 text-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-150 hover:border-gray-500">
+                            <option value="">-- Select County --</option>
+                            {% for county in counties %}
+                                <option value="{{ county.id }}" {% if selected_county == county.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ county.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <p class="mt-1 text-xs text-gray-400">Select your preferred county for teacher swaps</p>
+                    </div>
+                    
+                    <!-- Constituency Field -->
+                    <div class="mb-5">
+                        <label for="id_constituency" class="block text-sm font-medium text-gray-300 mb-2">
+                            Preferred Constituency (Optional)
+                        </label>
+                        <select name="constituency" id="id_constituency"
+                                class="mt-1 block w-full pl-3 pr-10 py-2.5 text-base bg-gray-700 border border-gray-600 text-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-150 hover:border-gray-500">
+                            <option value="">-- Select Constituency --</option>
+                            {% for constituency in constituencies %}
+                                <option value="{{ constituency.id }}" {% if selected_constituency == constituency.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ constituency.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <p class="mt-1 text-xs text-gray-400">Optionally select a specific constituency</p>
+                    </div>
+                    
+                    <!-- Ward Field -->
+                    <div class="mb-6">
+                        <label for="id_ward" class="block text-sm font-medium text-gray-300 mb-2">
+                            Preferred Ward (Optional)
+                        </label>
+                        <select name="ward" id="id_ward"
+                                class="mt-1 block w-full pl-3 pr-10 py-2.5 text-base bg-gray-700 border border-gray-600 text-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-150 hover:border-gray-500">
+                            <option value="">-- Select Ward --</option>
+                            {% for ward in wards %}
+                                <option value="{{ ward.id }}" {% if selected_ward == ward.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ ward.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <p class="mt-1 text-xs text-gray-400">Optionally select a specific ward</p>
+                    </div>
+                    
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-700">
+                        <a href="{% url 'users:dashboard' %}" class="text-sm text-gray-400 hover:text-gray-300 flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Back to Dashboard
+                        </a>
+                        <button type="submit" 
+                                class="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-150">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            {% if form.instance.pk %}Update{% else %}Save{% endif %} Preferences
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Form container */
+    #preferencesForm {
+        color: #e5e7eb; /* text-gray-200 */
+    }
+    
+    /* Input fields */
+    select, input, textarea {
+        background-color: #1f2937 !important; /* bg-gray-800 */
+        border-color: #4b5563 !important; /* border-gray-600 */
+        color: #f3f4f6 !important; /* text-gray-200 */
+    }
+    
+    /* Focus states */
+    select:focus, input:focus, textarea:focus {
+        --tw-ring-color: rgba(20, 184, 166, 0.5) !important; /* teal-500 with opacity */
+        border-color: #0d9488 !important; /* teal-600 */
+        box-shadow: 0 0 0 2px var(--tw-ring-color);
+    }
+    
+    /* Select dropdown arrow */
+    select {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+        background-position: right 0.5rem center !important;
+        background-repeat: no-repeat !important;
+        background-size: 1.5em 1.5em !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        padding-right: 2.5rem !important;
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+    }
+    
+    /* Form labels */
+    label {
+        color: #e5e7eb !important; /* text-gray-200 */
+    }
+    
+    /* Help text */
+    .text-sm.text-gray-500 {
+        color: #9ca3af !important; /* text-gray-400 */
+    }
+    
+    /* Placeholder text */
+    ::placeholder {
+        color: #9ca3af !important; /* text-gray-400 */
+        opacity: 1 !important;
+    }
+    
+    /* Disabled state */
+    select:disabled, input:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+
+<script>
+// Handle dynamic loading of constituencies based on selected county
+document.getElementById('id_county').addEventListener('change', function() {
+    const countyId = this.value;
+    const constituencySelect = document.getElementById('id_constituency');
+    const wardSelect = document.getElementById('id_ward');
+    
+    // Reset constituency and ward selects
+    constituencySelect.innerHTML = '<option value="">-- Select Constituency --</option>';
+    wardSelect.innerHTML = '<option value="">-- Select Ward --</option>';
+    
+    if (countyId) {
+        // Fetch constituencies for the selected county
+        fetch(`/schools/get-constituencies/?county=${countyId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.constituencies && data.constituencies.length > 0) {
+                    data.constituencies.forEach(constituency => {
+                        const option = document.createElement('option');
+                        option.value = constituency.id;
+                        option.textContent = constituency.name;
+                        constituencySelect.appendChild(option);
+                    });
+                }
+            });
+    }
+});
+
+// Handle dynamic loading of wards based on selected constituency
+document.getElementById('id_constituency').addEventListener('change', function() {
+    const constituencyId = this.value;
+    const wardSelect = document.getElementById('id_ward');
+    
+    // Reset ward select
+    wardSelect.innerHTML = '<option value="">-- Select Ward --</option>';
+    
+    if (constituencyId) {
+        // Fetch wards for the selected constituency
+        fetch(`/schools/get-wards/?constituency=${constituencyId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.wards && data.wards.length > 0) {
+                    data.wards.forEach(ward => {
+                        const option = document.createElement('option');
+                        option.value = ward.id;
+                        option.textContent = ward.name;
+                        wardSelect.appendChild(option);
+                    });
+                }
+            });
+    }
+});
+</script>
+{% endblock %}

@@ -42,20 +42,16 @@ def initiate_payment(request):
             print(f"Request data: {data}")
                 
             phone_number = data.get('phone_number')
-            # Get amount from request or default to 100 (Standard)
-            try:
-                amount = float(data.get('amount', 1))  # Default to 1 KES for testing
-                # Set subscription type based on amount (2 or more for Premium)
-                if amount >= 2:
-                    sub_type = 'Premium'
-                    description = 'TSC Premium Subscription (Test)'
-                else:
-                    sub_type = 'Standard'
-                    description = 'TSC Standard Subscription (Test)'
-            except (ValueError, TypeError):
-                amount = 1  # Default to 1 KES for testing
+            # Get plan type from request and set appropriate amount
+            plan = data.get('plan', 'standard').lower()
+            if plan == 'premium':
+                amount = 200  # KSH 2,000 for Premium annual plan
+                sub_type = 'Premium'
+                description = 'TSC Premium Annual Subscription'
+            else:  # Default to Standard plan
+                amount = 100  # KSH 1,000 for Standard annual plan
                 sub_type = 'Standard'
-                description = 'TSC Standard Subscription (Test)'
+                description = 'TSC Standard Annual Subscription'
                 
             account_reference = f'TSC{request.user.id}'
             
@@ -376,10 +372,12 @@ def mpesa_callback(request):
                         print(f"DEBUG - Converted amount to float: {amount}")
                         
                         # Determine subscription type based on amount
-                        if amount >= 2.0:
+                        if amount >= 200.00:
                             sub_type = 'Premium'
-                        else:
+                        elif amount >= 100.00:
                             sub_type = 'Standard'
+                        else:
+                            sub_type = 'Custom'
                             
                         print(f"DEBUG - Determined subscription type: {sub_type} (amount: {amount})")
                     except (TypeError, ValueError) as e:

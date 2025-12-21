@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -8,13 +9,19 @@ from django.contrib.auth import update_session_auth_hash
 from django.views.decorators.http import require_POST
 from .forms import MyUserCreationForm, MyAuthenticationForm, ProfileEditForm, CustomPasswordChangeForm
 from .models import PersonalProfile
-from home.models import Level, Subject, MySubject
+from home.models import Level, Subject, MySubject, Swaps, SwapRequests, SwapPreference
 from home.utils import verify_kra_details
 
 # Create your views here.
 
 def login_view(request):
     if request.user.is_authenticated:
+        # Check if user has completed their profile
+        if hasattr(request.user, 'profile'):
+            profile = request.user.profile
+            if not (profile.first_name and profile.last_name):
+                messages.info(request, 'Please complete your profile to continue.')
+                return redirect('users:profile_completion')
         next_url = request.GET.get('next') or request.POST.get('next')
         return redirect(next_url or 'home:home')  # Updated to use 'home:home' namespace
     
@@ -27,6 +34,14 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Welcome back, {username}!')
+                
+                # Check if user has completed their profile
+                if hasattr(user, 'profile'):
+                    profile = user.profile
+                    if not (profile.first_name and profile.last_name):
+                        messages.info(request, 'Please complete your profile to continue.')
+                        return redirect('users:profile_completion')
+                
                 next_url = request.GET.get('next') or request.POST.get('next')
                 return redirect(next_url or 'home:home')  # Updated to use 'home:home' namespace
             else:
@@ -41,7 +56,7 @@ def login_view(request):
 
 def signup_view(request):
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect('home:home')  # Updated to use 'home:home' namespace
     
     if request.method == 'POST':
         form = MyUserCreationForm(request.POST)
@@ -69,7 +84,18 @@ def logout_view(request):
 def profile_view(request):
     # Get or create the user's profile
     profile, created = PersonalProfile.objects.get_or_create(user=request.user)
-    return render(request, 'users/profile.html', {'profile': profile})
+    
+    # Get user's school and subjects
+    school = profile.school
+    my_subjects = MySubject.objects.filter(user=request.user).first()
+    subjects = my_subjects.subject.all() if my_subjects else []
+    
+    context = {
+        'profile': profile,
+        'school': school,
+        'subjects': subjects
+    }
+    return render(request, 'users/profile.html', context)
 
 @login_required
 def profile_edit_view(request):
@@ -157,12 +183,43 @@ def profile_completion_view(request):
             # Parse the full name
             first_name, last_name, surname = parse_name(full_name)
             
-            # Update user model
+            # Check if ID number is already in use by another user
+            from django.db import IntegrityError
+            from django.contrib.auth import get_user_model
+            
             user = request.user
-            user.id_number = id_number
-            user.first_name = first_name
-            user.last_name = last_name  # Second name is always the last name
-            user.save()
+            User = get_user_model()
+            
+            # Check if ID number is already in use by another user
+            if User.objects.exclude(pk=user.pk).filter(id_number=id_number).exists():
+                messages.error(request, 'This ID number is already registered with another account. Please contact support if this is an error.')
+                return render(request, 'users/profile_completion.html', {
+                    'id_number': id_number,
+                    'first_name': first_name,
+                    'show_verification_modal': True,
+                    'kra_data': {
+                        'name': kra_data.get('name', ''),
+                        'id_number': id_number,
+                    }
+                })
+            
+            # Update user model
+            try:
+                user.id_number = id_number
+                user.first_name = first_name
+                user.last_name = last_name  # Second name is always the last name
+                user.save()
+            except IntegrityError:
+                messages.error(request, 'This ID number is already registered. Please contact support if this is an error.')
+                return render(request, 'users/profile_completion.html', {
+                    'id_number': id_number,
+                    'first_name': first_name,
+                    'show_verification_modal': True,
+                    'kra_data': {
+                        'name': kra_data.get('name', ''),
+                        'id_number': id_number,
+                    }
+                })
             
             # Update or create personal profile
             profile, created = PersonalProfile.objects.get_or_create(user=user)
@@ -208,7 +265,7 @@ def profile_completion_view(request):
             kra_verification = verify_kra_details(id_number)
 
             if not kra_verification['success']:
-                messages.error(request, f"KRA verification failed: {kra_verification['message']}")
+                messages.error(request, f"TSC verification failed: Name doesnt match with ID Number")
                 return render(request, 'users/profile_completion.html', {
                     'id_number': id_number,
                     'first_name': first_name
@@ -266,9 +323,6 @@ def password_change_view(request):
     
     return render(request, 'users/password_change.html', {'form': form})
 
-from home.models import Swaps, SwapRequests
-
-@login_required
 def dashboard(request):
     """User dashboard with overview of user's swaps and requests"""
     user = request.user
@@ -305,6 +359,15 @@ def dashboard(request):
     # Profile Picture
     profile_picture_complete = has_profile and bool(user.profile.profile_picture)
     
+    # Swap Preferences
+    swap_preference = None
+    try:
+        swap_preference = SwapPreference.objects.get(user=request.user)
+    except SwapPreference.DoesNotExist:
+        pass
+    
+    preferences_complete = swap_preference is not None
+    
     # Calculate completion percentage (each section is worth ~33.33%)
     completion_percentage = 0
     if personal_info_complete:
@@ -315,7 +378,7 @@ def dashboard(request):
         completion_percentage += 33.34  # To ensure it adds up to 100%
         
     # Overall profile complete if all sections are complete
-    profile_complete = all([personal_info_complete, teaching_info_complete, profile_picture_complete])
+    profile_complete = all([personal_info_complete, teaching_info_complete, profile_picture_complete, preferences_complete])
     
     # Get subscription status
     subscription = getattr(user, 'my_subscription', None)
@@ -339,6 +402,8 @@ def dashboard(request):
         'teaching_info_complete': teaching_info_complete,
         'profile_picture_complete': profile_picture_complete,
         'subscription': subscription_status,
+        'swap_preference': swap_preference,
+        'preferences_complete': preferences_complete,
     }
     
     return render(request, 'users/dashboard.html', context)
@@ -427,9 +492,83 @@ def select_teaching_info(request):
 
 @login_required
 def get_subjects_for_level(request, level_id):
-    """API endpoint to get subjects for a specific level"""
-    subjects = Subject.objects.filter(level_id=level_id).order_by('name')
+    level = get_object_or_404(Level, id=level_id)
+    subjects = level.subjects.all().values('id', 'name')
+    return JsonResponse(list(subjects), safe=False)
+
+@login_required
+def admin_users_view(request):
+    if not request.user.is_staff:
+        return redirect('home:home')
+    
+    User = get_user_model()
+    users = User.objects.select_related('profile', 'swappreference').prefetch_related('mysubject_set').order_by('-date_joined')
+    
+    # Get all user profiles in one query
+    from users.models import PersonalProfile
+    user_profiles = {profile.user_id: profile for profile in PersonalProfile.objects.select_related('school', 'level')}
+    
+    # Calculate profile completion percentage for each user
+    user_data = []
+    for user in users:
+        completion_score = 0
+        total_checks = 4  # Total number of completion checks
+        
+        # 1. Check if personal profile is set up (25%)
+        profile = user_profiles.get(user.id)
+        has_personal_profile = bool(profile and all([
+            profile.phone,
+            user.id_number,
+            # kra_pin might not exist in the model
+            user.tsc_number,
+            # bank details might not be in the profile
+            profile.first_name,
+            profile.last_name,
+            profile.gender
+        ]))
+        if has_personal_profile:
+            completion_score += 25
+        
+        # 2. Check if school info is set up (25%)
+        has_school_info = bool(profile and all([
+            profile.school,
+            profile.level,
+            # These fields might not exist in the profile model
+            # Add any other school-related fields that should be checked
+        ]))
+        if has_school_info:
+            completion_score += 25
+        
+        # 3. Check if MySubjects are set up (25%)
+        has_subjects = user.mysubject_set.exists()
+        if has_subjects:
+            completion_score += 25
+        
+        # 4. Check if swap preferences are set up (25%)
+        has_swap_prefs = hasattr(user, 'swappreference') and all([
+            user.swappreference.desired_county,
+            user.swappreference.desired_constituency,
+            # preferred_school_type might not exist, check for other relevant fields
+            user.swappreference.desired_ward
+        ])
+        if has_swap_prefs:
+            completion_score += 25
+        
+        user_data.append({
+            'user': user,
+            'completion_percentage': completion_score,
+            'has_active_subscription': hasattr(user, 'subscription') and user.subscription.is_active,
+            'has_personal_profile': has_personal_profile,
+            'has_school_info': has_school_info,
+            'has_subjects': has_subjects,
+            'has_swap_prefs': has_swap_prefs
+        })
+    
     context = {
-        'subjects': [{'id': s.id, 'name': s.name} for s in subjects]
+        'users': user_data,
+        'total_users': users.count(),
+        'active_subscriptions': sum(1 for u in user_data if u['has_active_subscription']),
+        'avg_completion': sum(u['completion_percentage'] for u in user_data) / len(user_data) if user_data else 0
     }
-    return JsonResponse(context)
+    
+    return render(request, 'users/admin_users.html', context)

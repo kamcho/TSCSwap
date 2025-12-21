@@ -53,6 +53,8 @@ class MyUser(AbstractUser):
         blank=True,
         help_text=_('The groups this user belongs to. A user will get all permissions granted to each of their groups.')
     )
+
+    
     
     user_permissions = models.ManyToManyField(
         'auth.Permission',

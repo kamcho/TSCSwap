@@ -1,0 +1,176 @@
+{% extends 'users/base.html' %}
+
+{% block title %}Admin - Payment Transactions{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-white">Payment Transactions</h1>
+            <div class="text-right">
+                <div class="text-xl font-semibold text-white">Total: KSh {{ total_amount|floatformat:2 }}</div>
+                <div class="text-sm text-gray-300">{{ total_payments }} transaction{{ total_payments|pluralize }}</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-gray-700 p-4 rounded-lg mb-6">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-200 mb-1">Status</label>
+                    <select name="status" class="w-full rounded-md bg-gray-700 border border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2">
+                        <option value="" class="bg-gray-700">All Statuses</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %} class="bg-gray-700">Pending</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %} class="bg-gray-700">Completed</option>
+                        <option value="failed" {% if status_filter == 'failed' %}selected{% endif %} class="bg-gray-700">Failed</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-200 mb-1">From Date</label>
+                    <input type="date" name="date_from" value="{{ date_from }}" class="w-full rounded-md bg-gray-700 border border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-200 mb-1">To Date</label>
+                    <input type="date" name="date_to" value="{{ date_to }}" class="w-full rounded-md bg-gray-700 border border-gray-600 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Filter
+                    </button>
+                    <a href="{% url 'payments:admin_payments' %}" class="ml-2 px-4 py-2 border border-gray-600 rounded-md text-gray-200 hover:bg-gray-700">
+                        Reset
+                    </a>
+                </div>
+            </form>
+            <div class="mt-4">
+                <input type="text" 
+                       name="search" 
+                       placeholder="Search by phone, reference, or user..." 
+                       hx-get="{% url 'payments:admin_payments' %}" 
+                       hx-trigger="keyup changed delay:500ms" 
+                       hx-target="#payments-table"
+                       hx-include="[name='status'], [name='date_from'], [name='date_to']"
+                       class="w-full rounded-md bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm">
+            </div>
+        </div>
+
+        <!-- Status Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            {% for stat in status_counts %}
+            <div class="bg-gray-700 p-4 rounded-lg shadow border-l-4 
+                {% if stat.status == 'completed' %}border-green-500
+                {% elif stat.status == 'failed' %}border-red-500
+                {% else %}border-yellow-500{% endif %}">
+                <div class="text-sm font-medium text-gray-300">{{ stat.status|title }}</div>
+                <div class="text-2xl font-bold text-white">{{ stat.count }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Payments Table -->
+        <div id="payments-table">
+            <div class="overflow-x-auto">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Phone</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-gray-800 divide-y divide-gray-700">
+                            {% for payment in page_obj %}
+                            <tr class="hover:bg-gray-700 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-200">{{ payment.id }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-white">
+                                        {% if payment.user %}
+                                            {{ payment.user.get_full_name }}
+                                            <div class="text-sm text-gray-400">{{ payment.user.email }}</div>
+                                        {% else %}
+                                            Guest
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ payment.phone_number }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-400">KSh {{ payment.amount|floatformat:2 }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if payment.status == 'completed' %}bg-green-900 text-green-200
+                                        {% elif payment.status == 'failed' %}bg-red-900 text-red-200
+                                        else %}bg-yellow-900 text-yellow-200{% endif %}">
+                                        {{ payment.status|title }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                    {{ payment.created_at|date:"M d, Y H:i" }}
+                                    <div class="text-xs text-gray-400">{{ payment.created_at|timesince }} ago</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                    <div class="font-mono text-xs text-indigo-300">{{ payment.transaction_id|default:payment.account_reference|truncatechars:12 }}</div>
+                                    {% if payment.description %}
+                                    <div class="text-xs text-gray-400">{{ payment.description|truncatechars:20 }}</div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-400">No payments found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.paginator.num_pages > 1 %}
+            <div class="mt-4 flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Showing <span class="font-medium">{{ page_obj.start_index }}</span> to 
+                    <span class="font-medium">{{ page_obj.end_index }}</span> of 
+                    <span class="font-medium">{{ page_obj.paginator.count }}</span> results
+                </div>
+                <div class="flex space-x-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page=1" 
+                           class="px-3 py-1 border rounded text-gray-700 hover:bg-gray-50">First</a>
+                        <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}" 
+                           class="px-3 py-1 border rounded text-gray-700 hover:bg-gray-50">Previous</a>
+                    {% endif %}
+                    
+                    <span class="px-3 py-1 border rounded bg-indigo-50 text-indigo-700">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}" 
+                           class="px-3 py-1 border rounded text-gray-700 hover:bg-gray-50">Next</a>
+                        <a href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}" 
+                           class="px-3 py-1 border rounded text-gray-700 hover:bg-gray-50">Last</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // HTMX initialization for search and filters
+    document.body.addEventListener('htmx:configRequest', function(evt) {
+        // Add the search parameter from the search input
+        const searchInput = document.querySelector('input[name="search"]');
+        if (searchInput && searchInput.value) {
+            evt.detail.parameters['search'] = searchInput.value;
+        }
+    });
+</script>
+{% endblock %}

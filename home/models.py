@@ -128,3 +128,19 @@ class SwapRequests(models.Model):
     accepted = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.user} - {self.swap}"
+
+
+class SwapPreference(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    desired_county = models.ForeignKey(Counties, null=True, on_delete=models.SET_NULL, related_name='desired_swaps')
+    desired_constituency = models.ForeignKey(Constituencies, null=True, on_delete=models.SET_NULL)
+    desired_ward = models.ForeignKey(Wards, null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Preferences for {self.user}"
+
+    class Meta:
+        verbose_name = "Swap Preference"
+        verbose_name_plural = "Swap Preferences"

@@ -7,9 +7,22 @@
 <div class="min-h-screen bg-gray-100 dark:bg-gray-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
         <!-- Page Header -->
-        <div class="text-center mb-12">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">Choose Your Plan</h1>
-            <p class="mt-4 text-xl text-gray-600 dark:text-gray-300">Select the plan that works best for you</p>
+        <div class="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 sm:p-10 mb-12 text-center">
+            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==')] opacity-20"></div>
+            <div class="relative z-10">
+                <h1 class="text-4xl sm:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-white">
+                    Choose Your Perfect Plan
+                </h1>
+                <p class="mt-4 text-xl text-blue-100 max-w-2xl mx-auto">
+                    Unlock powerful features with our flexible subscription options. 
+                    <span class="block mt-2 text-blue-50 font-medium">Start your journey to better teaching opportunities today!</span>
+                </p>
+                <div class="mt-6 flex justify-center space-x-4">
+                    <div class="w-16 h-1 bg-yellow-400 rounded-full"></div>
+                    <div class="w-16 h-1 bg-blue-300 rounded-full opacity-50"></div>
+                    <div class="w-16 h-1 bg-blue-300 rounded-full opacity-30"></div>
+                </div>
+            </div>
         </div>
 
         <!-- Pricing Plans -->
@@ -20,7 +33,7 @@
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Free</h3>
                     <p class="mt-4 flex items-baseline text-gray-900 dark:text-white">
                         <span class="text-4xl font-bold tracking-tight">KSH 0</span>
-                        <span class="ml-1 text-lg font-semibold text-gray-500 dark:text-gray-400">/month</span>
+                        <span class="ml-1 text-lg font-semibold text-gray-500 dark:text-gray-400">/year</span>
                     </p>
                     <p class="mt-6 text-gray-600 dark:text-gray-300">Browse only - no matches</p>
                     <ul role="list" class="mt-8 space-y-4">
@@ -64,7 +77,7 @@
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Standard</h3>
                     <p class="mt-4 flex items-baseline text-gray-900 dark:text-white">
                         <span class="text-4xl font-bold tracking-tight">KSH 100</span>
-                        <span class="ml-1 text-lg font-semibold text-gray-500 dark:text-gray-400">/month</span>
+                        <span class="ml-1 text-lg font-semibold text-gray-500 dark:text-gray-400">/year</span>
                     </p>
                     <p class="mt-6 text-gray-600 dark:text-gray-300">Full swap capabilities</p>
                     <ul role="list" class="mt-8 space-y-4">
@@ -108,7 +121,7 @@
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Premium AI</h3>
                     <p class="mt-4 flex items-baseline text-gray-900 dark:text-white">
                         <span class="text-4xl font-bold tracking-tight">KSH 200</span>
-                        <span class="ml-1 text-lg font-semibold text-gray-500 dark:text-gray-400">/month</span>
+                        <span class="ml-1 text-lg font-semibold text-gray-500 dark:text-gray-400">/year</span>
                     </p>
                     <p class="mt-6 text-gray-600 dark:text-gray-300">Advanced AI-powered features</p>
                     <ul role="list" class="mt-8 space-y-4">
@@ -154,7 +167,7 @@
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">Can I change plans later?</h3>
-                    <p class="mt-2 text-gray-600 dark:text-gray-300">Yes, you can upgrade or downgrade your plan at any time. Your subscription will be prorated accordingly.</p>
+                    <p class="mt-2 text-gray-600 dark:text-gray-300">Yes, you can upgrade or downgrade your plan at any time. Your subscription will be prorated based on the remaining term.</p>
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">Is there a free trial?</h3>
@@ -162,7 +175,7 @@
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">How do I cancel my subscription?</h3>
-                    <p class="mt-2 text-gray-600 dark:text-gray-300">You can cancel your subscription at any time from your account settings. There are no cancellation fees.</p>
+                    <p class="mt-2 text-gray-600 dark:text-gray-300">You can cancel your subscription at any time from your account settings. There are no cancellation fees, but no refunds are provided for the unused portion of the annual subscription.</p>
                 </div>
             </div>
         </div>

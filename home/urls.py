@@ -27,6 +27,11 @@ urlpatterns = [
     path("api/constituencies/", ConstituencyAPIView.as_view(), name="api_constituencies"),
     path("api/wards/", WardAPIView.as_view(), name="api_wards"),
     
+    # Swap preferences
+    
+    # User preferences
+    path("preferences/", login_required(views.swap_preferences), name="swap_preferences"),
+    
     # School management
     path("schools/", views.all_schools, name="all_schools"),
     path("schools/new/", login_required(views.create_school), name="create_school"),

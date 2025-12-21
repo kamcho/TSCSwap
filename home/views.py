@@ -5,10 +5,10 @@ from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 
-from .forms import MySubjectForm, SwapForm, SchoolForm
+from .forms import MySubjectForm, SwapForm, SchoolForm, SwapPreferenceForm
 from .models import (
     Level, MySubject, Subject, Swaps, User, 
-    SwapRequests, Counties, Constituencies, Wards, Schools
+    SwapRequests, Counties, Constituencies, Wards, Schools, SwapPreference
 )
 
 
@@ -252,6 +252,12 @@ def all_swaps(request):
     Public page listing recent active swaps from all users.
     Excludes archived and inactive swaps.
     """
+    # Check if user has swap preferences
+    has_swap_preferences = False
+    if request.user.is_authenticated:
+        from home.models import SwapPreference
+        has_swap_preferences = SwapPreference.objects.filter(user=request.user).exists()
+    
     # Get filter parameters
     selected_county = request.GET.get('county')
     selected_constituency = request.GET.get('constituency')
@@ -260,71 +266,195 @@ def all_swaps(request):
     # Debug print
     print(f"DEBUG - Filters - County: {selected_county}, Constituency: {selected_constituency}, Ward: {selected_ward}")
     
-    # Start with base query
+    # Start with base query - exclude archived, inactive, and current user's swaps
     swaps = Swaps.objects.filter(
         archived=False,  # Exclude archived swaps
-        status=True      # Only include active swaps
+        status=True,     # Only include active swaps
     )
+    
+    # Exclude swaps created by the current user if they're logged in
+    if request.user.is_authenticated:
+        swaps = swaps.exclude(user=request.user)
     
     # Apply filters if provided
     if selected_county and selected_county.isdigit():
         print(f"DEBUG - Filtering by county_id: {selected_county}")
         swaps = swaps.filter(county_id=selected_county)
-        
-        # If county is selected, get its constituencies
-        if selected_constituency and selected_constituency.isdigit():
-            print(f"DEBUG - Filtering by constituency_id: {selected_constituency}")
-            swaps = swaps.filter(constituency_id=selected_constituency)
-            
-            # If constituency is selected, get its wards
-            if selected_ward and selected_ward.isdigit():
-                print(f"DEBUG - Filtering by ward_id: {selected_ward}")
-                swaps = swaps.filter(ward_id=selected_ward)
+    
+    if selected_constituency and selected_constituency.isdigit():
+        print(f"DEBUG - Filtering by constituency_id: {selected_constituency}")
+        swaps = swaps.filter(constituency_id=selected_constituency)
+    
+    if selected_ward and selected_ward.isdigit():
+        print(f"DEBUG - Filtering by ward_id: {selected_ward}")
+        swaps = swaps.filter(ward_id=selected_ward)
     
     # Order and limit results
-    swaps = swaps.select_related("county", "constituency", "ward").order_by("-created_at")[:50]
+    from django.db.models import Prefetch
     
-    # Get all unique counties for the filter
+    # First get all the swaps with related data
+    swaps = swaps.select_related(
+        "county", 
+        "constituency", 
+        "ward",
+        "user__profile__school"  # Get the user's school
+    ).order_by("-created_at")[:50]
+    
+    # Prefetch the subjects for all users in one query
+    from django.db.models import Prefetch
+    from home.models import MySubject  # MySubject is defined in the home app
+    
+    # Get all user IDs from the swaps
+    user_ids = [swap.user_id for swap in swaps]
+    
+    # Create a dictionary mapping user_id to their subjects
+    user_subjects = {}
+    # Prefetch the many-to-many relationship
+    for mysubject in MySubject.objects.filter(user_id__in=user_ids).prefetch_related('subject'):
+        if mysubject.user_id not in user_subjects:
+            user_subjects[mysubject.user_id] = []
+        # Get all subjects for this MySubject instance
+        user_subjects[mysubject.user_id].extend(list(mysubject.subject.all()))
+    
+    # Get all counties for the filter dropdown
     counties = Counties.objects.all().order_by('name')
     
-    # Get constituencies and wards based on selected values
+    # Get selected county and its constituencies if a county is selected
+    selected_county_obj = None
+    # Initialize as empty querysets instead of empty lists
     constituencies = Constituencies.objects.none()
     wards = Wards.objects.none()
     
     if selected_county and selected_county.isdigit():
-        print(f"DEBUG - Loading constituencies for county_id: {selected_county}")
-        constituencies = Constituencies.objects.filter(county_id=selected_county).order_by('name')
-        print(f"DEBUG - Found {constituencies.count()} constituencies")
-        
-        if selected_constituency and selected_constituency.isdigit():
-            print(f"DEBUG - Loading wards for constituency_id: {selected_constituency}")
-            wards = Wards.objects.filter(constituency_id=selected_constituency).order_by('name')
-            print(f"DEBUG - Found {wards.count()} wards")
+        selected_county_obj = Counties.objects.filter(id=selected_county).first()
+        if selected_county_obj:
+            constituencies = Constituencies.objects.filter(county=selected_county_obj).order_by('name')
     
-    # Convert selected values to integers for the template
-    selected_county_id = int(selected_county) if selected_county and selected_county.isdigit() else ''
-    selected_constituency_id = int(selected_constituency) if selected_constituency and selected_constituency.isdigit() else ''
-    selected_ward_id = int(selected_ward) if selected_ward and selected_ward.isdigit() else ''
+    # Get selected constituency and its wards if a constituency is selected
+    selected_constituency_obj = None
+    if selected_constituency and selected_constituency.isdigit():
+        selected_constituency_obj = Constituencies.objects.filter(id=selected_constituency).first()
+        if selected_constituency_obj:
+            wards = Wards.objects.filter(constituency=selected_constituency_obj).order_by('name')
     
     context = {
-        "swaps": swaps,
+        'swaps': swaps,
+        'counties': counties,
+        'constituencies': constituencies,
+        'wards': wards,
+        'selected_county': int(selected_county) if selected_county and selected_county.isdigit() else '',
+        'selected_constituency': int(selected_constituency) if selected_constituency and selected_constituency.isdigit() else '',
+        'selected_ward': int(selected_ward) if selected_ward and selected_ward.isdigit() else '',
+        'has_swap_preferences': has_swap_preferences,
+        'user': request.user if request.user.is_authenticated else None,
+    }
+    # Get current user's profile, school, and swap preferences if logged in
+    current_user = request.user
+    current_user_profile = getattr(current_user, 'profile', None) if current_user.is_authenticated else None
+    current_user_school = getattr(current_user_profile, 'school', None) if current_user_profile else None
+    
+    # Get current user's swap preferences
+    current_user_prefs = None
+    if current_user.is_authenticated:
+        current_user_prefs = getattr(current_user, 'swappreference', None)
+    
+    # Get current user's subjects if logged in
+    current_user_subjects = set()
+    if current_user.is_authenticated:
+        current_user_subjects = set(MySubject.objects.filter(user=current_user).values_list('subject__name', flat=True))
+    
+    # Prepare the swaps data with match scoring
+    swaps_data = []
+    for swap in swaps:
+        user_profile = getattr(swap.user, 'profile', None)
+        school = getattr(user_profile, 'school', None)
+        
+        # Get swap poster's subjects
+        poster_subjects = set(subj.name for subj in user_subjects.get(swap.user_id, []))
+        
+        # Calculate match score (0-100)
+        match_score = 0
+        common_subjects = set()
+        
+        # 1. Subject match (50 points max)
+        if current_user.is_authenticated and poster_subjects:
+            common_subjects = current_user_subjects.intersection(poster_subjects)
+            if common_subjects:
+                match_score += 50  # Max 50 points for subject match
+        
+        # 2. Location match (50 points max)
+        location_score = 0
+        is_near_perfect_match = False
+        
+        if current_user_prefs and swap.county and swap.constituency and swap.ward:
+            # County match (20 points)
+            if current_user_prefs.desired_county and current_user_prefs.desired_county == swap.county:
+                location_score += 20
+                # Constituency match (20 points)
+                if (current_user_prefs.desired_constituency and 
+                    current_user_prefs.desired_constituency == swap.constituency):
+                    location_score += 20
+                    # Ward match (10 points) - only if it matches
+                    if (current_user_prefs.desired_ward and 
+                        current_user_prefs.desired_ward == swap.ward):
+                        location_score += 10
+                    # Check for near perfect match (county and constituency match, but not ward)
+                    elif (current_user_prefs.desired_ward and 
+                          current_user_prefs.desired_ward != swap.ward and
+                          common_subjects):
+                        is_near_perfect_match = True
+            
+            match_score += location_score
+        
+        swaps_data.append({
+            'swap': swap,
+            'user_school': school,
+            'user_subjects': user_subjects.get(swap.user_id, []),
+            'match_score': match_score,
+            'is_perfect_match': match_score == 100,  # 100% match
+            'is_near_perfect_match': is_near_perfect_match,
+            'common_subjects': list(common_subjects)[:3]  # Show up to 3 common subjects
+        })
+    
+    # Sort by match score (highest first)
+    swaps_data.sort(key=lambda x: x['match_score'], reverse=True)
+    
+    context = {
+        "swaps_data": swaps_data,  # Use the enriched data
         "title": "All Swaps",
         "counties": counties,
         "constituencies": constituencies,
         "wards": wards,
-        "selected_county": selected_county_id,
-        "selected_constituency": selected_constituency_id,
-        "selected_ward": selected_ward_id,
+        "selected_county": selected_county,
+        "selected_constituency": selected_constituency,
+        "selected_ward": selected_ward,
     }
     
+    # Convert querysets to lists for template rendering and get counts
+    constituencies_list = list(constituencies)
+    wards_list = list(wards)
+    
     print("DEBUG - Context:", {
-        'selected_county': selected_county_id,
-        'selected_constituency': selected_constituency_id,
-        'selected_ward': selected_ward_id,
-        'constituencies_count': constituencies.count(),
-        'wards_count': wards.count(),
-        'swaps_count': swaps.count()
+        'selected_county': selected_county,
+        'selected_constituency': selected_constituency,
+        'selected_ward': selected_ward,
+        'constituencies_count': len(constituencies_list),
+        'wards_count': len(wards_list),
+        'swaps_count': len(swaps_data) if isinstance(swaps_data, list) else swaps_data.count()
     })
+    
+    context = {
+        "swaps_data": swaps_data,  # Use the enriched data
+        "title": "All Swaps",
+        "counties": counties,
+        "constituencies": constituencies_list,  # Use the list version
+        "wards": wards_list,  # Use the list version
+        "selected_county": selected_county,
+        "selected_constituency": selected_constituency,
+        "selected_ward": selected_ward,
+        "has_swap_preferences": has_swap_preferences,
+        "user": request.user if request.user.is_authenticated else None,
+    }
     
     return render(request, "home/all_swaps.html", context)
 
@@ -624,3 +754,81 @@ def delete_school(request, school_id):
         return JsonResponse({'success': True, 'message': f'School "{school_name}" has been deleted successfully.'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def get_constituencies(request):
+    """API endpoint to get constituencies for a given county."""
+    county_id = request.GET.get('county')
+    if not county_id:
+        return JsonResponse({'error': 'County ID is required'}, status=400)
+    
+    try:
+        constituencies = list(Constituencies.objects.filter(
+            county_id=county_id
+        ).order_by('name').values('id', 'name'))
+        return JsonResponse({'constituencies': constituencies})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def get_wards(request):
+    """API endpoint to get wards for a given constituency."""
+    constituency_id = request.GET.get('constituency')
+    if not constituency_id:
+        return JsonResponse({'error': 'Constituency ID is required'}, status=400)
+    
+    try:
+        wards = list(Wards.objects.filter(
+            constituency_id=constituency_id
+        ).order_by('name').values('id', 'name'))
+        return JsonResponse({'wards': wards})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def swap_preferences(request):
+    """
+    View to handle user's swap preferences.
+    Users can set their preferred location for swaps.
+    """
+    # Get or create the user's swap preferences
+    preference, created = SwapPreference.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        form = SwapPreferenceForm(request.POST, instance=preference)
+        if form.is_valid():
+            preference = form.save(commit=False)
+            preference.user = request.user
+            preference.save()
+            messages.success(request, 'Your swap preferences have been updated successfully!')
+            return redirect('home:swap_preferences')
+    else:
+        form = SwapPreferenceForm(instance=preference)
+    
+    # Get all counties for the template
+    counties = Counties.objects.all().order_by('name')
+    
+    # Get selected values for form repopulation
+    selected_county = preference.desired_county.id if preference.desired_county else None
+    selected_constituency = preference.desired_constituency.id if preference.desired_constituency else None
+    
+    # Get constituencies and wards based on selected values
+    constituencies = Constituencies.objects.none()
+    if selected_county:
+        constituencies = Constituencies.objects.filter(county_id=selected_county).order_by('name')
+    
+    wards = Wards.objects.none()
+    if selected_constituency:
+        wards = Wards.objects.filter(constituency_id=selected_constituency).order_by('name')
+    
+    return render(request, 'home/swap_preferences.html', {
+        'form': form,
+        'counties': counties,
+        'constituencies': constituencies,
+        'wards': wards,
+        'selected_county': selected_county,
+        'selected_constituency': selected_constituency,
+        'selected_ward': preference.desired_ward.id if preference.desired_ward else None,
+    })
+

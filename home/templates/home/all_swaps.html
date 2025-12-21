@@ -458,6 +458,61 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Preferences Modal -->
+<div id="preferencesModal" class="ai-modal" {% if not user.is_authenticated or not has_swap_preferences %}style="display: flex;"{% endif %}>
+    <div class="ai-modal-content">
+        <div class="ai-modal-header">
+            <h3>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Set Up Your Swap Preferences
+            </h3>
+            <button class="ai-modal-close" onclick="closePreferencesModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+        <div class="ai-modal-body">
+            <div class="bg-blue-900/20 border-l-4 border-blue-500 p-4 mb-4 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h2a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-100">Why Set Up Swap Preferences?</h3>
+                        <div class="mt-2 text-sm text-blue-100">
+                            <p>To help us find the best swap matches for you, please set your swap preferences. This includes:</p>
+                            <ul class="list-disc pl-5 mt-2 space-y-1">
+                                <li>Your preferred locations for swapping</li>
+                                <li>Your current school and subjects</li>
+                                <li>Your availability and preferences</li>
+                            </ul>
+                            <p class="mt-2">This information helps us show you the most relevant swap opportunities.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" onclick="closePreferencesModal()" class="px-4 py-2 border border-gray-600 rounded-md text-sm font-medium text-gray-200 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    Maybe Later
+                </button>
+                <a href="{% url 'home:swap_preferences' %}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Set Up Preferences
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // AI Search Modal Functionality
     document.addEventListener('DOMContentLoaded', function() {
@@ -480,7 +535,13 @@
         
         // Close modal
         function closeModal() {
-            aiSearchModal.style.display = 'none';
+            const modal = document.getElementById('aiSearchModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function closePreferencesModal() {
+            const modal = document.getElementById('preferencesModal');
+            if (modal) modal.style.display = 'none';
         }
         
         if (aiSearchModalClose) {
@@ -669,10 +730,34 @@
         </div>
     </form>
 
-    {% if swaps %}
+    {% if swaps_data %}
         <div class="swaps-grid">
-            {% for swap in swaps %}
-                <div class="swap-card">
+            {% for swap_data in swaps_data %}
+                {% with swap=swap_data.swap %}
+                <div class="swap-card {% if swap_data.is_perfect_match %}border-2 border-green-500{% elif swap_data.is_near_perfect_match %}border-2 border-blue-500{% endif %}">
+                    {% if swap_data.is_perfect_match %}
+                    <div class="bg-green-100 text-green-800 text-sm font-semibold px-4 py-1 rounded-t-lg">
+                        ★ Perfect Match
+                    </div>
+                    {% elif swap_data.is_near_perfect_match %}
+                    <div class="bg-blue-100 text-blue-800 text-sm font-semibold px-4 py-1 rounded-t-lg">
+                        ⚡ Near Perfect Match
+                        <div class="text-xs text-blue-700 mt-1">
+                            <span class="inline-flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                                County & Constituency Match
+                            </span>
+                            <span class="inline-flex items-center ml-3">
+                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                                Subject Match
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="card-header">
                         <h3>
                             {% if swap.gender == 'M' %}
@@ -705,16 +790,37 @@
                     <div class="card-body">
                         <div class="meta-item">
                             <span class="meta-label">Current School:</span>
-                            <span class="meta-value">{{ swap.current_school.name|default:"Not specified" }}</span>
+                            <span class="meta-value">
+                                {% if swap_data.user_school %}
+                                    {{ swap_data.user_school.name }}
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </span>
                         </div>
                         <div class="meta-item">
-                            <span class="meta-label">Preferred Subject:</span>
-                            <span class="meta-value">{{ swap.preferred_subject|default:"Any" }}</span>
+                            <span class="meta-label">Preferred Subjects:</span>
+                            <span class="meta-value">
+                                {% if swap_data.user_subjects %}
+                                    {% for subject in swap_data.user_subjects %}
+                                        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+                                            {{ subject.name }}
+                                        </span>
+                                    {% endfor %}
+                                {% else %}
+                                    Any
+                                {% endif %}
+                            </span>
                         </div>
                         <div class="meta-item">
                             <span class="meta-label">Reason:</span>
                             <span class="meta-value">{{ swap.reason|truncatechars:50|default:"Not specified" }}</span>
                         </div>
+                        {% if user.is_authenticated %}
+                        <div class="mt-2 text-sm text-gray-500">
+                            Match: {{ swap_data.match_score }}%
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="card-footer">
                         <span class="date">Posted {{ swap.created_at|timesince }} ago</span>
@@ -726,6 +832,7 @@
                         </a>
                     </div>
                 </div>
+                {% endwith %}
             {% endfor %}
         </div>
     {% else %}
@@ -808,6 +915,27 @@
             document.getElementById('filterForm').submit();
         }
         
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const preferencesModal = document.getElementById('preferencesModal');
+            if (event.target === preferencesModal) {
+                closePreferencesModal();
+            }
+            
+            const aiSearchModal = document.getElementById('aiSearchModal');
+            if (event.target === aiSearchModal) {
+                closeModal();
+            }
+        };
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePreferencesModal();
+                closeModal();
+            }
+        });
+
         // Initialize form state on page load
         document.addEventListener('DOMContentLoaded', function() {
             const countySelect = document.getElementById('county');

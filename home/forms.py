@@ -1,5 +1,5 @@
 from django import forms
-from .models import MySubject, Subject, Swaps, Counties, Constituencies, Wards, Schools, Level, Curriculum
+from .models import MySubject, Subject, Swaps, Counties, Constituencies, Wards, Schools, Level, Curriculum, SwapPreference
 
 
 class MySubjectForm(forms.ModelForm):
@@ -182,4 +182,82 @@ class SchoolForm(forms.ModelForm):
             self.fields['ward'].queryset = Wards.objects.filter(
                 constituency=self.instance.ward.constituency
             ).order_by('name')
+
+
+class SwapPreferenceForm(forms.ModelForm):
+    county = forms.ModelChoiceField(
+        queryset=Counties.objects.all().order_by('name'),
+        required=True,
+        label="Preferred County",
+        help_text="Select your preferred county for swapping",
+        widget=forms.Select(attrs={"class": "form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"}),
+    )
+    
+    constituency = forms.ModelChoiceField(
+        queryset=Constituencies.objects.none(),
+        required=False,
+        label="Preferred Constituency (Optional)",
+        help_text="Optionally select a specific constituency",
+        widget=forms.Select(attrs={"class": "form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"}),
+    )
+    
+    ward = forms.ModelChoiceField(
+        queryset=Wards.objects.none(),
+        required=False,
+        label="Preferred Ward (Optional)",
+        help_text="Optionally select a specific ward",
+        widget=forms.Select(attrs={"class": "form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"}),
+    )
+
+    class Meta:
+        model = SwapPreference
+        fields = ['county', 'constituency', 'ward']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Set up the querysets for constituency and ward fields
+        if 'county' in self.data:
+            try:
+                county_id = int(self.data.get('county'))
+                self.fields['constituency'].queryset = Constituencies.objects.filter(
+                    county_id=county_id
+                ).order_by('name')
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk and self.instance.desired_county:
+            self.fields['constituency'].queryset = self.instance.desired_county.constituencies_set.order_by('name')
+        
+        if 'constituency' in self.data:
+            try:
+                constituency_id = int(self.data.get('constituency'))
+                self.fields['ward'].queryset = Wards.objects.filter(
+                    constituency_id=constituency_id
+                ).order_by('name')
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk and self.instance.desired_constituency:
+            self.fields['ward'].queryset = self.instance.desired_constituency.wards_set.order_by('name')
+        
+        # Set initial values if editing an existing instance
+        if self.instance.pk:
+            if self.instance.desired_county:
+                self.fields['county'].initial = self.instance.desired_county
+            if self.instance.desired_constituency:
+                self.fields['constituency'].initial = self.instance.desired_constituency
+            if self.instance.desired_ward:
+                self.fields['ward'].initial = self.instance.desired_ward
+    
+    def save(self, commit=True):
+        # Get the unsaved instance
+        instance = super().save(commit=False)
+        
+        # Map the form fields to the model fields
+        instance.desired_county = self.cleaned_data.get('county')
+        instance.desired_constituency = self.cleaned_data.get('constituency')
+        instance.desired_ward = self.cleaned_data.get('ward')
+        
+        if commit:
+            instance.save()
+        return instance
 

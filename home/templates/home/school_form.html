@@ -250,38 +250,6 @@
 <!-- JavaScript for form styling and dynamic location fields -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Add consistent styling to all form inputs
-        const inputs = document.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            // Skip if already has specific styling
-            if (!input.classList.contains('form-select') && !input.classList.contains('btn')) {
-                input.classList.add('block', 'w-full', 'pl-10', 'pr-3', 'py-2.5', 'text-base', 'border', 'border-gray-300', 'rounded-lg', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500', 'transition-colors', 'duration-200');
-                
-                // Add dark mode styles for dark background inputs
-                if (input.classList.contains('bg-slate-700')) {
-                    input.classList.add('text-white', 'border-gray-600');
-                }
-            }
-            
-            // Add focus styles
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50', 'rounded-lg');
-            });
-            
-            input.addEventListener('blur', function() {
-                this.parentElement.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50');
-            });
-        });
-        
-        // Initialize select2 for better select dropdowns
-        if (typeof $ !== 'undefined') {
-            $('select').select2({
-                theme: 'bootstrap4',
-                width: '100%',
-                placeholder: 'Select an option',
-                allowClear: true
-            });
-        }
         // Get DOM elements
         const countySelect = document.getElementById('county');
         const constituencySelect = document.getElementById('constituency');
@@ -300,144 +268,145 @@
             });
         }
         
-        // Style all form inputs
-        const inputs = document.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            input.classList.add('block', 'w-full', 'px-4', 'py-2.5', 'text-base', 'text-white', 'bg-slate-700', 'border', 'border-gray-600', 'rounded-lg', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500', 'transition-colors', 'duration-200');
-            
-            // Add focus styles
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50');
-                this.parentElement.classList.add('rounded-lg');
+        // Style form elements
+        const styleFormElements = () => {
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                // Skip if already has specific styling
+                if (!input.classList.contains('form-select') && !input.classList.contains('btn')) {
+                    input.classList.add('block', 'w-full', 'px-4', 'py-2.5', 'text-base', 'text-white', 'bg-slate-700', 'border', 'border-gray-600', 'rounded-lg', 'focus:ring-2', 'focus:ring-blue-500', 'focus:border-blue-500', 'transition-colors', 'duration-200');
+                }
+                
+                // Add focus styles
+                input.addEventListener('focus', function() {
+                    const parent = this.parentElement;
+                    if (parent) {
+                        parent.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50', 'rounded-lg');
+                    }
+                });
+                
+                input.addEventListener('blur', function() {
+                    const parent = this.parentElement;
+                    if (parent) {
+                        parent.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50');
+                    }
+                });
             });
             
-            input.addEventListener('blur', function() {
-                this.parentElement.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50');
+            // Style select elements specifically
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                select.classList.add('appearance-none', 'pr-10');
             });
-        });
+        };
         
-        // Style select elements specifically
-        const selects = document.querySelectorAll('select');
-        selects.forEach(select => {
-            select.classList.add('appearance-none', 'pr-10');
-        });
-        const countySelect = document.getElementById('county');
-        const constituencySelect = document.getElementById('constituency');
-        const wardSelect = document.getElementById('id_ward');
-        
-        // Function to load constituencies
-        function loadConstituencies(countyId) {
-            if (!countyId) {
-                constituencySelect.innerHTML = '<option value="">Select a constituency</option>';
-                constituencySelect.disabled = true;
-                wardSelect.disabled = true;
-                return;
-            }
-            
-            fetch(`/schools/get-constituencies/?county_id=${countyId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const options = '<option value="">Select a constituency</option>' + 
-                        data.constituencies.map(c => 
-                            `<option value="${c.id}">${c.name}</option>`
-                        ).join('');
-                    
-                    constituencySelect.innerHTML = options;
-                    constituencySelect.disabled = false;
-                    wardSelect.disabled = true;
-                });
-        }
-        
-        // Function to load wards
-        function loadWards(constituencyId) {
-            if (!constituencyId) {
-                wardSelect.innerHTML = '<option value="">Select a ward</option>';
-                wardSelect.disabled = true;
-                return;
-            }
-            
-            fetch(`/schools/get-wards/?constituency_id=${constituencyId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const options = '<option value="">Select a ward</option>' + 
-                        data.wards.map(w => 
-                            `<option value="${w.id}">${w.name}</option>`
-                        ).join('');
-                    
-                    wardSelect.innerHTML = options;
-                    wardSelect.disabled = false;
-                });
-        }
+        // Initialize form styling
+        styleFormElements();
         
         // Function to load constituencies
         async function loadConstituencies(countyId) {
             if (!countyId) {
-                // Clear and disable constituency and ward selects
-                constituencySelect.innerHTML = '<option value="">Select a constituency</option>';
-                wardSelect.innerHTML = '<option value="">Select a ward</option>';
-                constituencySelect.disabled = true;
-                wardSelect.disabled = true;
+                if (constituencySelect) {
+                    constituencySelect.innerHTML = '<option value="">Select a constituency</option>';
+                    constituencySelect.disabled = true;
+                }
+                if (wardSelect) {
+                    wardSelect.innerHTML = '<option value="">Select a ward</option>';
+                    wardSelect.disabled = true;
+                }
                 return;
             }
             
             try {
-                const response = await fetch(`/get-constituencies/?county_id=${countyId}`);
+                const response = await fetch(`/schools/get-constituencies/?county_id=${countyId}`);
                 const data = await response.json();
                 
-                // Clear and populate constituencies
-                constituencySelect.innerHTML = '<option value="">Select a constituency</option>';
-                data.constituencies.forEach(constituency => {
-                    const option = document.createElement('option');
-                    option.value = constituency.id;
-                    option.textContent = constituency.name;
-                    constituencySelect.appendChild(option);
-                });
-                
-                // Enable constituency select
-                constituencySelect.disabled = false;
+                if (constituencySelect) {
+                    // Clear and populate constituencies
+                    constituencySelect.innerHTML = '<option value="">Select a constituency</option>';
+                    if (data.constituencies && data.constituencies.length > 0) {
+                        data.constituencies.forEach(constituency => {
+                            const option = document.createElement('option');
+                            option.value = constituency.id;
+                            option.textContent = constituency.name;
+                            constituencySelect.appendChild(option);
+                        });
+                        constituencySelect.disabled = false;
+                        
+                        // If there's a previously selected constituency, select it
+                        const selectedConstituency = constituencySelect.dataset.selected;
+                        if (selectedConstituency) {
+                            constituencySelect.value = selectedConstituency;
+                            // Trigger change event to load wards
+                            const event = new Event('change');
+                            constituencySelect.dispatchEvent(event);
+                        }
+                    } else {
+                        console.error('No constituencies found for the selected county');
+                        constituencySelect.disabled = true;
+                    }
+                }
                 
                 // Clear and disable ward select
-                wardSelect.innerHTML = '<option value="">Select a ward</option>';
-                wardSelect.disabled = true;
-                
+                if (wardSelect) {
+                    wardSelect.innerHTML = '<option value="">Select a ward</option>';
+                    wardSelect.disabled = true;
+                }
             } catch (error) {
                 console.error('Error loading constituencies:', error);
+                if (constituencySelect) {
+                    constituencySelect.innerHTML = '<option value="">Error loading constituencies</option>';
+                    constituencySelect.disabled = true;
+                }
+                if (wardSelect) {
+                    wardSelect.innerHTML = '<option value="">Select a ward</option>';
+                    wardSelect.disabled = true;
+                }
             }
         }
         
         // Function to load wards
         async function loadWards(constituencyId) {
             if (!constituencyId) {
-                // Clear and disable ward select
-                wardSelect.innerHTML = '<option value="">Select a ward</option>';
-                wardSelect.disabled = true;
+                if (wardSelect) {
+                    wardSelect.innerHTML = '<option value="">Select a ward</option>';
+                    wardSelect.disabled = true;
+                }
                 return;
             }
             
             try {
-                const response = await fetch(`/get-wards/?constituency_id=${constituencyId}`);
+                const response = await fetch(`/schools/get-wards/?constituency_id=${constituencyId}`);
                 const data = await response.json();
                 
                 // Clear and populate wards
-                wardSelect.innerHTML = '<option value="">Select a ward</option>';
-                data.wards.forEach(ward => {
-                    const option = document.createElement('option');
-                    option.value = ward.id;
-                    option.textContent = ward.name;
-                    
-                    // Check if this is the selected ward
-                    if (wardSelect.dataset.selected && wardSelect.dataset.selected === ward.id.toString()) {
-                        option.selected = true;
+                if (wardSelect) {
+                    wardSelect.innerHTML = '<option value="">Select a ward</option>';
+                    if (data.wards && data.wards.length > 0) {
+                        data.wards.forEach(ward => {
+                            const option = document.createElement('option');
+                            option.value = ward.id;
+                            option.textContent = ward.name;
+                            wardSelect.appendChild(option);
+                        });
+                        wardSelect.disabled = false;
+                        
+                        // If there's a previously selected ward, select it
+                        const selectedWard = wardSelect.dataset.selected;
+                        if (selectedWard) {
+                            wardSelect.value = selectedWard;
+                        }
+                    } else {
+                        console.error('No wards found for the selected constituency');
+                        wardSelect.disabled = true;
                     }
-                    
-                    wardSelect.appendChild(option);
-                });
-                
-                // Enable ward select
-                wardSelect.disabled = false;
-                
+                }
             } catch (error) {
                 console.error('Error loading wards:', error);
+                if (wardSelect) {
+                    wardSelect.innerHTML = '<option value="">Error loading wards</option>';
+                    wardSelect.disabled = true;
+                }
             }
         }
         
@@ -484,12 +453,22 @@
             countySelect.addEventListener('change', function() {
                 loadConstituencies(this.value);
             });
+            
+            // Trigger change event if a county is already selected
+            if (countySelect.value) {
+                loadConstituencies(countySelect.value);
+            }
         }
         
         if (constituencySelect) {
             constituencySelect.addEventListener('change', function() {
                 loadWards(this.value);
             });
+            
+            // Trigger change event if a constituency is already selected
+            if (constituencySelect.value) {
+                loadWards(constituencySelect.value);
+            }
         }
         
         constituencySelect.addEventListener('change', function() {
