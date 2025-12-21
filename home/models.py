@@ -23,11 +23,14 @@ class Level(models.Model):
 
 class Subject(models.Model):
     name = models.CharField(max_length=255)
-    code = models.CharField(max_length=255)
-    curriculum = models.ForeignKey(Curriculum, on_delete=models.CASCADE)
+    code = models.CharField(max_length=255, null=True, blank=True)
     level = models.ForeignKey(Level, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('name', 'level')
+        ordering = ['name']
 
     def __str__(self):
         return self.name
