@@ -571,95 +571,98 @@
 {% block content %}
 <div class="page-shell">
     <!-- HERO -->
-    <section class="relative bg-gray-900 overflow-hidden">
-        <!-- Background image with overlay -->
-        <div class="absolute inset-0 z-0">
-            <img 
-                src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1932&q=80" 
-                alt="African professionals shaking hands" 
-                class="w-full h-full object-cover opacity-30"
-            >
-            <div class="absolute inset-0 bg-gradient-to-b from-gray-900/90 to-gray-900/50"></div>
+    <section class="hero" id="hero">
+        <div>
+            <div class="hero-copy-eyebrow">
+                <div class="hero-eyebrow-dot"></div>
+                <span>Swap-ready in minutes</span>
+            </div>
+            <h1 class="hero-title">
+                Find the <span class="accent">right TSC swap</span> without cold-calling
+            </h1>
+            <p class="hero-subtitle">
+                A streamlined path to a compliant transfer. Set your counties and subjects, let the engine surface verified matches, and follow guided steps to submit.
+            </p>
+            <div class="hero-cta-row">
+                <button class="hero-primary-cta" onclick="window.location.href='/register'">
+                    <span class="icon">↗</span>
+                    Create your profile
+                </button>
+                <button class="hero-secondary-cta" onclick="document.getElementById('how-it-works').scrollIntoView({ behavior: 'smooth' })">
+                    <span class="icon">▶</span>
+                    How it works
+                </button>
+            </div>
+            <div class="hero-metadata">
+                <div class="hero-pill">
+                    <span class="hero-pill-badge">47</span>
+                    <span class="hero-pill-label">Counties covered</span>
+                </div>
+                <div class="hero-pill">
+                    <span class="hero-pill-badge">TSC</span>
+                    <span class="hero-pill-label hero-pill-highlight">Policy checks baked in</span>
+                </div>
+                <div class="hero-pill">
+                    <span class="hero-pill-badge">24/7</span>
+                    <span class="hero-pill-label">Human support</span>
+                </div>
+            </div>
         </div>
 
-        <div class="relative max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-12 py-24 md:py-32">
-            <div class="grid md:grid-cols-2 gap-12 items-center">
-                <!-- Left column - Text content -->
-                <div class="text-center md:text-left">
-                    <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-500/10 text-blue-400 mb-6">
-                        <span class="flex w-2 h-2 rounded-full bg-blue-400 mr-2"></span>
-                        TRUSTED BY TEACHERS ACROSS KENYA
+        <div class="hero-card-wrapper">
+            <div class="hero-card">
+                <div class="hero-card-header">
+                    <div>
+                        <div class="hero-card-title">Match preview</div>
+                        <div class="hero-card-subtitle">Built from your profile</div>
                     </div>
-                    
-                    <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-                        Seamless Teacher Swaps <span class="bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent">Made Simple</span>
-                    </h1>
-                    
-                    <p class="text-xl text-gray-300 mb-8 max-w-xl mx-auto md:mx-0">
-                        Connect with teachers across Kenya who want to swap stations. Our platform makes the entire process simple, transparent, and stress-free.
-                    </p>
-                    
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                        <a href="{% if request.user.is_authenticated %}{% url 'home:create_swap' %}{% else %}{% url 'users:signup' %}{% endif %}" 
-                           class="inline-flex items-center justify-center px-8 py-4 font-medium text-white bg-gradient-to-r from-blue-500 to-teal-500 rounded-full hover:from-blue-600 hover:to-teal-600 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl">
-                            <span class="flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                                Find My Swap Match
-                            </span>
-                        </a>
-                        
-                        <a href="#how" class="inline-flex items-center justify-center px-6 py-4 font-medium text-white hover:text-blue-300 transition-colors">
-                            <span class="flex items-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                How It Works
-                            </span>
-                        </a>
-                    </div>
-                    
-                    <!-- Stats -->
-                    <div class="mt-12 grid grid-cols-2 gap-8 max-w-md mx-auto md:mx-0">
-                        <div class="text-center md:text-left">
-                            <div class="text-3xl font-bold text-white mb-1">500+</div>
-                            <div class="text-sm text-gray-300">Active Teachers</div>
+                    <div class="hero-card-status-pill">Compliant</div>
+                </div>
+
+                <div class="hero-card-body">
+                    <div class="teacher-card">
+                        <div class="teacher-label">You</div>
+                        <div class="teacher-name">Maths & Physics · Kisumu</div>
+                        <div class="teacher-meta">
+                            <strong>Prefers:</strong> Kiambu, Nairobi<br>
+                            <strong>Level:</strong> Secondary
                         </div>
-                        <div class="text-center md:text-left">
-                            <div class="text-3xl font-bold text-white mb-1">47</div>
-                            <div class="text-sm text-gray-300">Counties</div>
+                        <div class="teacher-tags">
+                            <span class="tag-pill">4 yrs in station</span>
+                            <span class="tag-pill">Urban</span>
+                        </div>
+                    </div>
+
+                    <div class="swap-icon">⇆</div>
+
+                    <div class="teacher-card">
+                        <div class="teacher-label">Match</div>
+                        <div class="teacher-name">Grace • Nairobi</div>
+                        <div class="teacher-meta">
+                            <strong>Prefers:</strong> Kisumu<br>
+                            <strong>Level:</strong> Secondary
+                        </div>
+                        <div class="teacher-tags">
+                            <span class="tag-pill">2 yrs in station</span>
+                            <span class="tag-pill">Peri-urban</span>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Right column - Image -->
-                <div class="relative z-10">
-                    <div class="relative
-                        bg-gradient-to-br from-blue-500/20 to-teal-500/20 
-                        rounded-2xl p-1 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
-                        <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700">
-                            <img 
-                                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" 
-                                alt="Teachers exchanging documents"
-                                class="w-full h-auto rounded-lg"
-                            >
-                        </div>
-                        <!-- Decorative elements -->
-                        <div class="absolute -bottom-4 -right-4 w-24 h-24 bg-blue-500/10 rounded-full filter blur-xl"></div>
-                        <div class="absolute -top-4 -left-4 w-20 h-20 bg-teal-500/10 rounded-full filter blur-xl"></div>
+
+                <div class="hero-card-footer">
+                    <div class="hero-card-step">
+                        <div class="hero-card-step-badge">Next</div>
+                        <span>Verify subjects & county rules</span>
+                    </div>
+                    <div class="hero-card-footnote">
+                        Guided TSC forms after eligibility passes
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Decorative elements -->
-        <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-900 to-transparent"></div>
     </section>
-    
 
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
                 <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700 shadow-xl">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                         <!-- Left Column - Features -->
@@ -802,7 +805,7 @@
         </div>
 
         <!-- Guided TSC Forms Section -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16" id="guided-forms">
             <div class="bg-gradient-to-r from-blue-900/30 to-teal-900/30 rounded-2xl p-8 border border-gray-700 shadow-xl">
                 <div class="text-center mb-10">
                     <h2 class="text-2xl md:text-3xl font-bold text-white mb-3">Guided TSC Transfer Process</h2>
