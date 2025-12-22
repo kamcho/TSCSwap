@@ -760,17 +760,12 @@
                     </div>
                     {% endif %}
                     <div class="card-header">
-                        <h3>
-                            {% if swap.gender == 'M' %}
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400 inline" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                </svg>
-                            {% else %}
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pink-400 inline" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                </svg>
-                            {% endif %}
-                            {{ swap.get_gender_display }} Teacher
+                        <h3 class="text-lg font-semibold text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            From {{ swap_data.user_school.ward.constituency.county.name }} to {{ swap.county.name }}
                         </h3>
                         <div class="location">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
