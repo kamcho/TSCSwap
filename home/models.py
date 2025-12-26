@@ -1,5 +1,6 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
+
 User = settings.AUTH_USER_MODEL
 # Create your models here.
 class Curriculum(models.Model):
@@ -159,8 +160,11 @@ class SwapPreference(models.Model):
 class FastSwap(models.Model):
     names = models.CharField(max_length=255)
     phone = models.CharField(max_length=255)
-    school = models.ForeignKey(Schools, on_delete=models.CASCADE)
-    most_preferred = models.ForeignKey(Counties, on_delete=models.CASCADE, null=True, blank=True)
+    school = models.ForeignKey(Schools, on_delete=models.CASCADE, null=True, blank=True)
+    most_preferred = models.ForeignKey(Counties, on_delete=models.CASCADE, null=True, blank=True, related_name='fastswap_preferred')
+    current_county = models.ForeignKey(Counties, on_delete=models.CASCADE, null=True, blank=True, related_name='fastswap_current')
+    current_constituency = models.ForeignKey(Constituencies, on_delete=models.CASCADE, null=True, blank=True, related_name='fastswap_constituency')
+    current_ward = models.ForeignKey(Wards, on_delete=models.CASCADE, null=True, blank=True, related_name='fastswap_ward')
     acceptable_county = models.ManyToManyField(Counties, related_name='acceptable_county')
     level = models.ForeignKey(Level, on_delete=models.CASCADE)
     subjects = models.ManyToManyField(Subject)

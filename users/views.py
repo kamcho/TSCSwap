@@ -1,16 +1,19 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import get_user_model
-from django.http import JsonResponse
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
+from django.contrib.auth import (authenticate, get_user_model, login, logout,
+                                 update_session_auth_hash)
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from .forms import MyUserCreationForm, MyAuthenticationForm, ProfileEditForm, CustomPasswordChangeForm
-from .models import PersonalProfile
-from home.models import Level, Subject, MySubject, Swaps, SwapRequests, SwapPreference
+
+from home.models import (Level, MySubject, Subject, SwapPreference,
+                         SwapRequests, Swaps)
 from home.utils import verify_kra_details
+
+from .forms import (CustomPasswordChangeForm, MyAuthenticationForm,
+                    MyUserCreationForm, ProfileEditForm)
+from .models import PersonalProfile
 
 # Create your views here.
 
@@ -65,8 +68,8 @@ def signup_view(request):
             login(request, user)
             # Clear any existing messages and show only this one
             messages.get_messages(request)
-            messages.success(request, f'Account created successfully! Let\'s complete your profile.')
-            return redirect('users:profile_completion')  # Redirect to profile completion instead of home
+            messages.success(request, f'Account created successfully! Please complete your profile.')
+            return redirect('users:profile_edit')  # Redirect to profile edit page
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -184,8 +187,8 @@ def profile_completion_view(request):
             first_name, last_name, surname = parse_name(full_name)
             
             # Check if ID number is already in use by another user
-            from django.db import IntegrityError
             from django.contrib.auth import get_user_model
+            from django.db import IntegrityError
             
             user = request.user
             User = get_user_model()
@@ -335,26 +338,40 @@ def dashboard(request):
     pending_requests = SwapRequests.objects.filter(swap__user=user, accepted=False, is_active=True).count()
     
     # Check profile completion status
-    has_profile = hasattr(user, 'profile')
+    has_profile = hasattr(user, 'profile') and user.profile is not None
     
-    # Personal Information
-    personal_info_complete = has_profile and all([
-        user.profile.first_name,
-        user.profile.last_name,
-        user.profile.phone,
-        user.id_number,  # This is on the user model, not profile
-        user.tsc_number,  # This is on the user model, not profile
-        user.profile.gender,
-    ])
-    
-    # Teaching Information
-    teaching_info_complete = False
+    # Personal Information - Core fields only (name, phone, gender)
+    # first_name and last_name are on the User model, phone and gender on Profile
+    personal_info_complete = False
     if has_profile:
-        teaching_info_complete = all([
-            user.profile.level,
-            user.mysubject_set.exists(),
-            user.profile.school  # Check for school instead of county/constituency/ward
+        personal_info_complete = all([
+            user.first_name,  # On User model
+            user.last_name,   # On User model
+            user.profile.phone,
+            user.profile.gender,
         ])
+    
+    # Teaching Information - Different requirements based on level
+    teaching_info_complete = False
+    is_secondary_level = False
+    if has_profile and user.profile.level:
+        user_level = user.profile.level
+        
+        # Check if user is Secondary/High School level
+        if user_level.name == "Secondary/High School":
+            is_secondary_level = True
+            # Secondary teachers need: level, school, AND subjects
+            teaching_info_complete = all([
+                user.profile.level,
+                user.profile.school,
+                user.mysubject_set.exists()
+            ])
+        else:
+            # Primary teachers only need: level and school (no subjects required)
+            teaching_info_complete = all([
+                user.profile.level,
+                user.profile.school
+            ])
     
     # Profile Picture
     profile_picture_complete = has_profile and bool(user.profile.profile_picture)
@@ -366,16 +383,21 @@ def dashboard(request):
     except SwapPreference.DoesNotExist:
         pass
     
-    preferences_complete = swap_preference is not None
+    # Preferences complete if exists AND has at least county or is open_to_all
+    preferences_complete = swap_preference is not None and (
+        swap_preference.open_to_all or swap_preference.desired_county is not None
+    )
     
-    # Calculate completion percentage (each section is worth ~33.33%)
+    # Calculate completion percentage (4 sections, 25% each)
     completion_percentage = 0
     if personal_info_complete:
-        completion_percentage += 33.33
+        completion_percentage += 25
     if teaching_info_complete:
-        completion_percentage += 33.33
+        completion_percentage += 25
     if profile_picture_complete:
-        completion_percentage += 33.34  # To ensure it adds up to 100%
+        completion_percentage += 25
+    if preferences_complete:
+        completion_percentage += 25
         
     # Overall profile complete if all sections are complete
     profile_complete = all([personal_info_complete, teaching_info_complete, profile_picture_complete, preferences_complete])
@@ -401,6 +423,8 @@ def dashboard(request):
         'personal_info_complete': personal_info_complete,
         'teaching_info_complete': teaching_info_complete,
         'profile_picture_complete': profile_picture_complete,
+        'preferences_complete': preferences_complete,
+        'is_secondary_level': is_secondary_level,
         'subscription': subscription_status,
         'swap_preference': swap_preference,
         'preferences_complete': preferences_complete,

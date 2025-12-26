@@ -1,0 +1,944 @@
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} · TSC Swap{% endblock %}
+
+{% block extra_css %}
+<style>
+    body, main {
+        background: #030711;
+        color: #e5e7eb;
+    }
+    .swaps-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    .page-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+    .page-header h1 {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #f3f4f6;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(to right, {% if level_filter == 'primary' %}#f59e0b, #eab308{% else %}#60a5fa, #34d399{% endif %});
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+    .page-header p {
+        color: #9ca3af;
+        font-size: 1.125rem;
+        max-width: 42rem;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+    .level-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    .level-badge.primary {
+        background-color: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .level-badge.secondary {
+        background-color: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    /* Filter Form Styles */
+    .filter-form {
+        background: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .filter-form h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #f3f4f6;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .filter-form h3 svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: #60a5fa;
+    }
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1rem;
+    }
+    @media (min-width: 768px) {
+        .filter-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    .form-group {
+        margin-bottom: 0;
+    }
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #9ca3af;
+        margin-bottom: 0.5rem;
+    }
+    .form-control {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        color: #f3f4f6;
+        background-color: #1f2937;
+        border: 1px solid #374151;
+        border-radius: 0.375rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-control:focus {
+        outline: none;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    .filter-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #1f2937;
+    }
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+        border: 1px solid #3b82f6;
+    }
+    .btn-primary:hover {
+        background-color: #2563eb;
+        border-color: #2563eb;
+    }
+    .btn-outline {
+        background-color: transparent;
+        color: #9ca3af;
+        border: 1px solid #4b5563;
+    }
+    .btn-outline:hover {
+        background-color: #1f2937;
+        color: #e5e7eb;
+        border-color: #6b7280;
+    }
+    .swaps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    .swap-card {
+        background: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .swap-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border-color: {% if level_filter == 'primary' %}#f59e0b{% else %}#3b82f6{% endif %};
+    }
+    .card-header {
+        padding: 1.25rem 1.5rem 0.5rem;
+        border-bottom: 1px solid #1f2937;
+    }
+    .card-header h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #f9fafb;
+        margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .location {
+        display: flex;
+        align-items: center;
+        color: #9ca3af;
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+    }
+    .location svg {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 0.375rem;
+        color: {% if level_filter == 'primary' %}#fbbf24{% else %}#60a5fa{% endif %};
+    }
+    .card-body {
+        padding: 1.25rem 1.5rem;
+        flex-grow: 1;
+    }
+    .meta-item {
+        display: flex;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+    }
+    .meta-label {
+        color: #9ca3af;
+        width: 100px;
+        flex-shrink: 0;
+    }
+    .meta-value {
+        color: #e5e7eb;
+        font-weight: 500;
+    }
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .badge-blue {
+        background-color: rgba(37, 99, 235, 0.1);
+        color: #60a5fa;
+    }
+    .badge-green {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #34d399;
+    }
+    .badge-amber {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #fbbf24;
+    }
+    .card-footer {
+        padding: 0.75rem 1.5rem 1.25rem;
+        border-top: 1px solid #1f2937;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .date {
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+    .view-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background-color: {% if level_filter == 'primary' %}rgba(245, 158, 11, 0.1){% else %}rgba(59, 130, 246, 0.1){% endif %};
+        color: {% if level_filter == 'primary' %}#fbbf24{% else %}#60a5fa{% endif %};
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .view-btn:hover {
+        background-color: {% if level_filter == 'primary' %}rgba(245, 158, 11, 0.2){% else %}rgba(59, 130, 246, 0.2){% endif %};
+    }
+    .view-btn svg {
+        width: 1rem;
+        height: 1rem;
+        margin-left: 0.5rem;
+    }
+    .no-swaps {
+        text-align: center;
+        padding: 3rem 1rem;
+        grid-column: 1 / -1;
+    }
+    .no-swaps p {
+        color: #9ca3af;
+        font-size: 1.125rem;
+        margin-bottom: 1.5rem;
+    }
+    .create-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, {% if level_filter == 'primary' %}#f59e0b, #eab308{% else %}#3b82f6, #8b5cf6{% endif %});
+        color: white;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .create-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .create-btn svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        margin-right: 0.5rem;
+    }
+    /* Match Label Styles */
+    .match-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+    .match-badge.perfect {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    }
+    .match-badge.excellent {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    }
+    .match-badge.good {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+    }
+    .match-badge.normal {
+        background-color: #374151;
+        color: #9ca3af;
+    }
+    .match-banner {
+        padding: 0.5rem 1rem;
+        text-align: center;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    .match-banner.perfect {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2));
+        border-bottom: 2px solid #10b981;
+        color: #34d399;
+    }
+    .match-banner.excellent {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2));
+        border-bottom: 2px solid #3b82f6;
+        color: #60a5fa;
+    }
+    .match-banner.good {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2));
+        border-bottom: 2px solid #f59e0b;
+        color: #fbbf24;
+    }
+    .swap-card.perfect-match {
+        border: 2px solid #10b981;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    }
+    .swap-card.excellent-match {
+        border: 2px solid #3b82f6;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.12);
+    }
+    .swap-card.good-match {
+        border: 2px solid #f59e0b;
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.1);
+    }
+    @media (max-width: 640px) {
+        .swaps-grid {
+            grid-template-columns: 1fr;
+        }
+        .page-header h1 {
+            font-size: 1.875rem;
+        }
+        .page-header p {
+            font-size: 1rem;
+        }
+    }
+    
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 1rem;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .modal-container {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 20px;
+        padding: 2.5rem;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        animation: slideUp 0.4s ease;
+    }
+    
+    .modal-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.1));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fbbf24;
+    }
+    
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #f1f5f9;
+        margin: 0 0 0.75rem 0;
+    }
+    
+    .modal-description {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 0 0 1.5rem 0;
+    }
+    
+    .missing-items-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .missing-item-link {
+        text-decoration: none;
+        display: block;
+    }
+    
+    .missing-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: left;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .missing-item-link:hover .missing-item {
+        background: rgba(34, 211, 238, 0.1);
+        border-color: rgba(34, 211, 238, 0.3);
+        transform: translateX(4px);
+    }
+    
+    .item-arrow {
+        margin-left: auto;
+        color: #64748b;
+        transition: all 0.3s ease;
+    }
+    
+    .missing-item-link:hover .item-arrow {
+        color: #22d3ee;
+        transform: translateX(4px);
+    }
+    
+    .item-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .item-icon.warning {
+        background: rgba(251, 191, 36, 0.15);
+        color: #fbbf24;
+    }
+    
+    .item-content {
+        flex: 1;
+    }
+    
+    .item-content h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin: 0 0 0.25rem 0;
+    }
+    
+    .item-content p {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin: 0;
+        line-height: 1.4;
+    }
+    
+    .modal-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .btn-setup-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-setup-primary:hover {
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .btn-setup-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        background: transparent;
+        color: #94a3b8;
+        font-weight: 500;
+        font-size: 0.9rem;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-setup-secondary:hover {
+        background: rgba(148, 163, 184, 0.1);
+        color: #e2e8f0;
+    }
+    
+    .modal-note {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: #64748b;
+        margin: 0;
+    }
+    
+    .modal-hidden {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Setup Modal for incomplete profile -->
+{% if user.is_authenticated and show_setup_modal %}
+<div id="setupModal" class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </div>
+        <h2 class="modal-title">Complete Your Profile for Better Matches</h2>
+        <p class="modal-description">
+            To help our system find the best swap matches for you, please complete the following:
+        </p>
+        
+        <div class="missing-items-list">
+            {% if 'level' in missing_items %}
+            <a href="{% url 'users:profile_edit' %}" class="missing-item-link">
+                <div class="missing-item">
+                    <div class="item-icon warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="item-content">
+                        <h4>Teaching Level</h4>
+                        <p>Set your teaching level (Primary or Secondary/High School)</p>
+                    </div>
+                    <div class="item-arrow">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+            {% endif %}
+            
+            {% if 'swap_preference' in missing_items %}
+            <a href="{% url 'home:swap_preferences' %}" class="missing-item-link">
+                <div class="missing-item">
+                    <div class="item-icon warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </div>
+                    <div class="item-content">
+                        <h4>Swap Preferences</h4>
+                        <p>Set your preferred swap locations (County, Constituency, Ward)</p>
+                    </div>
+                    <div class="item-arrow">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+            {% endif %}
+            
+            {% if 'subjects' in missing_items and level_filter == 'secondary' %}
+            <a href="{% url 'home:create_mysubject' %}" class="missing-item-link">
+                <div class="missing-item">
+                    <div class="item-icon warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                    </div>
+                    <div class="item-content">
+                        <h4>Teaching Subjects</h4>
+                        <p>Add the subjects you teach for better matching with other teachers</p>
+                    </div>
+                    <div class="item-arrow">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </a>
+            {% endif %}
+        </div>
+        
+        <div class="modal-actions">
+            <a href="{% url 'users:profile_edit' %}" class="btn-setup-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Complete Profile Setup
+            </a>
+            <button type="button" onclick="closeSetupModal()" class="btn-setup-secondary">
+                Continue Browsing
+            </button>
+        </div>
+        
+        <p class="modal-note">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+            </svg>
+            Complete your profile to see personalized match scores!
+        </p>
+    </div>
+</div>
+{% endif %}
+
+<div class="swaps-container">
+    <div class="page-header">
+        <div>
+            <span class="level-badge {{ level_filter }}">
+                {% if level_filter == 'primary' %}
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                Primary School
+                {% else %}
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                Secondary/High School
+                {% endif %}
+            </span>
+            <h1>{{ title }}</h1>
+            <p>{{ page_subtitle }}</p>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="get" class="filter-form" id="filterForm">
+        <h3>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filter Swaps
+        </h3>
+        <div class="filter-grid">
+            <div class="form-group">
+                <label for="county">County</label>
+                <select name="county" id="county" class="form-control" onchange="this.form.submit()">
+                    <option value="">All Counties</option>
+                    {% for county in counties %}
+                        <option value="{{ county.id }}" {% if selected_county == county.id|stringformat:'s' %}selected{% endif %}>
+                            {{ county.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="constituency">Constituency</label>
+                <select name="constituency" id="constituency" class="form-control" onchange="this.form.submit()" {% if not selected_county %}disabled{% endif %}>
+                    <option value="">All Constituencies</option>
+                    {% for constituency in constituencies %}
+                        <option value="{{ constituency.id }}" {% if selected_constituency == constituency.id|stringformat:'s' %}selected{% endif %}>
+                            {{ constituency.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ward">Ward</label>
+                <select name="ward" id="ward" class="form-control" {% if not selected_constituency %}disabled{% endif %}>
+                    <option value="">All Wards</option>
+                    {% for ward in wards %}
+                        <option value="{{ ward.id }}" {% if selected_ward == ward.id|stringformat:'s' %}selected{% endif %}>
+                            {{ ward.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="filter-actions">
+            <a href="{% if level_filter == 'primary' %}{% url 'home:primary_swaps' %}{% else %}{% url 'home:secondary_swaps' %}{% endif %}" class="btn btn-outline">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reset
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Apply Filters
+            </button>
+        </div>
+    </form>
+
+    {% if swaps_data %}
+        <div class="swaps-grid">
+            {% for swap_data in swaps_data %}
+                {% with swap=swap_data.swap %}
+                <div class="swap-card {% if swap_data.is_perfect_match %}perfect-match{% elif swap_data.is_excellent_match %}excellent-match{% elif swap_data.is_good_match %}good-match{% endif %}">
+                    {% if user.is_authenticated %}
+                    <!-- Match Banner -->
+                    {% if swap_data.is_perfect_match %}
+                    <div class="match-banner perfect">
+                        <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        ★ Perfect Match{% if level_filter == 'secondary' %} - Location & Subjects Match!{% else %} - Mutual Swap Opportunity!{% endif %}
+                    </div>
+                    {% elif swap_data.is_excellent_match %}
+                    <div class="match-banner excellent">
+                        <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                        </svg>
+                        ⚡ Excellent Match
+                    </div>
+                    {% elif swap_data.is_good_match %}
+                    <div class="match-banner good">
+                        <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        Good Match
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    <div class="card-header">
+                        <h3 class="text-lg font-semibold text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {% if swap_data.is_perfect_match %}text-green-400{% elif swap_data.is_excellent_match %}text-blue-400{% elif swap_data.is_good_match %}text-amber-400{% elif level_filter == 'primary' %}text-amber-400{% else %}text-blue-400{% endif %} inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {% if swap_data.user_school and swap_data.user_school.ward %}
+                            From {{ swap_data.user_school.ward.constituency.county.name }} to {{ swap.county.name }}
+                            {% else %}
+                            Looking for {{ swap.county.name }}
+                            {% endif %}
+                        </h3>
+                        <div class="location">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            {{ swap.county }}{% if swap.constituency %}, {{ swap.constituency }}{% endif %}{% if swap.ward %}, {{ swap.ward }}{% endif %}
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="badge {% if swap.boarding == 'B' %}badge-blue{% else %}badge-green{% endif %}">
+                                {{ swap.boarding }}
+                            </span>
+                            {% if user.is_authenticated and swap_data.match_score > 0 %}
+                            <span class="match-badge {% if swap_data.is_perfect_match %}perfect{% elif swap_data.is_excellent_match %}excellent{% elif swap_data.is_good_match %}good{% else %}normal{% endif %}">
+                                {{ swap_data.match_label }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="meta-item">
+                            <span class="meta-label">Current School:</span>
+                            <span class="meta-value">
+                                {% if swap_data.user_school %}
+                                    {{ swap_data.user_school.name }}
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if swap_data.user_school and swap_data.user_school.ward %}
+                        <div class="meta-item">
+                            <span class="meta-label">Location:</span>
+                            <span class="meta-value text-sm">
+                                {{ swap_data.user_school.ward.constituency.county.name }}, {{ swap_data.user_school.ward.constituency.name }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        <div class="meta-item">
+                            <span class="meta-label">Subjects:</span>
+                            <span class="meta-value">
+                                {% if swap_data.user_subjects %}
+                                    {% for subject in swap_data.user_subjects|slice:":3" %}
+                                        <span class="inline-block bg-gray-700 rounded-full px-2 py-0.5 text-xs font-medium text-gray-300 mr-1 mb-1">
+                                            {{ subject.name }}
+                                        </span>
+                                    {% endfor %}
+                                    {% if swap_data.user_subjects|length > 3 %}
+                                        <span class="text-xs text-gray-500">+{{ swap_data.user_subjects|length|add:"-3" }} more</span>
+                                    {% endif %}
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if level_filter == 'secondary' and user.is_authenticated and swap_data.common_subjects %}
+                        <div class="mt-3 p-2 bg-green-900/20 border border-green-700/30 rounded-lg">
+                            <div class="flex items-center text-green-400 text-sm font-medium mb-1">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                Matching Subjects:
+                            </div>
+                            <div class="flex flex-wrap gap-1">
+                                {% for subject in swap_data.common_subjects %}
+                                <span class="inline-block bg-green-800/50 text-green-300 rounded-full px-2 py-0.5 text-xs font-medium">
+                                    {{ subject }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer">
+                        <span class="date">Posted {{ swap.created_at|timesince }} ago</span>
+                        <a href="{% url 'home:swap_detail' swap.id %}" class="view-btn">
+                            View Details
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                {% endwith %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-swaps">
+            <svg class="mx-auto h-16 w-16 text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>No {{ title|lower }} found matching your criteria.</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'home:create_swap' %}" class="create-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Create Swap Request
+            </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+{% if user.is_authenticated and show_setup_modal %}
+<script>
+function closeSetupModal() {
+    const modal = document.getElementById('setupModal');
+    if (modal) {
+        modal.classList.add('modal-hidden');
+    }
+}
+
+// Close modal when clicking outside
+document.getElementById('setupModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSetupModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeSetupModal();
+    }
+});
+</script>
+{% endif %}
+{% endblock %}
+

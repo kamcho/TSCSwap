@@ -12,6 +12,8 @@ urlpatterns = [
     path("mysubject/new/", login_required(views.create_mysubject), name="create_mysubject"),
     path("swap/new/", login_required(views.create_swap), name="create_swap"),
     path("swaps/", views.all_swaps, name="all_swaps"),
+    path("swaps/primary/", views.primary_swaps, name="primary_swaps"),
+    path("swaps/secondary/", views.secondary_swaps, name="secondary_swaps"),
     path("swaps/mine/", login_required(views.my_swaps), name="my_swaps"),
     path("swaps/<int:swap_id>/", views.swap_detail, name="swap_detail"),
     path("swaps/<int:swap_id>/request/", login_required(views.request_swap), name="request_swap"),
@@ -34,7 +36,7 @@ urlpatterns = [
     
     # FastSwap management
     path("fast-swap/add/", login_required(views.add_fast_swap), name="add_fast_swap"),
-    path("fast-swap/list/", login_required(views.fast_swap_list), name="fast_swap_list"),
+    path("fast-swap/list/", views.fast_swap_list, name="fast_swap_list"),
     
     # School management
     path("schools/", views.all_schools, name="all_schools"),

@@ -3,171 +3,757 @@
 
 {% block title %}{{ title }} - TSC Swap{% endblock %}
 
+{% block extra_css %}
+<style>
+    .fast-swap-page {
+        min-height: 100vh;
+        background: 
+            radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08), transparent 50%),
+            #0f172a;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .page-subtitle {
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+
+    .add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #22d3ee, #3b82f6);
+        color: #0f172a;
+        font-weight: 600;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 30px rgba(34, 211, 238, 0.3);
+    }
+
+    .add-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 40px rgba(34, 211, 238, 0.5);
+    }
+
+    .message-alert {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .message-error {
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+    }
+
+    .message-success {
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        color: #86efac;
+    }
+
+    /* Card Grid */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+        .cards-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .cards-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    /* Swap Card */
+    .swap-card {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .swap-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(34, 211, 238, 0.3);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(34, 211, 238, 0.1);
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(59, 130, 246, 0.1));
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .card-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #f1f5f9;
+        margin-bottom: 0.25rem;
+    }
+
+    .card-phone {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #22d3ee;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s ease;
+    }
+
+    .card-phone:hover {
+        color: #67e8f9;
+    }
+
+    .card-phone-masked {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #64748b;
+        font-size: 0.9rem;
+        cursor: default;
+    }
+
+    .card-body {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .location-section {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .location-block {
+        flex: 1;
+    }
+
+    .location-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        margin-bottom: 0.25rem;
+    }
+
+    .location-value {
+        color: #e2e8f0;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .location-sub {
+        color: #94a3b8;
+        font-size: 0.8rem;
+        margin-top: 2px;
+    }
+
+    .swap-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: rgba(34, 211, 238, 0.15);
+        border-radius: 50%;
+        color: #22d3ee;
+        flex-shrink: 0;
+        margin-top: 1rem;
+    }
+
+    .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        background: rgba(15, 23, 42, 0.5);
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .level-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .level-primary {
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        color: #86efac;
+    }
+
+    .level-secondary {
+        background: rgba(168, 85, 247, 0.15);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        color: #c4b5fd;
+    }
+
+    .card-date {
+        color: #64748b;
+        font-size: 0.75rem;
+    }
+
+    /* Subjects tags */
+    .subjects-section {
+        margin-top: 0.75rem;
+    }
+
+    .subjects-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+
+    .subjects-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+    }
+
+    .subject-tag {
+        padding: 2px 8px;
+        background: rgba(59, 130, 246, 0.15);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        color: #93c5fd;
+        border-radius: 4px;
+        font-size: 0.7rem;
+    }
+
+    .more-subjects {
+        padding: 2px 8px;
+        background: rgba(148, 163, 184, 0.15);
+        color: #94a3b8;
+        border-radius: 4px;
+        font-size: 0.7rem;
+    }
+
+    /* Acceptable Counties */
+    .acceptable-section {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px dashed rgba(148, 163, 184, 0.1);
+    }
+
+    .acceptable-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        margin-bottom: 0.375rem;
+    }
+
+    .acceptable-list {
+        color: #94a3b8;
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        background: rgba(30, 41, 59, 0.4);
+        border-radius: 16px;
+        border: 1px dashed rgba(148, 163, 184, 0.2);
+    }
+
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1.5rem;
+        color: #475569;
+    }
+
+    .empty-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-text {
+        color: #64748b;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: rgba(30, 41, 59, 0.6);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 180px;
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #94a3b8;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 10px;
+        color: #f1f5f9;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 1.25rem;
+        padding-right: 2.5rem;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #22d3ee;
+        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+    }
+
+    .filter-select option {
+        background: #1e293b;
+        color: #f1f5f9;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .filter-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, #0891b2, #0e7490);
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        transform: translateY(-1px);
+    }
+
+    .filter-reset {
+        padding: 0.75rem 1rem;
+        color: #94a3b8;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .filter-reset:hover {
+        color: #f1f5f9;
+    }
+
+    @media (max-width: 768px) {
+        .filter-form {
+            flex-direction: column;
+        }
+        
+        .filter-group {
+            width: 100%;
+        }
+        
+        .filter-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .filter-btn {
+            flex: 1;
+        }
+    }
+
+    /* Stats bar */
+    .stats-bar {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem 1.5rem;
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #22d3ee;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #94a3b8;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="min-h-screen bg-gray-50">
+<div class="fast-swap-page">
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div class="sm:flex sm:items-center">
-            <div class="sm:flex-auto">
-                <h1 class="text-2xl font-semibold text-gray-900">{{ title }}</h1>
-                <p class="mt-2 text-sm text-gray-700">
-                    A list of all FastSwap entries for quick teacher transfers.
+        <!-- Header -->
+        <div class="sm:flex sm:items-center sm:justify-between page-header">
+            <div>
+                <h1 class="page-title">{{ title }}</h1>
+                <p class="page-subtitle">
+                    Quick teacher transfer listings for fast matching.
                 </p>
             </div>
-            <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                <a href="{% url 'home:add_fast_swap' %}" class="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto">
+            {% if user.is_superuser %}
+            <div class="mt-4 sm:mt-0">
+                <a href="{% url 'home:add_fast_swap' %}" class="add-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
                     Add FastSwap
                 </a>
             </div>
+            {% endif %}
         </div>
 
+        <!-- Messages -->
         {% if messages %}
             {% for message in messages %}
-                <div class="mt-4 p-4 rounded-md {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                <div class="message-alert {% if message.tags == 'error' %}message-error{% else %}message-success{% endif %}">
                     {{ message }}
                 </div>
             {% endfor %}
         {% endif %}
 
-        <div class="mt-8 flex flex-col">
-            <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                        {% if fast_swaps %}
-                            <table class="min-w-full divide-y divide-gray-300">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Name</th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Phone</th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">School</th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Preferred County</th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Level</th>
-                                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date Added</th>
-                                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                            <span class="sr-only">Actions</span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 bg-white">
-                                    {% for swap in fast_swaps %}
-                                        <tr>
-                                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                                {{ swap.names }}
-                                            </td>
-                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                <a href="tel:{{ swap.phone }}" class="text-blue-600 hover:text-blue-900">
-                                                    {{ swap.phone }}
-                                                </a>
-                                            </td>
-                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {{ swap.school.name }}
-                                            </td>
-                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {% if swap.most_preferred %}
-                                                    {{ swap.most_preferred.name }}
-                                                {% else %}
-                                                    -
-                                                {% endif %}
-                                            </td>
-                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {{ swap.level.name }}
-                                            </td>
-                                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {{ swap.created_at|date:"M d, Y" }}
-                                            </td>
-                                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                                <a href="#" class="text-blue-600 hover:text-blue-900">View</a>
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        {% else %}
-                            <div class="text-center py-12">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                                </svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900">No FastSwap entries</h3>
-                                <p class="mt-1 text-sm text-gray-500">Get started by creating a new FastSwap entry.</p>
-                                <div class="mt-6">
-                                    <a href="{% url 'home:add_fast_swap' %}" class="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                        </svg>
-                                        New FastSwap
-                                    </a>
+        <!-- Filter Form -->
+        <div class="filter-section">
+            <form method="get" class="filter-form" id="filterForm">
+                <div class="filter-group">
+                    <label for="county">County</label>
+                    <select name="county" id="county" class="filter-select">
+                        <option value="">All Counties</option>
+                        {% for county in counties %}
+                            <option value="{{ county.id }}" {% if selected_county == county.id|stringformat:"i" %}selected{% endif %}>
+                                {{ county.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="constituency">Constituency</label>
+                    <select name="constituency" id="constituency" class="filter-select">
+                        <option value="">All Constituencies</option>
+                        {% for constituency in constituencies %}
+                            <option value="{{ constituency.id }}" {% if selected_constituency == constituency.id|stringformat:"i" %}selected{% endif %}>
+                                {{ constituency.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="ward">Ward</label>
+                    <select name="ward" id="ward" class="filter-select">
+                        <option value="">All Wards</option>
+                        {% for ward in wards %}
+                            <option value="{{ ward.id }}" {% if selected_ward == ward.id|stringformat:"i" %}selected{% endif %}>
+                                {{ ward.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button type="submit" class="filter-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        Filter
+                    </button>
+                    <a href="{% url 'home:fast_swap_list' %}" class="filter-reset">Reset</a>
+                </div>
+            </form>
+        </div>
+
+        {% if fast_swaps %}
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-value">{{ fast_swaps|length }}</span>
+                    <span class="stat-label">{% if selected_county or selected_constituency or selected_ward %}Filtered Results{% else %}Total Listings{% endif %}</span>
+                </div>
+                {% if selected_county or selected_constituency or selected_ward %}
+                <div class="stat-item" style="margin-left: auto;">
+                    <span style="color: #94a3b8; font-size: 0.875rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                        </svg>
+                        Filters applied
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="cards-grid">
+                {% for swap in fast_swaps %}
+                    <div class="swap-card">
+                        <!-- Card Header -->
+                        <div class="card-header">
+                            {% if user.is_superuser or user.is_staff %}
+                                {# Full details for admin #}
+                                <h3 class="card-name">{{ swap.names }}</h3>
+                                <a href="tel:{{ swap.phone }}" class="card-phone">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                                    </svg>
+                                    {{ swap.phone }}
+                                </a>
+                            {% else %}
+                                {# Masked details for regular users #}
+                                <h3 class="card-name">{{ swap.names|slice:":3" }}***</h3>
+                                <span class="card-phone-masked">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                                    </svg>
+                                    {{ swap.phone|slice:":4" }}****{{ swap.phone|slice:"-3:" }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="card-body">
+                            <!-- Location Section -->
+                            <div class="location-section">
+                                <div class="location-block">
+                                    <div class="location-label">Current Location</div>
+                                    {% if swap.current_county %}
+                                        <div class="location-value">{{ swap.current_county.name }}</div>
+                                        {% if swap.current_constituency %}
+                                            <div class="location-sub">{{ swap.current_constituency.name }}{% if swap.current_ward %}, {{ swap.current_ward.name }}{% endif %}</div>
+                                        {% endif %}
+                                    {% elif swap.school %}
+                                        <div class="location-value">{{ swap.school.name }}</div>
+                                    {% else %}
+                                        <div class="location-value" style="color: #64748b;">Not specified</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="swap-arrow">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                                    </svg>
+                                </div>
+
+                                <div class="location-block">
+                                    <div class="location-label">Preferred</div>
+                                    {% if swap.most_preferred %}
+                                        <div class="location-value">{{ swap.most_preferred.name }}</div>
+                                    {% else %}
+                                        <div class="location-value" style="color: #64748b;">Any County</div>
+                                    {% endif %}
                                 </div>
                             </div>
-                        {% endif %}
+
+                            <!-- Acceptable Counties -->
+                            {% if swap.acceptable_county.all %}
+                            <div class="acceptable-section">
+                                <div class="acceptable-label">Also Acceptable</div>
+                                <div class="acceptable-list">
+                                    {% for county in swap.acceptable_county.all|slice:":5" %}
+                                        {{ county.name }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                    {% if swap.acceptable_county.count > 5 %}
+                                        <span style="color: #64748b;">+{{ swap.acceptable_county.count|add:"-5" }} more</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Subjects (for Secondary) -->
+                            {% if swap.subjects.all %}
+                            <div class="subjects-section">
+                                <div class="subjects-label">Subjects</div>
+                                <div class="subjects-tags">
+                                    {% for subject in swap.subjects.all|slice:":4" %}
+                                        <span class="subject-tag">{{ subject.name }}</span>
+                                    {% endfor %}
+                                    {% if swap.subjects.count > 4 %}
+                                        <span class="more-subjects">+{{ swap.subjects.count|add:"-4" }} more</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="card-footer">
+                            <span class="level-badge {% if 'Primary' in swap.level.name %}level-primary{% else %}level-secondary{% endif %}">
+                                {% if 'Primary' in swap.level.name %}
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                {% else %}
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                    </svg>
+                                {% endif %}
+                                {{ swap.level.name }}
+                            </span>
+                            <span class="card-date">{{ swap.created_at|date:"M d, Y" }}</span>
+                        </div>
                     </div>
-                </div>
+                {% endfor %}
             </div>
-        </div>
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state">
+                <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                </svg>
+                {% if selected_county or selected_constituency or selected_ward %}
+                    <h3 class="empty-title">No results for this filter</h3>
+                    <p class="empty-text">Try adjusting your filter criteria or reset to see all listings.</p>
+                    <a href="{% url 'home:fast_swap_list' %}" class="filter-btn" style="margin-top: 1rem; display: inline-flex;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                        </svg>
+                        Reset Filters
+                    </a>
+                {% else %}
+                    <h3 class="empty-title">No FastSwap entries yet</h3>
+                    <p class="empty-text">There are no FastSwap entries available at the moment.</p>
+                    {% if user.is_superuser %}
+                    <a href="{% url 'home:add_fast_swap' %}" class="add-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Create First FastSwap
+                    </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endif %}
     </div>
 </div>
 
-<!-- Add some custom styling for better appearance -->
-<style>
-    /* Make the table rows have a hover effect */
-    tbody tr {
-        transition: background-color 0.2s ease;
-    }
-    
-    tbody tr:hover {
-        background-color: #f9fafb;
-    }
-    
-    /* Style the action buttons */
-    .action-btn {
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
-        line-height: 1rem;
-        transition: all 0.2s ease;
-    }
-    
-    .action-btn.view {
-        color: #3b82f6;
-    }
-    
-    .action-btn.view:hover {
-        background-color: #eff6ff;
-    }
-    
-    .action-btn.edit {
-        color: #10b981;
-    }
-    
-    .action-btn.edit:hover {
-        background-color: #ecfdf5;
-    }
-    
-    .action-btn.delete {
-        color: #ef4444;
-    }
-    
-    .action-btn.delete:hover {
-        background-color: #fef2f2;
-    }
-    
-    /* Style the empty state */
-    .empty-state {
-        padding: 3rem 1.5rem;
-        text-align: center;
-        background-color: #fff;
-        border-radius: 0.5rem;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    }
-    
-    /* Responsive table */
-    @media (max-width: 768px) {
-        .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const countySelect = document.getElementById('county');
+    const constituencySelect = document.getElementById('constituency');
+    const wardSelect = document.getElementById('ward');
+
+    // Handle county change - load constituencies
+    countySelect.addEventListener('change', function() {
+        const countyId = this.value;
         
-        table {
-            min-width: 640px;
+        // Reset dependent dropdowns
+        constituencySelect.innerHTML = '<option value="">All Constituencies</option>';
+        wardSelect.innerHTML = '<option value="">All Wards</option>';
+        
+        if (countyId) {
+            fetch(`/api/constituencies/?county=${countyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(constituency => {
+                        const option = document.createElement('option');
+                        option.value = constituency.id;
+                        option.textContent = constituency.name;
+                        constituencySelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading constituencies:', error));
         }
-    }
-</style>
+    });
+
+    // Handle constituency change - load wards
+    constituencySelect.addEventListener('change', function() {
+        const constituencyId = this.value;
+        
+        // Reset ward dropdown
+        wardSelect.innerHTML = '<option value="">All Wards</option>';
+        
+        if (constituencyId) {
+            fetch(`/api/wards/?constituency=${constituencyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(ward => {
+                        const option = document.createElement('option');
+                        option.value = ward.id;
+                        option.textContent = ward.name;
+                        wardSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading wards:', error));
+        }
+    });
+});
+</script>
 {% endblock %}

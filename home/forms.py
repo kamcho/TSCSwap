@@ -41,24 +41,54 @@ class FastSwapForm(forms.ModelForm):
         self.fields['school'].queryset = Schools.objects.all().order_by('name')
         self.fields['most_preferred'].queryset = Counties.objects.all().order_by('name')
         self.fields['acceptable_county'].queryset = Counties.objects.all().order_by('name')
-        self.fields['subjects'].queryset = Subject.objects.all().order_by('name')
+        # Only show Secondary/High School subjects
+        self.fields['subjects'].queryset = Subject.objects.filter(
+            level__name="Secondary/High School"
+        ).order_by('name')
+        self.fields['current_county'].queryset = Counties.objects.all().order_by('name')
         
         # Make fields required
         self.fields['names'].required = True
         self.fields['phone'].required = True
-        self.fields['school'].required = True
+        self.fields['school'].required = False  # Now optional since we have current location
         self.fields['level'].required = True
-        self.fields['subjects'].required = True
+        self.fields['subjects'].required = False  # Only for secondary
+        self.fields['current_county'].required = True
+        
+        # Set up cascading dropdowns for current location
+        self.fields['current_constituency'].queryset = Constituencies.objects.none()
+        self.fields['current_ward'].queryset = Wards.objects.none()
+        
+        if 'current_county' in self.data:
+            try:
+                county_id = int(self.data.get('current_county'))
+                self.fields['current_constituency'].queryset = Constituencies.objects.filter(county_id=county_id).order_by('name')
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk and self.instance.current_county:
+            self.fields['current_constituency'].queryset = Constituencies.objects.filter(county=self.instance.current_county).order_by('name')
+                
+        if 'current_constituency' in self.data:
+            try:
+                constituency_id = int(self.data.get('current_constituency'))
+                self.fields['current_ward'].queryset = Wards.objects.filter(constituency_id=constituency_id).order_by('name')
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk and self.instance.current_constituency:
+            self.fields['current_ward'].queryset = Wards.objects.filter(constituency=self.instance.current_constituency).order_by('name')
 
     class Meta:
         model = FastSwap
-        fields = ['names', 'phone', 'school', 'most_preferred', 'acceptable_county', 'level', 'subjects']
+        fields = ['names', 'phone', 'school', 'current_county', 'current_constituency', 'current_ward', 'most_preferred', 'acceptable_county', 'level', 'subjects']
         widgets = {
             'acceptable_county': forms.CheckboxSelectMultiple(),
             'subjects': forms.CheckboxSelectMultiple(),
             'names': forms.TextInput(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'school': forms.Select(attrs={'class': 'form-select'}),
+            'current_county': forms.Select(attrs={'class': 'form-select'}),
+            'current_constituency': forms.Select(attrs={'class': 'form-select'}),
+            'current_ward': forms.Select(attrs={'class': 'form-select'}),
             'most_preferred': forms.Select(attrs={'class': 'form-select'}),
             'level': forms.Select(attrs={'class': 'form-select'}),
         }
@@ -216,7 +246,7 @@ class SchoolForm(forms.ModelForm):
 class SwapPreferenceForm(forms.ModelForm):
     county = forms.ModelChoiceField(
         queryset=Counties.objects.all().order_by('name'),
-        required=True,
+        required=False,
         label="Preferred County",
         help_text="Select your preferred county for swapping",
         widget=forms.Select(attrs={"class": "form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"}),
@@ -237,10 +267,25 @@ class SwapPreferenceForm(forms.ModelForm):
         help_text="Optionally select a specific ward",
         widget=forms.Select(attrs={"class": "form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"}),
     )
+    
+    open_to_all = forms.BooleanField(
+        required=False,
+        label="Open to All Counties",
+        help_text="Check this if you're willing to swap to any county in Kenya",
+        widget=forms.CheckboxInput(attrs={"class": "form-checkbox h-5 w-5 text-teal-600 rounded border-gray-300 focus:ring-teal-500"}),
+    )
+    
+    is_hardship = forms.ChoiceField(
+        choices=SwapPreference.Hardship,
+        required=True,
+        label="Hardship Area Preference",
+        help_text="Are you willing to swap to a hardship area?",
+        widget=forms.Select(attrs={"class": "form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"}),
+    )
 
     class Meta:
         model = SwapPreference
-        fields = ['county', 'constituency', 'ward']
+        fields = ['county', 'constituency', 'ward', 'open_to_all', 'is_hardship']
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

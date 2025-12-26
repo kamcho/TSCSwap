@@ -3,199 +3,437 @@
 
 {% block title %}Subscription Plans - TSC Swap{% endblock %}
 
+{% block extra_css %}
+<style>
+    .subscription-page {
+        min-height: 100vh;
+        background: 
+            radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08), transparent 50%),
+            #0f172a;
+        padding: 3rem 1rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 4rem;
+        position: relative;
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(168, 85, 247, 0.15));
+        border-radius: 24px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .page-header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-title {
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 800;
+        background: linear-gradient(135deg, #fbbf24, #f1f5f9);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+        color: #94a3b8;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .plan-card {
+        position: relative;
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        border-radius: 20px;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+    }
+
+    .plan-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .plan-card.popular {
+        border-color: rgba(59, 130, 246, 0.5);
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
+    }
+
+    .plan-card.premium {
+        border-color: rgba(20, 184, 166, 0.5);
+        box-shadow: 0 0 40px rgba(20, 184, 166, 0.15);
+    }
+
+    .plan-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 6px 16px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .badge-popular {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: #ffffff;
+    }
+
+    .badge-premium {
+        background: linear-gradient(135deg, #14b8a6, #0d9488);
+        color: #ffffff;
+    }
+
+    .plan-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #f1f5f9;
+        margin-bottom: 1rem;
+    }
+
+    .plan-price {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        margin-bottom: 0.5rem;
+    }
+
+    .price-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #f1f5f9;
+    }
+
+    .price-period {
+        font-size: 1rem;
+        color: #64748b;
+    }
+
+    .plan-description {
+        color: #94a3b8;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .features-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 2rem 0;
+        flex-grow: 1;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .feature-item:last-child {
+        border-bottom: none;
+    }
+
+    .feature-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+    }
+
+    .feature-icon.check {
+        color: #22c55e;
+    }
+
+    .feature-icon.cross {
+        color: #64748b;
+    }
+
+    .feature-text {
+        font-size: 0.9rem;
+        color: #e2e8f0;
+    }
+
+    .feature-text.disabled {
+        color: #64748b;
+        text-decoration: line-through;
+    }
+
+    .plan-button {
+        display: block;
+        width: 100%;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-default {
+        background: rgba(148, 163, 184, 0.1);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        color: #94a3b8;
+    }
+
+    .btn-default:hover {
+        background: rgba(148, 163, 184, 0.15);
+        color: #e2e8f0;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: #ffffff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+        transform: translateY(-1px);
+    }
+
+    .btn-premium {
+        background: linear-gradient(135deg, #14b8a6, #0d9488);
+        color: #ffffff;
+        border: none;
+    }
+
+    .btn-premium:hover {
+        box-shadow: 0 0 30px rgba(20, 184, 166, 0.4);
+        transform: translateY(-1px);
+    }
+
+    /* FAQ Section */
+    .faq-section {
+        max-width: 800px;
+        margin: 5rem auto 0;
+    }
+
+    .faq-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #f1f5f9;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .faq-item {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .faq-question {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 0.75rem;
+    }
+
+    .faq-answer {
+        font-size: 0.9rem;
+        color: #94a3b8;
+        line-height: 1.6;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="min-h-screen bg-gray-100 dark:bg-gray-900 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+<div class="subscription-page">
     <div class="max-w-7xl mx-auto">
         <!-- Page Header -->
-        <div class="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 sm:p-10 mb-12 text-center">
-            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==')] opacity-20"></div>
-            <div class="relative z-10">
-                <h1 class="text-4xl sm:text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-white">
-                    Choose Your Perfect Plan
-                </h1>
-                <p class="mt-4 text-xl text-blue-100 max-w-2xl mx-auto">
+        <div class="page-header">
+            <div class="page-header-content">
+                <h1 class="page-title">Choose Your Perfect Plan</h1>
+                <p class="page-subtitle">
                     Unlock powerful features with our flexible subscription options. 
-                    <span class="block mt-2 text-blue-50 font-medium">Start your journey to better teaching opportunities today!</span>
+                    Start your journey to better teaching opportunities today!
                 </p>
-                <div class="mt-6 flex justify-center space-x-4">
-                    <div class="w-16 h-1 bg-yellow-400 rounded-full"></div>
-                    <div class="w-16 h-1 bg-blue-300 rounded-full opacity-50"></div>
-                    <div class="w-16 h-1 bg-blue-300 rounded-full opacity-30"></div>
-                </div>
             </div>
         </div>
 
         <!-- Pricing Plans -->
-        <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
+        <div class="plans-grid">
             <!-- Free Plan -->
-            <div class="relative flex flex-col rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-sm transition-all duration-300 hover:shadow-md">
-                <div class="flex-1">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Free</h3>
-                    <p class="mt-4 flex items-baseline text-gray-900 dark:text-white">
-                        <span class="text-4xl font-bold tracking-tight">KSH 0</span>
-                        <span class="ml-1 text-lg font-semibold text-gray-500 dark:text-gray-400">/year</span>
-                    </p>
-                    <p class="mt-6 text-gray-600 dark:text-gray-300">Browse only - no matches</p>
-                    <ul role="list" class="mt-8 space-y-4">
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="ml-3 text-gray-700 dark:text-gray-300">Browse available swaps</span>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="ml-3 text-gray-700 dark:text-gray-300">View teacher profiles</span>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            <span class="ml-3 text-gray-500 dark:text-gray-400 line-through">Cannot initiate swaps</span>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            <span class="ml-3 text-gray-500 dark:text-gray-400 line-through">No match notifications</span>
-                        </li>
-                    </ul>
+            <div class="plan-card">
+                <h3 class="plan-name">Free</h3>
+                <div class="plan-price">
+                    <span class="price-amount">KSH 0</span>
+                    <span class="price-period">/year</span>
                 </div>
-                <a href="{% url 'home:home' %}" class="mt-8 block w-full rounded-lg bg-gray-100 dark:bg-gray-700 px-6 py-3 text-center text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-300">
+                <p class="plan-description">Browse only - no matches</p>
+                
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <svg class="feature-icon check" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="feature-text">Browse available swaps</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="feature-text">View teacher profiles</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon cross" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span class="feature-text disabled">Cannot initiate swaps</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon cross" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span class="feature-text disabled">No match notifications</span>
+                    </li>
+                </ul>
+                
+                <a href="{% url 'home:home' %}" class="plan-button btn-default">
                     Current Plan
                 </a>
             </div>
 
             <!-- Standard Plan -->
-            <div class="relative flex flex-col rounded-2xl border-2 border-blue-600 bg-white dark:bg-gray-800 p-8 shadow-lg shadow-blue-100 dark:shadow-blue-900/20 transition-all duration-300 transform hover:scale-[1.02]">
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span class="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-800 px-4 py-1 text-sm font-semibold text-blue-800 dark:text-blue-100">Popular</span>
+            <div class="plan-card popular">
+                <span class="plan-badge badge-popular">Popular</span>
+                <h3 class="plan-name">Standard</h3>
+                <div class="plan-price">
+                    <span class="price-amount">KSH 100</span>
+                    <span class="price-period">/year</span>
                 </div>
-                <div class="flex-1">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Standard</h3>
-                    <p class="mt-4 flex items-baseline text-gray-900 dark:text-white">
-                        <span class="text-4xl font-bold tracking-tight">KSH 100</span>
-                        <span class="ml-1 text-lg font-semibold text-gray-500 dark:text-gray-400">/year</span>
-                    </p>
-                    <p class="mt-6 text-gray-600 dark:text-gray-300">Full swap capabilities</p>
-                    <ul role="list" class="mt-8 space-y-4">
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="ml-3 text-gray-700 dark:text-gray-300">Unlimited swap requests</span>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="ml-3 text-gray-700 dark:text-gray-300">Direct messaging with teachers</span>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="ml-3 text-gray-700 dark:text-gray-300">Advanced search filters</span>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            <span class="ml-3 text-gray-500 dark:text-gray-400 line-through">No AI-powered matching</span>
-                        </li>
-                    </ul>
-                </div>
-                <a href="{% url 'payments:make_payment' %}?plan=standard" class="mt-8 block w-full rounded-lg bg-blue-600 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700 transition-colors duration-300">
+                <p class="plan-description">Full swap capabilities</p>
+                
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <svg class="feature-icon check" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="feature-text">Unlimited swap requests</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="feature-text">Direct messaging with teachers</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="feature-text">Advanced search filters</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon cross" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span class="feature-text disabled">No AI-powered matching</span>
+                    </li>
+                </ul>
+                
+                <a href="{% url 'payments:make_payment' %}?plan=standard" class="plan-button btn-primary">
                     Choose Standard
                 </a>
             </div>
 
             <!-- Premium AI Plan -->
-            <div class="relative flex flex-col rounded-2xl border-2 border-teal-600 bg-white dark:bg-gray-800 p-8 shadow-lg shadow-teal-100 dark:shadow-teal-900/20 transition-all duration-300 transform hover:scale-[1.02]">
-                <div class="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span class="inline-flex items-center rounded-full bg-teal-100 dark:bg-teal-800 px-4 py-1 text-sm font-semibold text-teal-800 dark:text-teal-100">Best Value</span>
+            <div class="plan-card premium">
+                <span class="plan-badge badge-premium">Best Value</span>
+                <h3 class="plan-name">Premium AI</h3>
+                <div class="plan-price">
+                    <span class="price-amount">KSH 200</span>
+                    <span class="price-period">/year</span>
                 </div>
-                <div class="flex-1">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Premium AI</h3>
-                    <p class="mt-4 flex items-baseline text-gray-900 dark:text-white">
-                        <span class="text-4xl font-bold tracking-tight">KSH 200</span>
-                        <span class="ml-1 text-lg font-semibold text-gray-500 dark:text-gray-400">/year</span>
-                    </p>
-                    <p class="mt-6 text-gray-600 dark:text-gray-300">Advanced AI-powered features</p>
-                    <ul role="list" class="mt-8 space-y-4">
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="ml-3 text-gray-700 dark:text-gray-300">Instant AI support for quick matches</span>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="ml-3 text-gray-700 dark:text-gray-300">Find closest swap locations</span>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="ml-3 text-gray-700 dark:text-gray-300">Weekly updates on best matches</span>
-                        </li>
-                        <li class="flex items-center">
-                            <svg class="h-6 w-6 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="ml-3 text-gray-700 dark:text-gray-300">Priority customer support</span>
-                        </li>
-                    </ul>
-                </div>
-                <a href="{% url 'payments:make_payment' %}?plan=premium" class="mt-8 block w-full rounded-lg bg-gradient-to-r from-teal-600 to-blue-600 px-6 py-3 text-center text-sm font-semibold text-white hover:from-teal-700 hover:to-blue-700 transition-colors duration-300">
+                <p class="plan-description">Advanced AI-powered features</p>
+                
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <svg class="feature-icon check" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="feature-text">Instant AI support for quick matches</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="feature-text">Find closest swap locations</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="feature-text">Weekly updates on best matches</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg class="feature-icon check" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="feature-text">Priority customer support</span>
+                    </li>
+                </ul>
+                
+                <a href="{% url 'payments:make_payment' %}?plan=premium" class="plan-button btn-premium">
                     Get Premium AI
                 </a>
             </div>
         </div>
 
         <!-- FAQ Section -->
-        <div class="mt-24 max-w-3xl mx-auto">
-            <h2 class="text-2xl font-bold text-center text-gray-900 dark:text-white mb-8">Frequently Asked Questions</h2>
-            <div class="space-y-4">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">What payment methods do you accept?</h3>
-                    <p class="mt-2 text-gray-600 dark:text-gray-300">We accept M-Pesa payments for all our plans. You'll receive a payment request on your phone when you subscribe.</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Can I change plans later?</h3>
-                    <p class="mt-2 text-gray-600 dark:text-gray-300">Yes, you can upgrade or downgrade your plan at any time. Your subscription will be prorated based on the remaining term.</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Is there a free trial?</h3>
-                    <p class="mt-2 text-gray-600 dark:text-gray-300">Yes! You can start with our free plan to explore the platform. No credit card required.</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">How do I cancel my subscription?</h3>
-                    <p class="mt-2 text-gray-600 dark:text-gray-300">You can cancel your subscription at any time from your account settings. There are no cancellation fees, but no refunds are provided for the unused portion of the annual subscription.</p>
-                </div>
+        <div class="faq-section">
+            <h2 class="faq-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <h3 class="faq-question">What payment methods do you accept?</h3>
+                <p class="faq-answer">We accept M-Pesa payments for all our plans. You'll receive a payment request on your phone when you subscribe.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3 class="faq-question">Can I change plans later?</h3>
+                <p class="faq-answer">Yes, you can upgrade or downgrade your plan at any time. Your subscription will be prorated based on the remaining term.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3 class="faq-question">Is there a free trial?</h3>
+                <p class="faq-answer">Yes! You can start with our free plan to explore the platform. No credit card required.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h3 class="faq-question">How do I cancel my subscription?</h3>
+                <p class="faq-answer">You can cancel your subscription at any time from your account settings. There are no cancellation fees, but no refunds are provided for the unused portion of the annual subscription.</p>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Add any JavaScript for the subscription page here
-    document.addEventListener('DOMContentLoaded', function() {
-        // Smooth scroll for FAQ links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    });
-</script>
 {% endblock %}

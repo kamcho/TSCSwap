@@ -2,45 +2,59 @@
 
 {% block title %}Login - TSC Swap{% endblock %}
 
+{% block navbar %}{% endblock %}
+
 {% block content %}
-<div class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
+<style>
+    main { padding-top: 0 !important; }
+</style>
+<div class="min-h-screen bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <!-- Background Decorative Elements -->
+    <div class="absolute inset-0 -z-10 overflow-hidden">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+        <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-1/4 left-1/3 w-96 h-96 bg-indigo-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style="animation-delay: 4s;"></div>
+    </div>
+
+    <div class="max-w-md w-full space-y-8 relative z-10">
         <!-- Header -->
         <div class="text-center">
-            <div class="mx-auto h-20 w-20 bg-gradient-to-br from-blue-600 to-teal-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-            </div>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome to TSC Swap</h2>
-            <p class="text-gray-600">Sign in to manage your teacher transfer requests</p>
+            <a href="{% url 'home:home' %}" class="inline-block">
+                <div class="mx-auto h-20 w-20 bg-gradient-to-br from-blue-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-shadow">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                    </svg>
+                </div>
+            </a>
+            <h2 class="text-3xl font-bold text-white mb-2">Welcome Back</h2>
+            <p class="text-gray-400">Sign in to continue to TSC Swap</p>
         </div>
 
         <!-- Login Form -->
-        <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl p-8 border border-gray-700/50">
             <form method="post" class="space-y-6">
                 {% csrf_token %}
                 {% if next %}
                 <input type="hidden" name="next" value="{{ next }}">
                 {% endif %}
                 
-                <!-- Username/Email Field -->
+                <!-- Email Field -->
                 <div>
-                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        Username or Email
+                    <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                        Email Address
                     </label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
                             </svg>
                         </div>
                         <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" 
-                               class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                               placeholder="Enter your username or email" required>
+                               class="block w-full pl-10 pr-3 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-200" 
+                               placeholder="Enter your email" required>
                     </div>
                     {% if form.username.errors %}
-                        <div class="mt-1 text-sm text-red-600">
+                        <div class="mt-2 text-sm text-red-400">
                             {% for error in form.username.errors %}
                                 <p>{{ error }}</p>
                             {% endfor %}
@@ -51,30 +65,25 @@
                 <!-- Password Field -->
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700">
-                            <p class="text-sm text-gray-600">
-                                New to TSC Swap?
-                                <a href="{% url 'users:signup' %}" class="font-medium text-blue-600 hover:text-blue-500 transition-colors">
-                                    Create an account
-                                </a>
-                            </p>
+                        <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-300">
+                            Password
                         </label>
-                        <a href="{% url 'users:password_reset' %}" class="text-xs text-blue-600 hover:text-blue-500 transition-colors">
+                        <a href="{% url 'users:password_reset' %}" class="text-sm text-teal-400 hover:text-teal-300 transition-colors">
                             Forgot password?
                         </a>
                     </div>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                             </svg>
                         </div>
                         <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" 
-                               class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                               class="block w-full pl-10 pr-3 py-3 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-200" 
                                placeholder="Enter your password" required>
                     </div>
                     {% if form.password.errors %}
-                        <div class="mt-1 text-sm text-red-600">
+                        <div class="mt-2 text-sm text-red-400">
                             {% for error in form.password.errors %}
                                 <p>{{ error }}</p>
                             {% endfor %}
@@ -84,22 +93,15 @@
 
                 <!-- Remember Me -->
                 <div class="flex items-center">
-                    <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                    <label for="remember-me" class="ml-2 block text-sm text-gray-600">
+                    <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 bg-gray-700 border-gray-600 rounded text-teal-500 focus:ring-teal-500 focus:ring-offset-gray-800">
+                    <label for="remember-me" class="ml-2 block text-sm text-gray-400">
                         Keep me signed in
                     </label>
                 </div>
 
-                <!-- Submit Button -->
-                <div>
-                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                        Sign In
-                    </button>
-                </div>
-
                 <!-- Error Messages -->
                 {% if form.non_field_errors %}
-                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="bg-red-900/30 border border-red-700/50 rounded-xl p-4">
                         <div class="flex">
                             <div class="flex-shrink-0">
                                 <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,8 +109,8 @@
                                 </svg>
                             </div>
                             <div class="ml-3">
-                                <h3 class="text-sm font-medium text-red-800">Authentication Error</h3>
-                                <div class="mt-2 text-sm text-red-700">
+                                <h3 class="text-sm font-medium text-red-300">Authentication Error</h3>
+                                <div class="mt-1 text-sm text-red-400">
                                     {% for error in form.non_field_errors %}
                                         <p>{{ error }}</p>
                                     {% endfor %}
@@ -117,23 +119,30 @@
                         </div>
                     </div>
                 {% endif %}
+
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-teal-500 transition-all duration-200 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30">
+                        Sign In
+                    </button>
+                </div>
             </form>
 
             <!-- Divider -->
-            <div class="mt-6">
+            <div class="mt-8">
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
+                        <div class="w-full border-t border-gray-700"></div>
                     </div>
                     <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-white text-gray-500">New to TravelsKe?</span>
+                        <span class="px-4 bg-gray-800/50 text-gray-500">New to TSC Swap?</span>
                     </div>
                 </div>
             </div>
 
             <!-- Sign Up Link -->
             <div class="mt-6">
-                <a href="{% url 'users:signup' %}" class="w-full flex justify-center py-3 px-4 border-2 border-emerald-300 text-sm font-medium rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200">
+                <a href="{% url 'users:signup' %}" class="w-full flex justify-center py-3 px-4 border-2 border-teal-500/50 text-sm font-semibold rounded-xl text-teal-400 hover:bg-teal-500/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-teal-500 transition-all duration-200">
                     Create your account
                 </a>
             </div>
@@ -143,38 +152,21 @@
         <div class="text-center">
             <p class="text-sm text-gray-500">
                 By signing in, you agree to our 
-                <a href="#" class="text-emerald-600 hover:text-emerald-500 font-medium">Terms of Service</a>
+                <a href="#" class="text-teal-400 hover:text-teal-300 transition-colors">Terms of Service</a>
                 and
-                <a href="#" class="text-emerald-600 hover:text-emerald-500 font-medium">Privacy Policy</a>
+                <a href="#" class="text-teal-400 hover:text-teal-300 transition-colors">Privacy Policy</a>
             </p>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center">
+            <a href="{% url 'home:home' %}" class="inline-flex items-center text-sm text-gray-400 hover:text-white transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back to Home
+            </a>
         </div>
     </div>
 </div>
-
-<!-- Background Decorative Elements -->
-<div class="fixed inset-0 -z-10 overflow-hidden">
-    <div class="absolute top-0 left-1/4 w-96 h-96 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-    <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style="animation-delay: 2s;"></div>
-    <div class="absolute bottom-1/4 left-1/3 w-96 h-96 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style="animation-delay: 4s;"></div>
-</div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-// Add custom styling to form fields
-document.addEventListener('DOMContentLoaded', function() {
-    const usernameField = document.getElementById('{{ form.username.id_for_label }}');
-    const passwordField = document.getElementById('{{ form.password.id_for_label }}');
-    
-    if (usernameField) {
-        usernameField.className = 'block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition duration-200 text-gray-900 placeholder-gray-500';
-        usernameField.placeholder = 'Enter your username or email';
-    }
-    
-    if (passwordField) {
-        passwordField.className = 'block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition duration-200 text-gray-900 placeholder-gray-500';
-        passwordField.placeholder = 'Enter your password';
-    }
-});
-</script>
-{% endblock %} 

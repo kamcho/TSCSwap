@@ -184,7 +184,8 @@
                         {% endif %}
                     </div>
                     
-                    <!-- Subjects Taught - Full Width -->
+                    <!-- Subjects Taught - Only for Secondary/High School teachers -->
+                    {% if is_secondary_level %}
                     <div class="bg-slate-700/50 p-6 rounded-lg w-full">
                         <div class="flex justify-between items-center mb-3">
                             <h3 class="text-sm font-medium text-gray-300 flex items-center">
@@ -230,19 +231,30 @@
                                 </a>
                             </div>
                         {% endif %}
-                        
-                        <!-- Loading Indicator -->
-                        <div id="schoolLoading" class="hidden items-center justify-center py-4">
-                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    {% else %}
+                    <!-- Primary School - No subjects needed -->
+                    <div class="bg-slate-700/50 p-6 rounded-lg w-full">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-medium text-gray-300 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                </svg>
+                                Subjects
+                            </h3>
+                            <span class="px-2 py-0.5 text-xs rounded-full bg-green-500/20 text-green-400">
+                                Not Required
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-3 p-4 bg-blue-900/20 border border-blue-700/30 rounded-lg">
+                            <svg class="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            <span class="text-sm text-gray-400">Saving...</span>
+                            <p class="text-sm text-gray-300">
+                                As a Primary School teacher, subject selection is not required for your profile.
+                            </p>
                         </div>
-                            
-                        </div>
-                        
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -385,7 +397,8 @@
                                     <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                                 </svg>
                                 <a href="{% url 'users:profile_edit' %}" class="text-blue-400 hover:text-blue-300">
-                                    Add Personal Information
+                                    Complete Personal Information
+                                    <span class="text-xs text-gray-500 ml-1">(Name, Phone, Gender)</span>
                                 </a>
                             {% endif %}
                         </li>
@@ -401,9 +414,20 @@
                                 <svg class="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                                 </svg>
-                                <a href="{% url 'users:select_teaching_info' %}" class="text-blue-400 hover:text-blue-300">
-                                    Add Teaching Information
-                                </a>
+                                <div class="flex flex-col">
+                                    <a href="{% url 'users:select_teaching_info' %}" class="text-blue-400 hover:text-blue-300">
+                                        Complete Teaching Information
+                                    </a>
+                                    <span class="text-xs text-gray-500">
+                                        {% if not user.profile.level %}
+                                            ⚠️ Level not set
+                                        {% elif not user.profile.school %}
+                                            ✓ Level set | ⚠️ School not set
+                                        {% elif is_secondary_level and not user.mysubject_set.exists %}
+                                            ✓ Level & School set | ⚠️ Subjects not set
+                                        {% endif %}
+                                    </span>
+                                </div>
                             {% endif %}
                         </li>
                         
@@ -423,15 +447,33 @@
                                 </a>
                             {% endif %}
                         </li>
+                        
+                        <!-- Swap Preferences -->
+                        <li class="flex items-center">
+                            {% if preferences_complete %}
+                                <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="text-gray-400 line-through">Swap Preferences</span>
+                            {% else %}
+                                <svg class="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                                </svg>
+                                <a href="{% url 'home:swap_preferences' %}" class="text-blue-400 hover:text-blue-300">
+                                    Set Swap Preferences
+                                </a>
+                            {% endif %}
+                        </li>
                     </ul>
-                    <!-- Swap Preferences Section -->
-                    <div class="mt-6">
+                    <!-- Swap Preferences Details Section -->
+                    <div class="mt-6 pt-4 border-t border-gray-700">
                         <h3 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            <svg class="w-5 h-5 mr-2 {% if preferences_complete %}text-green-400{% else %}text-yellow-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            Swap Preferences
-                            {% if swap_preference %}
+                            Swap Preferences Details
+                            {% if preferences_complete %}
                                 <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-green-500/20 text-green-400">
                                     Complete
                                 </span>

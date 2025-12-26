@@ -197,6 +197,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Function to format message with links and basic markdown
+    function formatMessage(message) {
+        // Escape HTML first to prevent XSS
+        let formatted = message
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        
+        // Convert markdown-style links [text](url) to HTML links
+        formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(match, text, url) {
+            return '<a href="' + url + '" class="text-teal-400 hover:text-teal-300 underline font-medium">' + text + '</a>';
+        });
+        
+        // Convert newlines to <br>
+        formatted = formatted.replace(/\n/g, '<br>');
+        
+        // Convert emoji arrows 👉 to styled spans
+        formatted = formatted.replace(/👉/g, '<span class="mr-1">👉</span>');
+        
+        return formatted;
+    }
+    
     // Function to add a message to the chat
     function addMessage(message, sender) {
         const messageContainer = document.createElement('div');
@@ -209,8 +231,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 : 'bg-gray-700 text-gray-100 rounded-bl-none'
         }`;
         
-        const messageContent = document.createElement('p');
-        messageContent.textContent = message;
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        
+        if (sender === 'user') {
+            // User messages are plain text (no need to parse links)
+            messageContent.textContent = message;
+        } else {
+            // AI messages may contain links - render as HTML
+            messageContent.innerHTML = formatMessage(message);
+        }
         
         const messageMeta = document.createElement('div');
         messageMeta.className = 'text-xs text-gray-300 mt-1 text-right';

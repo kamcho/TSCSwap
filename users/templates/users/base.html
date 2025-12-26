@@ -16,6 +16,14 @@
             transition: opacity 0.3s ease-in-out;
         }
         
+        /* Navbar responsive fixes */
+        @media (max-width: 640px) {
+            nav .max-w-7xl {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+        }
+        
         /* Custom scrollbar for chat */
         .chat-scrollbar::-webkit-scrollbar {
             width: 6px;
@@ -51,14 +59,14 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between h-16">
                 <!-- Logo -->
-                <div class="flex items-center">
+                <div class="flex items-center flex-shrink-0">
                     <a href="{% url 'home:home' %}" class="flex items-center space-x-2">
-                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M10.707 2.293a1 1 0 00-1.414 0l7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                             </svg>
                         </div>
-                        <span class="text-xl sm:text-2xl font-bold text-white">Find-A-Swap</span>
+                        <span class="text-base sm:text-xl lg:text-2xl font-bold text-white whitespace-nowrap">Find-A-Swap</span>
                     </a>
                 </div>
 
@@ -72,35 +80,59 @@
                         <span>Home</span>
                     </a>
                     
-                    <!-- Admin Links -->
+                    <!-- Admin Dropdown -->
                     {% if user.is_staff or user.is_superuser %}
-                    <div class="flex items-center space-x-6">
-                        <a href="{% url 'users:admin_users' %}" class="flex items-center text-gray-300 hover:text-teal-400 font-medium transition duration-300">
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="flex items-center text-gray-300 hover:text-teal-400 font-medium transition duration-300 focus:outline-none">
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0111.357-3m-6.517 3.5a6 6 0 0011.32-3.5M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                             </svg>
-                            <span>Users</span>
-                        </a>
-                        <a href="{% url 'home:all_schools' %}" class="flex items-center text-gray-300 hover:text-teal-400 font-medium transition duration-300">
-                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            <span>Admin</span>
+                            <svg class="w-4 h-4 ml-1 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
-                            <span>Schools</span>
-                        </a>
-                        <a href="{% url 'payments:admin_payments' %}" class="flex items-center text-gray-300 hover:text-teal-400 font-medium transition duration-300">
-                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                            <span>Payments</span>
-                        </a>
-                        <a href="{% url 'home:fast_swap_list' %}" class="flex items-center text-gray-300 hover:text-teal-400 font-medium transition duration-300">
-                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
-                            <span>FastSwap</span>
-                        </a>
+                        </button>
+
+                        <!-- Admin Dropdown Menu -->
+                        <div x-show="open" @click.away="open = false" 
+                             x-transition:enter="transition ease-out duration-200" 
+                             x-transition:enter-start="opacity-0 scale-95" 
+                             x-transition:enter-end="opacity-100 scale-100" 
+                             x-transition:leave="transition ease-in duration-150" 
+                             x-transition:leave-start="opacity-100 scale-100" 
+                             x-transition:leave-end="opacity-0 scale-95" 
+                             class="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
+                            <a href="{% url 'users:admin_users' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <svg class="w-4 h-4 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0111.357-3m-6.517 3.5a6 6 0 0011.32-3.5M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                                Manage Users
+                            </a>
+                            <a href="{% url 'payments:admin_payments' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <svg class="w-4 h-4 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                                Manage Payments
+                            </a>
+                            <div class="border-t border-gray-100 my-1"></div>
+                            <a href="{% url 'home:all_schools' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <svg class="w-4 h-4 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                                Manage Schools
+                            </a>
+                        </div>
                     </div>
                     {% endif %}
+
+                    <!-- FastSwap Link (visible to all users) -->
+                    <a href="{% url 'home:fast_swap_list' %}" class="flex items-center text-gray-300 hover:text-teal-400 font-medium transition duration-300">
+                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        <span>FastSwap</span>
+                    </a>
 
                     <!-- Swaps Dropdown -->
                     <div class="relative" x-data="{ open: false }">
@@ -123,12 +155,19 @@
                              x-transition:leave-start="opacity-100 scale-100" 
                              x-transition:leave-end="opacity-0 scale-95" 
                              class="absolute left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
-                            <a href="{% url 'home:all_swaps' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            <a href="{% url 'home:primary_swaps' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-amber-50">
+                                <svg class="w-4 h-4 mr-3 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                 </svg>
-                                Browse All Swaps
+                                Primary Option
                             </a>
+                            <a href="{% url 'home:secondary_swaps' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">
+                                <svg class="w-4 h-4 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                                Secondary Option
+                            </a>
+                            <div class="border-t border-gray-100 my-1"></div>
                             {% if user.is_authenticated %}
                             <a href="{% url 'home:create_swap' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                 <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,7 +191,8 @@
                         </div>
                     </div>
 
-                    <!-- Teaching Profile Dropdown -->
+                    <!-- Teaching Profile Dropdown - Only for authenticated users -->
+                    {% if user.is_authenticated %}
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" class="flex items-center text-gray-300 hover:text-teal-400 font-medium transition duration-300 focus:outline-none">
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,9 +219,16 @@
                                 </svg>
                                 My Subjects
                             </a>
-                            
+                            <a href="{% url 'home:swap_preferences' %}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-teal-50">
+                                <svg class="w-4 h-4 mr-3 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                Swap Preferences
+                            </a>
                         </div>
                     </div>
+                    {% endif %}
 
                     <!-- Dashboard Link -->
                     {% if user.is_authenticated %}
@@ -302,13 +349,28 @@
                         <span>Home</span>
                     </a>
 
-                    <!-- Admin Schools Link -->
+                    <!-- Admin Section -->
                     {% if user.is_staff or user.is_superuser %}
-                    <a href="{% url 'home:all_schools' %}" class="flex items-center px-3 py-2 text-gray-300 hover:text-teal-400 hover:bg-gray-700 rounded-md font-medium transition duration-300">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="px-3 py-2 mt-2">
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin</h3>
+                    </div>
+                    <a href="{% url 'users:admin_users' %}" class="flex items-center px-3 py-2 text-gray-300 hover:text-teal-400 hover:bg-gray-700 rounded-md font-medium transition duration-300 pl-8">
+                        <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0111.357-3m-6.517 3.5a6 6 0 0011.32-3.5M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                        <span>Manage Users</span>
+                    </a>
+                    <a href="{% url 'payments:admin_payments' %}" class="flex items-center px-3 py-2 text-gray-300 hover:text-teal-400 hover:bg-gray-700 rounded-md font-medium transition duration-300 pl-8">
+                        <svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        <span>Manage Payments</span>
+                    </a>
+                    <a href="{% url 'home:all_schools' %}" class="flex items-center px-3 py-2 text-gray-300 hover:text-teal-400 hover:bg-gray-700 rounded-md font-medium transition duration-300 pl-8">
+                        <svg class="w-4 h-4 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
-                        <span>Schools</span>
+                        <span>Manage Schools</span>
                     </a>
                     {% endif %}
 
@@ -316,11 +378,17 @@
                     <div class="px-3 py-2">
                         <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Swaps</h3>
                     </div>
-                    <a href="{% url 'home:all_swaps' %}" class="flex items-center px-3 py-2 text-gray-300 hover:text-teal-400 hover:bg-gray-700 rounded-md font-medium transition duration-300 pl-8">
-                        <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    <a href="{% url 'home:primary_swaps' %}" class="flex items-center px-3 py-2 text-gray-300 hover:text-amber-400 hover:bg-gray-700 rounded-md font-medium transition duration-300 pl-8">
+                        <svg class="w-4 h-4 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
-                        <span>Browse All Swaps</span>
+                        <span>Primary Option</span>
+                    </a>
+                    <a href="{% url 'home:secondary_swaps' %}" class="flex items-center px-3 py-2 text-gray-300 hover:text-blue-400 hover:bg-gray-700 rounded-md font-medium transition duration-300 pl-8">
+                        <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        <span>Secondary Option</span>
                     </a>
                     {% if user.is_authenticated %}
                     <a href="{% url 'home:create_swap' %}" class="flex items-center px-3 py-2 text-gray-300 hover:text-teal-400 hover:bg-gray-700 rounded-md font-medium transition duration-300 pl-8">
@@ -343,16 +411,25 @@
                     </a>
                     {% endif %}
 
-                    <!-- My Subjects Section -->
+                    <!-- Teaching Profile Section - Only for authenticated users -->
+                    {% if user.is_authenticated %}
                     <div class="px-3 py-2 mt-2">
-                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">My Subjects</h3>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Teaching Profile</h3>
                     </div>
                     <a href="{% url 'home:create_mysubject' %}" class="flex items-center px-3 py-2 text-gray-300 hover:text-teal-400 hover:bg-gray-700 rounded-md font-medium transition duration-300 pl-8">
                         <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                         </svg>
-                        <span>Manage My Subjects</span>
+                        <span>My Subjects</span>
                     </a>
+                    <a href="{% url 'home:swap_preferences' %}" class="flex items-center px-3 py-2 text-gray-300 hover:text-teal-400 hover:bg-gray-700 rounded-md font-medium transition duration-300 pl-8">
+                        <svg class="w-4 h-4 mr-2 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span>Swap Preferences</span>
+                    </a>
+                    {% endif %}
 
                     {% if user.is_authenticated %}
                     <!-- Dashboard Link -->
@@ -443,6 +520,8 @@
         <div class="container mx-auto px-4 py-8 relative z-10 min-h-[calc(100vh-4rem)]">
             {% block content %}
             {% endblock %}
+        </div>
+        
         <!-- Messages Display -->
         {% if messages %}
         <div id="messages-container" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md">
@@ -542,5 +621,6 @@
             });
         });
     </script>
+    </main>
 </body>
-</html> 
+</html>

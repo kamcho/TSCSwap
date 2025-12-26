@@ -117,69 +117,99 @@
                 </div>
                 
                 {% if user_level %}
-                    <!-- Subjects Section -->
-                    <div style="padding-top: 16px; border-top: 1px solid #2d3748;">
-                        <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; color: #e5e7eb; display: flex; align-items: center; gap: 8px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10 9 9 9 8 9"></polyline>
-                            </svg>
-                            My Subjects
-                        </h3>
-                        
-                        {% if success %}
-                            <div style="padding: 10px 12px; border-radius: 6px; background: rgba(22, 163, 74, 0.2); border: 1px solid rgba(22, 163, 74, 0.4); color: #bbf7d0; margin-bottom: 16px; font-size: 14px;">
-                                Your subjects have been updated successfully!
-                            </div>
-                        {% endif %}
-                        
-                        <form method="post" style="display: flex; flex-direction: column; gap: 16px;">
-                            {% csrf_token %}
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                    <label style="font-weight: 600; color: #e5e7eb; font-size: 15px;">
-                                        Available Subjects for {{ user_level }}
-                                    </label>
-                                    <span style="color: #64748b; font-size: 13px;">
-                                        {{ current_subjects|length }} selected
-                                    </span>
+                    {% if is_secondary_level %}
+                        <!-- Subjects Section - Only for Secondary/High School -->
+                        <div style="padding-top: 16px; border-top: 1px solid #2d3748;">
+                            <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 16px; color: #e5e7eb; display: flex; align-items: center; gap: 8px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                My Subjects
+                            </h3>
+                            
+                            {% if success %}
+                                <div style="padding: 10px 12px; border-radius: 6px; background: rgba(22, 163, 74, 0.2); border: 1px solid rgba(22, 163, 74, 0.4); color: #bbf7d0; margin-bottom: 16px; font-size: 14px;">
+                                    Your subjects have been updated successfully!
+                                </div>
+                            {% endif %}
+                            
+                            <form method="post" style="display: flex; flex-direction: column; gap: 16px;">
+                                {% csrf_token %}
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                        <label style="font-weight: 600; color: #e5e7eb; font-size: 15px;">
+                                            Available Subjects for {{ user_level }}
+                                        </label>
+                                        <span style="color: #64748b; font-size: 13px;">
+                                            {{ current_subjects|length }} selected
+                                        </span>
+                                    </div>
+                                    
+                                    {% if form.subject.field.queryset.exists %}
+                                        <ul class="checkbox-group" style="list-style: none; padding-left: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px;">
+                                            {% for checkbox in form.subject %}
+                                                <li style="margin: 0;">
+                                                    <div style="display: flex; align-items: center; padding: 10px 14px; background: #1a2536; border-radius: 6px; transition: all 0.2s ease;">
+                                                        {{ checkbox.tag }}
+                                                        <label for="{{ checkbox.id_for_label }}" style="margin: 0; font-size: 14px; color: #e5e7eb; cursor: pointer; flex: 1; padding-left: 10px;">
+                                                            {{ checkbox.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <p style="color: #94a3b8; font-style: italic; margin: 12px 0 0;">
+                                            No subjects available for this level. Please contact support.
+                                        </p>
+                                    {% endif %}
                                 </div>
                                 
-                                {% if form.subject.field.queryset.exists %}
-                                    <ul class="checkbox-group" style="list-style: none; padding-left: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px;">
-                                        {% for checkbox in form.subject %}
-                                            <li style="margin: 0;">
-                                                <div style="display: flex; align-items: center; padding: 10px 14px; background: #1a2536; border-radius: 6px; transition: all 0.2s ease;">
-                                                    {{ checkbox.tag }}
-                                                    <label for="{{ checkbox.id_for_label }}" style="margin: 0; font-size: 14px; color: #e5e7eb; cursor: pointer; flex: 1; padding-left: 10px;">
-                                                        {{ checkbox.choice_label }}
-                                                    </label>
-                                                </div>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                {% else %}
-                                    <p style="color: #94a3b8; font-style: italic; margin: 12px 0 0;">
-                                        No subjects available for this level. Please contact support.
-                                    </p>
-                                {% endif %}
-                            </div>
-                            
-                            <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
-                                <button type="submit" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 6px;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                                        <polyline points="7 3v5h8"></polyline>
+                                <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+                                    <button type="submit" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; gap: 6px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                            <polyline points="7 3v5h8"></polyline>
+                                        </svg>
+                                        Save Subjects
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    {% else %}
+                        <!-- Primary School - No Subject Selection -->
+                        <div style="padding-top: 16px; border-top: 1px solid #2d3748;">
+                            <div style="padding: 24px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05)); border-radius: 12px; border: 1px solid rgba(34, 197, 94, 0.2); text-align: center;">
+                                <div style="width: 64px; height: 64px; margin: 0 auto 16px; background: rgba(34, 197, 94, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                     </svg>
-                                    Save Subjects
-                                </button>
+                                </div>
+                                <h3 style="margin: 0 0 12px; color: #86efac; font-size: 18px; font-weight: 600;">No Subject Selection Required</h3>
+                                <p style="margin: 0; color: #94a3b8; font-size: 15px; line-height: 1.6; max-width: 400px; margin: 0 auto;">
+                                    As a <strong style="color: #a5b4fc;">Primary School</strong> teacher, you don't need to select specific subjects. 
+                                    Primary school teachers typically teach all subjects to their class.
+                                </p>
+                                <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(148, 163, 184, 0.1);">
+                                    <a href="{% url 'users:dashboard' %}" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 14px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="14" width="7" height="7"></rect>
+                                            <rect x="3" y="14" width="7" height="7"></rect>
+                                        </svg>
+                                        Go to Dashboard
+                                    </a>
+                                </div>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
         {% else %}

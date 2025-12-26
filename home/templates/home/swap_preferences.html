@@ -47,6 +47,12 @@
                     </h3>
                     <div class="mt-2 text-sm text-gray-300 space-y-1.5">
                         <p class="flex items-center">
+                            <span class="w-2 h-2 rounded-full {% if form.instance.open_to_all %}bg-green-400{% else %}bg-gray-500{% endif %} mr-2"></span>
+                            <span class="font-medium">Open to All:</span> 
+                            <span class="ml-1">{% if form.instance.open_to_all %}Yes - Any county{% else %}No - Specific location{% endif %}</span>
+                        </p>
+                        {% if not form.instance.open_to_all %}
+                        <p class="flex items-center">
                             <span class="w-2 h-2 rounded-full bg-teal-400 mr-2"></span>
                             <span class="font-medium">County:</span> 
                             <span class="ml-1">{{ form.instance.desired_county|default:"Not specified" }}</span>
@@ -61,6 +67,20 @@
                             <span class="font-medium">Ward:</span> 
                             <span class="ml-1">{{ form.instance.desired_ward|default:"Not specified" }}</span>
                         </p>
+                        {% endif %}
+                        <p class="flex items-center">
+                            <span class="w-2 h-2 rounded-full bg-amber-400 mr-2"></span>
+                            <span class="font-medium">Hardship Area:</span> 
+                            <span class="ml-1">
+                                {% if form.instance.is_hardship == 'Yes' %}
+                                    Willing to go
+                                {% elif form.instance.is_hardship == 'No' %}
+                                    Non-hardship only
+                                {% else %}
+                                    No preference
+                                {% endif %}
+                            </span>
+                        </p>
                     </div>
                 </div>
                 {% endif %}
@@ -68,55 +88,85 @@
                 <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-5">
                     <h3 class="text-md font-medium text-gray-200 mb-4">Update Preferences</h3>
                     
-                    <!-- County Field -->
-                    <div class="mb-5">
-                        <label for="id_county" class="block text-sm font-medium text-gray-300 mb-2">
-                            Preferred County <span class="text-red-400">*</span>
+                    <!-- Open to All Toggle -->
+                    <div class="mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" name="open_to_all" id="id_open_to_all"
+                                   {% if form.instance.open_to_all %}checked{% endif %}
+                                   class="form-checkbox h-5 w-5 text-teal-500 rounded border-gray-500 bg-gray-700 focus:ring-teal-500 focus:ring-offset-gray-800">
+                            <span class="ml-3">
+                                <span class="text-sm font-medium text-gray-200">Open to All Counties</span>
+                                <span class="block text-xs text-gray-400 mt-0.5">Check this if you're willing to swap to any county in Kenya</span>
+                            </span>
                         </label>
-                        <select name="county" id="id_county" required
-                                class="mt-1 block w-full pl-3 pr-10 py-2.5 text-base bg-gray-700 border border-gray-600 text-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-150 hover:border-gray-500">
-                            <option value="">-- Select County --</option>
-                            {% for county in counties %}
-                                <option value="{{ county.id }}" {% if selected_county == county.id|stringformat:'s' %}selected{% endif %}>
-                                    {{ county.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <p class="mt-1 text-xs text-gray-400">Select your preferred county for teacher swaps</p>
                     </div>
                     
-                    <!-- Constituency Field -->
-                    <div class="mb-5">
-                        <label for="id_constituency" class="block text-sm font-medium text-gray-300 mb-2">
-                            Preferred Constituency (Optional)
-                        </label>
-                        <select name="constituency" id="id_constituency"
-                                class="mt-1 block w-full pl-3 pr-10 py-2.5 text-base bg-gray-700 border border-gray-600 text-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-150 hover:border-gray-500">
-                            <option value="">-- Select Constituency --</option>
-                            {% for constituency in constituencies %}
-                                <option value="{{ constituency.id }}" {% if selected_constituency == constituency.id|stringformat:'s' %}selected{% endif %}>
-                                    {{ constituency.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                        <p class="mt-1 text-xs text-gray-400">Optionally select a specific constituency</p>
+                    <!-- Location Fields Container (hidden when open_to_all is checked) -->
+                    <div id="location-fields">
+                        <!-- County Field -->
+                        <div class="mb-5">
+                            <label for="id_county" class="block text-sm font-medium text-gray-300 mb-2">
+                                Preferred County
+                            </label>
+                            <select name="county" id="id_county"
+                                    class="mt-1 block w-full pl-3 pr-10 py-2.5 text-base bg-gray-700 border border-gray-600 text-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-150 hover:border-gray-500">
+                                <option value="">-- Select County --</option>
+                                {% for county in counties %}
+                                    <option value="{{ county.id }}" {% if selected_county == county.id %}selected{% endif %}>
+                                        {{ county.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400">Select your preferred county for teacher swaps</p>
+                        </div>
+                        
+                        <!-- Constituency Field -->
+                        <div class="mb-5">
+                            <label for="id_constituency" class="block text-sm font-medium text-gray-300 mb-2">
+                                Preferred Constituency (Optional)
+                            </label>
+                            <select name="constituency" id="id_constituency"
+                                    class="mt-1 block w-full pl-3 pr-10 py-2.5 text-base bg-gray-700 border border-gray-600 text-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-150 hover:border-gray-500">
+                                <option value="">-- Select Constituency --</option>
+                                {% for constituency in constituencies %}
+                                    <option value="{{ constituency.id }}" {% if selected_constituency == constituency.id %}selected{% endif %}>
+                                        {{ constituency.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400">Optionally select a specific constituency</p>
+                        </div>
+                        
+                        <!-- Ward Field -->
+                        <div class="mb-5">
+                            <label for="id_ward" class="block text-sm font-medium text-gray-300 mb-2">
+                                Preferred Ward (Optional)
+                            </label>
+                            <select name="ward" id="id_ward"
+                                    class="mt-1 block w-full pl-3 pr-10 py-2.5 text-base bg-gray-700 border border-gray-600 text-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-150 hover:border-gray-500">
+                                <option value="">-- Select Ward --</option>
+                                {% for ward in wards %}
+                                    <option value="{{ ward.id }}" {% if selected_ward == ward.id %}selected{% endif %}>
+                                        {{ ward.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400">Optionally select a specific ward</p>
+                        </div>
                     </div>
                     
-                    <!-- Ward Field -->
+                    <!-- Hardship Preference -->
                     <div class="mb-6">
-                        <label for="id_ward" class="block text-sm font-medium text-gray-300 mb-2">
-                            Preferred Ward (Optional)
+                        <label for="id_is_hardship" class="block text-sm font-medium text-gray-300 mb-2">
+                            Hardship Area Preference <span class="text-red-400">*</span>
                         </label>
-                        <select name="ward" id="id_ward"
+                        <select name="is_hardship" id="id_is_hardship" required
                                 class="mt-1 block w-full pl-3 pr-10 py-2.5 text-base bg-gray-700 border border-gray-600 text-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-150 hover:border-gray-500">
-                            <option value="">-- Select Ward --</option>
-                            {% for ward in wards %}
-                                <option value="{{ ward.id }}" {% if selected_ward == ward.id|stringformat:'s' %}selected{% endif %}>
-                                    {{ ward.name }}
-                                </option>
-                            {% endfor %}
+                            <option value="Any" {% if form.instance.is_hardship == 'Any' %}selected{% endif %}>Any (No Preference)</option>
+                            <option value="Yes" {% if form.instance.is_hardship == 'Yes' %}selected{% endif %}>Yes, willing to go to hardship areas</option>
+                            <option value="No" {% if form.instance.is_hardship == 'No' %}selected{% endif %}>No, prefer non-hardship areas only</option>
                         </select>
-                        <p class="mt-1 text-xs text-gray-400">Optionally select a specific ward</p>
+                        <p class="mt-1 text-xs text-gray-400">Are you willing to swap to a hardship area?</p>
                     </div>
                     
                     <div class="flex justify-between items-center pt-2 border-t border-gray-700">
@@ -195,9 +245,45 @@
         opacity: 0.5;
         cursor: not-allowed;
     }
+    
+    /* Location fields transition */
+    #location-fields {
+        transition: all 0.3s ease;
+    }
+    
+    /* Checkbox styling */
+    .form-checkbox {
+        background-color: #374151 !important;
+        border-color: #4b5563 !important;
+    }
+    
+    .form-checkbox:checked {
+        background-color: #14b8a6 !important;
+        border-color: #14b8a6 !important;
+    }
 </style>
 
 <script>
+// Toggle location fields visibility based on "Open to All" checkbox
+const openToAllCheckbox = document.getElementById('id_open_to_all');
+const locationFields = document.getElementById('location-fields');
+
+function toggleLocationFields() {
+    if (openToAllCheckbox.checked) {
+        locationFields.style.display = 'none';
+        locationFields.style.opacity = '0';
+    } else {
+        locationFields.style.display = 'block';
+        locationFields.style.opacity = '1';
+    }
+}
+
+// Run on page load
+toggleLocationFields();
+
+// Run when checkbox changes
+openToAllCheckbox.addEventListener('change', toggleLocationFields);
+
 // Handle dynamic loading of constituencies based on selected county
 document.getElementById('id_county').addEventListener('change', function() {
     const countyId = this.value;
@@ -235,7 +321,7 @@ document.getElementById('id_constituency').addEventListener('change', function()
     
     if (constituencyId) {
         // Fetch wards for the selected constituency
-        fetch(`/schools/get-wards/?constituency=${constituencyId}`)
+        fetch(`/schools/get-wards/?constituency_id=${constituencyId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.wards && data.wards.length > 0) {
