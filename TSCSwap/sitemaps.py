@@ -47,3 +47,4 @@ class StaticViewSitemap(Sitemap):
             return 'monthly'
 
 
+

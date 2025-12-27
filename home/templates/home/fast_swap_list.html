@@ -454,11 +454,220 @@
         font-size: 0.875rem;
         color: #94a3b8;
     }
+
+    /* Level Selector */
+    .level-selector-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.9);
+        backdrop-filter: blur(8px);
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .level-selector-modal {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 24px;
+        padding: 2.5rem;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .level-selector-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #f1f5f9;
+        margin-bottom: 0.5rem;
+    }
+
+    .level-selector-subtitle {
+        color: #94a3b8;
+        margin-bottom: 2rem;
+    }
+
+    .level-options {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .level-option {
+        flex: 1;
+        min-width: 180px;
+        padding: 1.5rem;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .level-option-primary {
+        background: rgba(34, 197, 94, 0.1);
+        border: 2px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .level-option-primary:hover {
+        background: rgba(34, 197, 94, 0.2);
+        border-color: rgba(34, 197, 94, 0.6);
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(34, 197, 94, 0.2);
+    }
+
+    .level-option-secondary {
+        background: rgba(168, 85, 247, 0.1);
+        border: 2px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .level-option-secondary:hover {
+        background: rgba(168, 85, 247, 0.2);
+        border-color: rgba(168, 85, 247, 0.6);
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(168, 85, 247, 0.2);
+    }
+
+    .level-option-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .level-option-primary .level-option-icon {
+        background: rgba(34, 197, 94, 0.2);
+        color: #86efac;
+    }
+
+    .level-option-secondary .level-option-icon {
+        background: rgba(168, 85, 247, 0.2);
+        color: #c4b5fd;
+    }
+
+    .level-option-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #f1f5f9;
+    }
+
+    .level-option-count {
+        font-size: 0.875rem;
+        color: #94a3b8;
+    }
+
+    .view-all-link {
+        margin-top: 1.5rem;
+        color: #94a3b8;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        text-decoration: underline;
+        background: none;
+        border: none;
+    }
+
+    .view-all-link:hover {
+        color: #22d3ee;
+    }
+
+    /* Active level indicator in filter */
+    .level-filter-pills {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .level-pill {
+        padding: 0.5rem 1.25rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .level-pill-primary {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        color: #86efac;
+    }
+
+    .level-pill-primary:hover, .level-pill-primary.active {
+        background: rgba(34, 197, 94, 0.25);
+        border-color: rgba(34, 197, 94, 0.6);
+    }
+
+    .level-pill-secondary {
+        background: rgba(168, 85, 247, 0.1);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        color: #c4b5fd;
+    }
+
+    .level-pill-secondary:hover, .level-pill-secondary.active {
+        background: rgba(168, 85, 247, 0.25);
+        border-color: rgba(168, 85, 247, 0.6);
+    }
+
+    .level-pill-all {
+        background: rgba(34, 211, 238, 0.1);
+        border: 1px solid rgba(34, 211, 238, 0.3);
+        color: #67e8f9;
+    }
+
+    .level-pill-all:hover, .level-pill-all.active {
+        background: rgba(34, 211, 238, 0.25);
+        border-color: rgba(34, 211, 238, 0.6);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="fast-swap-page">
+    <!-- Level Selector Modal - Shows on page load if no level selected -->
+    {% if not selected_level %}
+    <div class="level-selector-overlay" id="levelSelectorModal" x-data="{ show: true }" x-show="show" x-cloak>
+        <div class="level-selector-modal">
+            <h2 class="level-selector-title">Select Teaching Level</h2>
+            <p class="level-selector-subtitle">Choose the level you want to browse swap listings for</p>
+            
+            <div class="level-options">
+                <a href="?level=primary" class="level-option level-option-primary">
+                    <div class="level-option-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </div>
+                    <span class="level-option-name">Primary School</span>
+                </a>
+                
+                <a href="?level=secondary" class="level-option level-option-secondary">
+                    <div class="level-option-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                    </div>
+                    <span class="level-option-name">Secondary/High School</span>
+                </a>
+            </div>
+            
+            <button class="view-all-link" @click="show = false">
+                Or view all listings without filter
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="sm:flex sm:items-center sm:justify-between page-header">
@@ -480,6 +689,27 @@
             {% endif %}
         </div>
 
+        <!-- Level Filter Pills -->
+        <div class="level-filter-pills">
+            <a href="{% url 'home:fast_swap_list' %}" class="level-pill level-pill-all {% if not selected_level %}active{% endif %}">
+                All Levels
+            </a>
+            <a href="?level=primary{% if selected_county %}&county={{ selected_county }}{% endif %}{% if selected_constituency %}&constituency={{ selected_constituency }}{% endif %}{% if selected_ward %}&ward={{ selected_ward }}{% endif %}" 
+               class="level-pill level-pill-primary {% if selected_level == 'primary' %}active{% endif %}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                    <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                Primary
+            </a>
+            <a href="?level=secondary{% if selected_county %}&county={{ selected_county }}{% endif %}{% if selected_constituency %}&constituency={{ selected_constituency }}{% endif %}{% if selected_ward %}&ward={{ selected_ward }}{% endif %}" 
+               class="level-pill level-pill-secondary {% if selected_level == 'secondary' %}active{% endif %}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 4px;">
+                    <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                </svg>
+                Secondary
+            </a>
+        </div>
+
         <!-- Messages -->
         {% if messages %}
             {% for message in messages %}
@@ -492,6 +722,11 @@
         <!-- Filter Form -->
         <div class="filter-section">
             <form method="get" class="filter-form" id="filterForm">
+                <!-- Preserve level selection -->
+                {% if selected_level %}
+                <input type="hidden" name="level" value="{{ selected_level }}">
+                {% endif %}
+                
                 <div class="filter-group">
                     <label for="county">County</label>
                     <select name="county" id="county" class="filter-select">
@@ -536,7 +771,7 @@
                         </svg>
                         Filter
                     </button>
-                    <a href="{% url 'home:fast_swap_list' %}" class="filter-reset">Reset</a>
+                    <a href="{% url 'home:fast_swap_list' %}{% if selected_level %}?level={{ selected_level }}{% endif %}" class="filter-reset">Reset Location</a>
                 </div>
             </form>
         </div>
@@ -546,15 +781,20 @@
             <div class="stats-bar">
                 <div class="stat-item">
                     <span class="stat-value">{{ fast_swaps|length }}</span>
-                    <span class="stat-label">{% if selected_county or selected_constituency or selected_ward %}Filtered Results{% else %}Total Listings{% endif %}</span>
+                    <span class="stat-label">
+                        {% if selected_level == 'primary' %}Primary{% elif selected_level == 'secondary' %}Secondary{% else %}All{% endif %}
+                        {% if selected_county or selected_constituency or selected_ward %}Filtered Results{% else %}Listings{% endif %}
+                    </span>
                 </div>
-                {% if selected_county or selected_constituency or selected_ward %}
+                {% if selected_level or selected_county or selected_constituency or selected_ward %}
                 <div class="stat-item" style="margin-left: auto;">
                     <span style="color: #94a3b8; font-size: 0.875rem;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 4px;">
                             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
                         </svg>
-                        Filters applied
+                        {% if selected_level %}{{ selected_level|title }} level{% endif %}
+                        {% if selected_level and selected_county %} + {% endif %}
+                        {% if selected_county or selected_constituency or selected_ward %}location filter{% endif %}
                     </span>
                 </div>
                 {% endif %}
@@ -677,16 +917,29 @@
                 <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                 </svg>
-                {% if selected_county or selected_constituency or selected_ward %}
+                {% if selected_level or selected_county or selected_constituency or selected_ward %}
                     <h3 class="empty-title">No results for this filter</h3>
-                    <p class="empty-text">Try adjusting your filter criteria or reset to see all listings.</p>
-                    <a href="{% url 'home:fast_swap_list' %}" class="filter-btn" style="margin-top: 1rem; display: inline-flex;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/>
-                            <path d="M3 3v5h5"/>
-                        </svg>
-                        Reset Filters
-                    </a>
+                    <p class="empty-text">
+                        {% if selected_level %}No {{ selected_level }} level listings found{% endif %}
+                        {% if selected_level and selected_county %} in the selected location{% elif selected_county %} for the selected location{% endif %}.
+                        {% if not selected_level and not selected_county %}Try adjusting your filter criteria.{% endif %}
+                    </p>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;">
+                        {% if selected_level %}
+                        <a href="{% url 'home:fast_swap_list' %}" class="filter-btn" style="display: inline-flex;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/>
+                                <path d="M3 3v5h5"/>
+                            </svg>
+                            Try Different Level
+                        </a>
+                        {% endif %}
+                        {% if selected_county or selected_constituency or selected_ward %}
+                        <a href="{% url 'home:fast_swap_list' %}{% if selected_level %}?level={{ selected_level }}{% endif %}" class="filter-reset" style="padding: 0.75rem 1.5rem; border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 10px;">
+                            Reset Location Filter
+                        </a>
+                        {% endif %}
+                    </div>
                 {% else %}
                     <h3 class="empty-title">No FastSwap entries yet</h3>
                     <p class="empty-text">There are no FastSwap entries available at the moment.</p>

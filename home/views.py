@@ -1325,7 +1325,7 @@ def fast_swap_list(request):
     """
     View to list all FastSwap entries.
     Accessible to all users (authenticated and unauthenticated).
-    Supports filtering by county, constituency, and ward.
+    Supports filtering by level, county, constituency, and ward.
     """
     fast_swaps = FastSwap.objects.all().select_related(
         'current_county', 'current_constituency', 'current_ward', 
@@ -1333,11 +1333,19 @@ def fast_swap_list(request):
     ).order_by('-created_at')
     
     # Get filter parameters
+    level_filter = request.GET.get('level')
     county_id = request.GET.get('county')
     constituency_id = request.GET.get('constituency')
     ward_id = request.GET.get('ward')
     
-    # Apply filters
+    # Apply level filter
+    if level_filter:
+        if level_filter == 'primary':
+            fast_swaps = fast_swaps.filter(level__name__icontains='Primary')
+        elif level_filter == 'secondary':
+            fast_swaps = fast_swaps.filter(level__name__icontains='Secondary')
+    
+    # Apply location filters
     if county_id:
         fast_swaps = fast_swaps.filter(current_county_id=county_id)
     if constituency_id:
@@ -1347,6 +1355,9 @@ def fast_swap_list(request):
     
     # Get all counties for the filter dropdown
     counties = Counties.objects.all().order_by('name')
+    
+    # Get all levels for the filter dropdown
+    levels = Level.objects.all().order_by('name')
     
     # Get constituencies and wards if filters are applied
     constituencies = Constituencies.objects.none()
@@ -1363,6 +1374,8 @@ def fast_swap_list(request):
         'counties': counties,
         'constituencies': constituencies,
         'wards': wards,
+        'levels': levels,
+        'selected_level': level_filter,
         'selected_county': county_id,
         'selected_constituency': constituency_id,
         'selected_ward': ward_id,
