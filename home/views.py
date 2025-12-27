@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from .forms import (FastSwapForm, MySubjectForm, SchoolForm, SwapForm,
                     SwapPreferenceForm)
-from .models import (Constituencies, Counties, FastSwap, Level, MySubject,
+from .models import (Bookmark, Constituencies, Counties, FastSwap, Level, MySubject,
                      Schools, Subject, SwapPreference, SwapRequests, Swaps,
                      User, Wards)
 
@@ -688,6 +688,14 @@ def primary_swaps(request):
     # Sort by match score (highest first)
     swaps_data.sort(key=lambda x: x['match_score'], reverse=True)
     
+    # Get bookmarked swap IDs for the current user (use list for template compatibility)
+    bookmarked_ids = []
+    if request.user.is_authenticated:
+        bookmarked_ids = list(Bookmark.objects.filter(
+            user=request.user,
+            bookmark_type='swap'
+        ).values_list('swap_id', flat=True))
+    
     context = {
         "swaps_data": swaps_data,
         "title": "Primary School Swaps",
@@ -704,6 +712,7 @@ def primary_swaps(request):
         "missing_items": missing_items,
         "user": request.user if request.user.is_authenticated else None,
         "level_filter": "primary",
+        "bookmarked_ids": bookmarked_ids,
     }
     
     return render(request, "home/level_swaps.html", context)
@@ -940,6 +949,14 @@ def secondary_swaps(request):
     # Sort by match score (highest first)
     swaps_data.sort(key=lambda x: x['match_score'], reverse=True)
     
+    # Get bookmarked swap IDs for the current user (use list for template compatibility)
+    bookmarked_ids = []
+    if request.user.is_authenticated:
+        bookmarked_ids = list(Bookmark.objects.filter(
+            user=request.user,
+            bookmark_type='swap'
+        ).values_list('swap_id', flat=True))
+    
     context = {
         "swaps_data": swaps_data,
         "title": "Secondary/High School Swaps",
@@ -957,6 +974,7 @@ def secondary_swaps(request):
         "missing_items": missing_items,
         "user": request.user if request.user.is_authenticated else None,
         "level_filter": "secondary",
+        "bookmarked_ids": bookmarked_ids,
     }
     
     return render(request, "home/level_swaps.html", context)
@@ -1020,6 +1038,64 @@ def swap_detail(request, swap_id):
     }
     
     return render(request, 'home/swap_detail.html', context)
+
+
+def fast_swap_detail(request, fastswap_id):
+    """
+    Detailed view of a specific FastSwap entry.
+    """
+    fast_swap = get_object_or_404(FastSwap, id=fastswap_id)
+    user = request.user
+    
+    # Check if the current user has an active subscription
+    has_active_subscription = False
+    is_admin = False
+    if user.is_authenticated:
+        is_admin = user.is_superuser or user.is_staff
+        if hasattr(user, 'my_subscription'):
+            has_active_subscription = user.my_subscription.is_active
+    
+    # Mask contact info for non-subscribers
+    show_contact = is_admin or has_active_subscription
+    if show_contact:
+        display_phone = fast_swap.phone
+        display_name = fast_swap.names
+    else:
+        display_phone = f"{fast_swap.phone[:4]}****{fast_swap.phone[-3:]}" if fast_swap.phone and len(fast_swap.phone) > 7 else "Hidden"
+        name_parts = fast_swap.names.split()
+        if name_parts:
+            display_name = f"{name_parts[0]} {'*' * 5}"
+        else:
+            display_name = "Hidden"
+    
+    # Get acceptable counties
+    acceptable_counties = fast_swap.acceptable_county.all()
+    
+    # Get subjects
+    subjects = fast_swap.subjects.all()
+    
+    # Check if bookmarked
+    is_bookmarked = False
+    if user.is_authenticated:
+        is_bookmarked = Bookmark.objects.filter(
+            user=user,
+            fast_swap=fast_swap,
+            bookmark_type='fastswap'
+        ).exists()
+    
+    context = {
+        'fast_swap': fast_swap,
+        'display_name': display_name,
+        'display_phone': display_phone,
+        'show_contact': show_contact,
+        'acceptable_counties': acceptable_counties,
+        'subjects': subjects,
+        'is_bookmarked': is_bookmarked,
+        'has_active_subscription': has_active_subscription,
+    }
+    
+    return render(request, 'home/fast_swap_detail.html', context)
+
 
 @login_required
 def toggle_swap_status(request, swap_id):
@@ -1368,6 +1444,14 @@ def fast_swap_list(request):
     if constituency_id:
         wards = Wards.objects.filter(constituency_id=constituency_id).order_by('name')
     
+    # Get bookmarked FastSwap IDs for the current user (use list for template compatibility)
+    bookmarked_ids = []
+    if request.user.is_authenticated:
+        bookmarked_ids = list(Bookmark.objects.filter(
+            user=request.user,
+            bookmark_type='fastswap'
+        ).values_list('fast_swap_id', flat=True))
+    
     return render(request, 'home/fast_swap_list.html', {
         'fast_swaps': fast_swaps,
         'title': 'FastSwap Entries',
@@ -1379,6 +1463,7 @@ def fast_swap_list(request):
         'selected_county': county_id,
         'selected_constituency': constituency_id,
         'selected_ward': ward_id,
+        'bookmarked_ids': bookmarked_ids,
     })
 
 
@@ -1428,4 +1513,165 @@ def swap_preferences(request):
         'open_to_all': preference.open_to_all,
         'is_hardship': preference.is_hardship,
     })
+
+
+@login_required
+def toggle_swap_bookmark(request, swap_id):
+    """
+    Toggle bookmark for a regular swap.
+    Returns JSON response for AJAX calls.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+    
+    swap = get_object_or_404(Swaps, id=swap_id)
+    
+    # Check if bookmark already exists
+    existing_bookmark = Bookmark.objects.filter(
+        user=request.user,
+        swap=swap,
+        bookmark_type='swap'
+    ).first()
+    
+    if existing_bookmark:
+        # Remove bookmark
+        existing_bookmark.delete()
+        return JsonResponse({
+            'success': True,
+            'action': 'removed',
+            'message': 'Swap removed from wishlist'
+        })
+    else:
+        # Create bookmark
+        Bookmark.objects.create(
+            user=request.user,
+            swap=swap,
+            bookmark_type='swap'
+        )
+        return JsonResponse({
+            'success': True,
+            'action': 'added',
+            'message': 'Swap added to wishlist'
+        })
+
+
+@login_required
+def toggle_fastswap_bookmark(request, fastswap_id):
+    """
+    Toggle bookmark for a FastSwap.
+    Returns JSON response for AJAX calls.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+    
+    fast_swap = get_object_or_404(FastSwap, id=fastswap_id)
+    
+    # Check if bookmark already exists
+    existing_bookmark = Bookmark.objects.filter(
+        user=request.user,
+        fast_swap=fast_swap,
+        bookmark_type='fastswap'
+    ).first()
+    
+    if existing_bookmark:
+        # Remove bookmark
+        existing_bookmark.delete()
+        return JsonResponse({
+            'success': True,
+            'action': 'removed',
+            'message': 'FastSwap removed from wishlist'
+        })
+    else:
+        # Create bookmark
+        Bookmark.objects.create(
+            user=request.user,
+            fast_swap=fast_swap,
+            bookmark_type='fastswap'
+        )
+        return JsonResponse({
+            'success': True,
+            'action': 'added',
+            'message': 'FastSwap added to wishlist'
+        })
+
+
+@login_required
+def my_bookmarks(request):
+    """
+    View to display all bookmarked swaps and fast swaps for the current user.
+    """
+    # Get filter parameter
+    filter_type = request.GET.get('type', 'all')
+    
+    # Get all bookmarks for the user
+    bookmarks = Bookmark.objects.filter(user=request.user).select_related(
+        'swap__user__profile__school__ward__constituency__county',
+        'swap__county',
+        'swap__constituency', 
+        'swap__ward',
+        'fast_swap__current_county',
+        'fast_swap__current_constituency',
+        'fast_swap__current_ward',
+        'fast_swap__most_preferred',
+        'fast_swap__level'
+    ).prefetch_related(
+        'fast_swap__acceptable_county',
+        'fast_swap__subjects'
+    )
+    
+    # Apply filter
+    if filter_type == 'swap':
+        bookmarks = bookmarks.filter(bookmark_type='swap')
+    elif filter_type == 'fastswap':
+        bookmarks = bookmarks.filter(bookmark_type='fastswap')
+    
+    # Get user subjects for matching
+    user_subjects = set()
+    if request.user.is_authenticated:
+        user_subjects = set(MySubject.objects.filter(user=request.user).values_list('subject__id', flat=True))
+    
+    # Prepare bookmark data with additional info
+    bookmark_data = []
+    for bookmark in bookmarks:
+        if bookmark.bookmark_type == 'swap' and bookmark.swap:
+            swap = bookmark.swap
+            user_profile = getattr(swap.user, 'profile', None)
+            school = getattr(user_profile, 'school', None)
+            
+            # Get swap creator's subjects
+            swap_user_subjects = list(MySubject.objects.filter(
+                user=swap.user
+            ).values_list('subject__name', flat=True))
+            
+            bookmark_data.append({
+                'bookmark': bookmark,
+                'type': 'swap',
+                'item': swap,
+                'user_school': school,
+                'user_subjects': swap_user_subjects[:4],
+                'level': getattr(user_profile, 'level', None) if user_profile else None,
+            })
+        elif bookmark.bookmark_type == 'fastswap' and bookmark.fast_swap:
+            fast_swap = bookmark.fast_swap
+            bookmark_data.append({
+                'bookmark': bookmark,
+                'type': 'fastswap',
+                'item': fast_swap,
+                'subjects': list(fast_swap.subjects.all()[:4]),
+            })
+    
+    # Count by type
+    swap_count = Bookmark.objects.filter(user=request.user, bookmark_type='swap').count()
+    fastswap_count = Bookmark.objects.filter(user=request.user, bookmark_type='fastswap').count()
+    
+    context = {
+        'bookmark_data': bookmark_data,
+        'filter_type': filter_type,
+        'swap_count': swap_count,
+        'fastswap_count': fastswap_count,
+        'total_count': swap_count + fastswap_count,
+        'title': 'My Wishlist',
+    }
+    
+    return render(request, 'home/my_bookmarks.html', context)
 

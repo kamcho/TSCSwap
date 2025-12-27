@@ -1,0 +1,497 @@
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block title %}FastSwap Details · TSC Swap{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-page {
+        min-height: 100vh;
+        background: 
+            radial-gradient(circle at top, rgba(168, 85, 247, 0.12), transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.08), transparent 50%),
+            #0f172a;
+    }
+
+    .detail-card {
+        max-width: 800px;
+        margin: 2rem auto;
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(59, 130, 246, 0.1));
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #e2e8f0;
+        margin: 0;
+    }
+
+    .header-subtitle {
+        color: #94a3b8;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .badge-fastswap {
+        padding: 6px 14px;
+        background: rgba(168, 85, 247, 0.2);
+        border: 1px solid rgba(168, 85, 247, 0.4);
+        color: #c4b5fd;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .section {
+        margin-bottom: 2rem;
+    }
+
+    .section:last-child {
+        margin-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .info-item {
+        background: rgba(15, 23, 42, 0.5);
+        padding: 1rem;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        color: #e2e8f0;
+        font-weight: 500;
+    }
+
+    .location-flow {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .location-box {
+        flex: 1;
+        min-width: 200px;
+        background: rgba(15, 23, 42, 0.5);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        text-align: center;
+    }
+
+    .location-label {
+        font-size: 0.7rem;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .location-value {
+        font-size: 1.125rem;
+        color: #e2e8f0;
+        font-weight: 600;
+    }
+
+    .location-sub {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+    }
+
+    .arrow-icon {
+        color: #a855f7;
+        flex-shrink: 0;
+    }
+
+    .tags-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tag {
+        padding: 6px 12px;
+        background: rgba(59, 130, 246, 0.15);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        color: #93c5fd;
+        border-radius: 999px;
+        font-size: 0.8rem;
+    }
+
+    .tag-county {
+        background: rgba(34, 211, 238, 0.15);
+        border-color: rgba(34, 211, 238, 0.3);
+        color: #67e8f9;
+    }
+
+    .contact-section {
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(59, 130, 246, 0.1));
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(34, 211, 238, 0.2);
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+        .contact-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .contact-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(34, 211, 238, 0.15);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #22d3ee;
+    }
+
+    .contact-label {
+        font-size: 0.7rem;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    .contact-value {
+        color: #e2e8f0;
+        font-weight: 500;
+    }
+
+    .subscribe-notice {
+        background: rgba(234, 179, 8, 0.1);
+        border: 1px solid rgba(234, 179, 8, 0.3);
+        padding: 1rem 1.25rem;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .subscribe-notice-text {
+        flex: 1;
+        color: #fcd34d;
+        font-size: 0.9rem;
+    }
+
+    .subscribe-btn {
+        padding: 8px 16px;
+        background: #eab308;
+        color: #0f172a;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .subscribe-btn:hover {
+        background: #facc15;
+    }
+
+    .card-footer {
+        padding: 1.5rem 2rem;
+        background: rgba(15, 23, 42, 0.5);
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover {
+        color: #e2e8f0;
+    }
+
+    .bookmark-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .bookmark-btn.not-bookmarked {
+        background: rgba(168, 85, 247, 0.15);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        color: #c4b5fd;
+    }
+
+    .bookmark-btn.not-bookmarked:hover {
+        background: rgba(168, 85, 247, 0.25);
+    }
+
+    .bookmark-btn.bookmarked {
+        background: rgba(168, 85, 247, 0.3);
+        border: 1px solid rgba(168, 85, 247, 0.5);
+        color: #e9d5ff;
+    }
+
+    .posted-date {
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+    <div class="detail-card">
+        <!-- Header -->
+        <div class="card-header">
+            <div>
+                <h1 class="header-title">FastSwap Details</h1>
+                <p class="header-subtitle">Quick swap listing from {{ display_name }}</p>
+            </div>
+            <span class="badge-fastswap">FastSwap</span>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+            <!-- Location Section -->
+            <div class="section">
+                <h2 class="section-title">Swap Direction</h2>
+                <div class="location-flow">
+                    <div class="location-box">
+                        <div class="location-label">Current Location</div>
+                        <div class="location-value">
+                            {% if fast_swap.current_county %}
+                                {{ fast_swap.current_county.name }}
+                            {% else %}
+                                Not specified
+                            {% endif %}
+                        </div>
+                        {% if fast_swap.current_constituency %}
+                        <div class="location-sub">{{ fast_swap.current_constituency.name }}{% if fast_swap.current_ward %}, {{ fast_swap.current_ward.name }}{% endif %}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="arrow-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+
+                    <div class="location-box">
+                        <div class="location-label">Preferred Destination</div>
+                        <div class="location-value">
+                            {% if fast_swap.most_preferred %}
+                                {{ fast_swap.most_preferred.name }}
+                            {% else %}
+                                Any Location
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details Section -->
+            <div class="section">
+                <h2 class="section-title">Details</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Level</div>
+                        <div class="info-value">{{ fast_swap.level.name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Posted</div>
+                        <div class="info-value">{{ fast_swap.created_at|date:"M d, Y" }}</div>
+                    </div>
+                    {% if fast_swap.school %}
+                    <div class="info-item">
+                        <div class="info-label">School Type</div>
+                        <div class="info-value">{{ fast_swap.school.boarding }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">School Gender</div>
+                        <div class="info-value">{{ fast_swap.school.gender }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Subjects Section -->
+            {% if subjects %}
+            <div class="section">
+                <h2 class="section-title">Subjects</h2>
+                <div class="tags-list">
+                    {% for subject in subjects %}
+                    <span class="tag">{{ subject.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Acceptable Counties Section -->
+            {% if acceptable_counties %}
+            <div class="section">
+                <h2 class="section-title">Also Acceptable Counties</h2>
+                <div class="tags-list">
+                    {% for county in acceptable_counties %}
+                    <span class="tag tag-county">{{ county.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Contact Section -->
+            <div class="section">
+                <h2 class="section-title">Send Request</h2>
+                <div class="contact-section" style="background: rgba(37, 211, 102, 0.1); border-color: rgba(37, 211, 102, 0.3); display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="#25D366">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    <span style="flex: 1; color: #86efac; font-size: 0.95rem;">
+                        Interested in this swap? Send a request via WhatsApp.
+                    </span>
+                    <a href="https://wa.me/254742134431?text=Hi%2C%20I'm%20interested%20in%20FastSwap%20%23{{ fast_swap.id }}%20listing.%20Please%20share%20more%20details." 
+                       target="_blank" 
+                       style="display: inline-flex; align-items: center; padding: 10px 20px; background: #25D366; color: white; border-radius: 10px; font-weight: 600; text-decoration: none; transition: all 0.2s;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="margin-right: 8px;">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                        </svg>
+                        Send Request
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer">
+            <a href="{% url 'home:fast_swap_list' %}" class="back-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Back to FastSwaps
+            </a>
+
+            {% if user.is_authenticated %}
+            <button class="bookmark-btn {% if is_bookmarked %}bookmarked{% else %}not-bookmarked{% endif %}"
+                    id="bookmark-btn"
+                    onclick="toggleBookmark()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="{% if is_bookmarked %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+                </svg>
+                <span id="bookmark-text">{% if is_bookmarked %}Saved{% else %}Save to Wishlist{% endif %}</span>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if user.is_authenticated %}
+<script>
+function toggleBookmark() {
+    const btn = document.getElementById('bookmark-btn');
+    const text = document.getElementById('bookmark-text');
+    const svg = btn.querySelector('svg');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch("{% url 'home:toggle_fastswap_bookmark' fastswap_id=fast_swap.id %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.bookmarked) {
+                btn.classList.remove('not-bookmarked');
+                btn.classList.add('bookmarked');
+                svg.setAttribute('fill', 'currentColor');
+                text.textContent = 'Saved';
+            } else {
+                btn.classList.remove('bookmarked');
+                btn.classList.add('not-bookmarked');
+                svg.setAttribute('fill', 'none');
+                text.textContent = 'Save to Wishlist';
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+{% endif %}
+{% endblock %}
+

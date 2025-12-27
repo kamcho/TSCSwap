@@ -248,6 +248,25 @@
         font-size: 0.75rem;
         color: #6b7280;
     }
+    .bookmark-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        color: #64748b;
+    }
+    .bookmark-btn:hover {
+        background: rgba(251, 191, 36, 0.1);
+        color: #fbbf24;
+    }
+    .bookmark-btn.active {
+        color: #fbbf24;
+    }
+    .bookmark-btn.active svg {
+        fill: #fbbf24;
+    }
     .view-btn {
         display: inline-flex;
         align-items: center;
@@ -887,12 +906,24 @@
                     </div>
                     <div class="card-footer">
                         <span class="date">Posted {{ swap.created_at|timesince }} ago</span>
-                        <a href="{% url 'home:swap_detail' swap.id %}" class="view-btn">
-                            View Details
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </a>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            {% if user.is_authenticated %}
+                            <button class="bookmark-btn {% if swap.id in bookmarked_ids %}active{% endif %}" 
+                                    data-swap-id="{{ swap.id }}"
+                                    onclick="toggleSwapBookmark({{ swap.id }}, this)"
+                                    title="{% if swap.id in bookmarked_ids %}Remove from wishlist{% else %}Add to wishlist{% endif %}">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="{% if swap.id in bookmarked_ids %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                                </svg>
+                            </button>
+                            {% endif %}
+                            <a href="{% url 'home:swap_detail' swap.id %}" class="view-btn">
+                                View Details
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {% endwith %}
@@ -940,5 +971,36 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 {% endif %}
+
+<script>
+// Toggle Swap bookmark
+function toggleSwapBookmark(swapId, button) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch(`/bookmarks/toggle/swap/${swapId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const svg = button.querySelector('svg');
+            if (data.action === 'added') {
+                button.classList.add('active');
+                svg.setAttribute('fill', 'currentColor');
+                button.title = 'Remove from wishlist';
+            } else {
+                button.classList.remove('active');
+                svg.setAttribute('fill', 'none');
+                button.title = 'Add to wishlist';
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
 {% endblock %}
 

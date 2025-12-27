@@ -172,4 +172,35 @@ class FastSwap(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return self.names
+
+
+class Bookmark(models.Model):
+    """
+    Model to store user bookmarks/wishlist for swaps and fast swaps.
+    A user can bookmark either a Swap or a FastSwap.
+    """
+    BOOKMARK_TYPES = (
+        ('swap', 'Regular Swap'),
+        ('fastswap', 'Fast Swap'),
+    )
     
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookmarks')
+    swap = models.ForeignKey(Swaps, on_delete=models.CASCADE, null=True, blank=True, related_name='bookmarks')
+    fast_swap = models.ForeignKey(FastSwap, on_delete=models.CASCADE, null=True, blank=True, related_name='bookmarks')
+    bookmark_type = models.CharField(max_length=20, choices=BOOKMARK_TYPES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        # Ensure a user can only bookmark the same item once
+        unique_together = [
+            ('user', 'swap'),
+            ('user', 'fast_swap'),
+        ]
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        if self.bookmark_type == 'swap' and self.swap:
+            return f"{self.user} bookmarked swap #{self.swap.id}"
+        elif self.bookmark_type == 'fastswap' and self.fast_swap:
+            return f"{self.user} bookmarked fastswap #{self.fast_swap.id}"
+        return f"{self.user} bookmark"

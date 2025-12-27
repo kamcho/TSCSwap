@@ -1,0 +1,412 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - TSC Swap{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bookmarks-page {
+        min-height: 100vh;
+        background: 
+            radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08), transparent 50%),
+            #0f172a;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .page-subtitle {
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+
+    /* Filter tabs */
+    .filter-tabs {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 0.5rem 1.25rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-tab-all {
+        background: rgba(34, 211, 238, 0.1);
+        border: 1px solid rgba(34, 211, 238, 0.3);
+        color: #67e8f9;
+    }
+
+    .filter-tab-all:hover, .filter-tab-all.active {
+        background: rgba(34, 211, 238, 0.25);
+        border-color: rgba(34, 211, 238, 0.6);
+    }
+
+    .filter-tab-swap {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        color: #93c5fd;
+    }
+
+    .filter-tab-swap:hover, .filter-tab-swap.active {
+        background: rgba(59, 130, 246, 0.25);
+        border-color: rgba(59, 130, 246, 0.6);
+    }
+
+    .filter-tab-fastswap {
+        background: rgba(168, 85, 247, 0.1);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        color: #c4b5fd;
+    }
+
+    .filter-tab-fastswap:hover, .filter-tab-fastswap.active {
+        background: rgba(168, 85, 247, 0.25);
+        border-color: rgba(168, 85, 247, 0.6);
+    }
+
+    .tab-count {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+    }
+
+    /* Cards grid */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+        .cards-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (min-width: 1024px) {
+        .cards-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* Bookmark card */
+    .bookmark-card {
+        background: rgba(30, 41, 59, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .bookmark-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(34, 211, 238, 0.3);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(59, 130, 246, 0.1));
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .card-type-badge {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    .badge-swap {
+        background: rgba(59, 130, 246, 0.2);
+        color: #93c5fd;
+    }
+
+    .badge-fastswap {
+        background: rgba(168, 85, 247, 0.2);
+        color: #c4b5fd;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .location-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .location-block {
+        flex: 1;
+    }
+
+    .location-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 0.25rem;
+    }
+
+    .location-value {
+        color: #e2e8f0;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .swap-arrow {
+        color: #22d3ee;
+    }
+
+    .card-footer {
+        padding: 1rem 1.25rem;
+        background: rgba(15, 23, 42, 0.5);
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .remove-btn {
+        padding: 6px 12px;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .remove-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .card-date {
+        color: #64748b;
+        font-size: 0.75rem;
+    }
+
+    .view-link {
+        padding: 6px 12px;
+        background: rgba(34, 211, 238, 0.1);
+        border: 1px solid rgba(34, 211, 238, 0.3);
+        color: #67e8f9;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .view-link:hover {
+        background: rgba(34, 211, 238, 0.2);
+        border-color: rgba(34, 211, 238, 0.5);
+        color: #a5f3fc;
+    }
+
+    /* Empty state */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        background: rgba(30, 41, 59, 0.4);
+        border-radius: 16px;
+        border: 1px dashed rgba(148, 163, 184, 0.2);
+    }
+
+    .empty-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1.5rem;
+        color: #475569;
+    }
+
+    .empty-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-text {
+        color: #64748b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bookmarks-page">
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="page-header">
+            <h1 class="page-title">{{ title }}</h1>
+            <p class="page-subtitle">Your saved swaps and listings</p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <a href="{% url 'home:my_bookmarks' %}" 
+               class="filter-tab filter-tab-all {% if filter_type == 'all' %}active{% endif %}">
+                All
+                <span class="tab-count">{{ total_count }}</span>
+            </a>
+            <a href="{% url 'home:my_bookmarks' %}?type=swap" 
+               class="filter-tab filter-tab-swap {% if filter_type == 'swap' %}active{% endif %}">
+                Swaps
+                <span class="tab-count">{{ swap_count }}</span>
+            </a>
+            <a href="{% url 'home:my_bookmarks' %}?type=fastswap" 
+               class="filter-tab filter-tab-fastswap {% if filter_type == 'fastswap' %}active{% endif %}">
+                FastSwaps
+                <span class="tab-count">{{ fastswap_count }}</span>
+            </a>
+        </div>
+
+        <!-- Bookmarks Grid -->
+        {% if bookmark_data %}
+        <div class="cards-grid">
+            {% for item in bookmark_data %}
+            <div class="bookmark-card" id="bookmark-{{ item.bookmark.id }}">
+                <div class="card-header">
+                    <div>
+                        {% if item.type == 'swap' %}
+                        <span class="card-type-badge badge-swap">Swap</span>
+                        {% else %}
+                        <span class="card-type-badge badge-fastswap">FastSwap</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="location-row">
+                        <div class="location-block">
+                            <div class="location-label">From</div>
+                            {% if item.type == 'swap' and item.user_school %}
+                            <div class="location-value">{{ item.user_school.ward.constituency.county.name }}</div>
+                            {% elif item.type == 'fastswap' and item.item.current_county %}
+                            <div class="location-value">{{ item.item.current_county.name }}</div>
+                            {% else %}
+                            <div class="location-value" style="color: #64748b;">Not specified</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="swap-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                        
+                        <div class="location-block">
+                            <div class="location-label">To</div>
+                            {% if item.type == 'swap' and item.item.county %}
+                            <div class="location-value">{{ item.item.county.name }}</div>
+                            {% elif item.type == 'fastswap' and item.item.most_preferred %}
+                            <div class="location-value">{{ item.item.most_preferred.name }}</div>
+                            {% else %}
+                            <div class="location-value" style="color: #64748b;">Any</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <span class="card-date">Saved {{ item.bookmark.created_at|date:"M d, Y" }}</span>
+                    <div style="display: flex; gap: 0.5rem;">
+                        {% if item.type == 'swap' %}
+                        <a href="{% url 'home:swap_detail' swap_id=item.item.id %}" class="view-link">
+                            View
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'home:fast_swap_detail' fastswap_id=item.item.id %}" class="view-link">
+                            View
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                        {% endif %}
+                        <button class="remove-btn" 
+                                onclick="removeBookmark('{{ item.type }}', {{ item.item.id }}, {{ item.bookmark.id }})">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                      d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+            </svg>
+            <h3 class="empty-title">No saved items yet</h3>
+            <p class="empty-text">Browse swaps and click the bookmark icon to save them here.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function removeBookmark(type, itemId, bookmarkId) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const url = type === 'swap' 
+        ? `{% url 'home:toggle_swap_bookmark' swap_id=0 %}`.replace('/0/', `/${itemId}/`)
+        : `{% url 'home:toggle_fastswap_bookmark' fastswap_id=0 %}`.replace('/0/', `/${itemId}/`);
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const card = document.getElementById(`bookmark-${bookmarkId}`);
+            if (card) {
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    card.remove();
+                    const grid = document.querySelector('.cards-grid');
+                    if (grid && grid.children.length === 0) {
+                        location.reload();
+                    }
+                }, 300);
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+{% endblock %}
+

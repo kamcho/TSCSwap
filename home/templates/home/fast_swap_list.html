@@ -198,6 +198,50 @@
         border-top: 1px solid rgba(148, 163, 184, 0.1);
     }
 
+    .view-detail-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #67e8f9;
+        background: rgba(34, 211, 238, 0.1);
+        border: 1px solid rgba(34, 211, 238, 0.25);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .view-detail-link:hover {
+        color: #a5f3fc;
+        background: rgba(34, 211, 238, 0.2);
+        border-color: rgba(34, 211, 238, 0.4);
+    }
+
+    .bookmark-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        color: #64748b;
+    }
+
+    .bookmark-btn:hover {
+        background: rgba(251, 191, 36, 0.1);
+        color: #fbbf24;
+    }
+
+    .bookmark-btn.active {
+        color: #fbbf24;
+    }
+
+    .bookmark-btn.active svg {
+        fill: #fbbf24;
+    }
+
     .level-badge {
         display: inline-flex;
         align-items: center;
@@ -816,14 +860,8 @@
                                     {{ swap.phone }}
                                 </a>
                             {% else %}
-                                {# Masked details for regular users #}
+                                {# Name only for regular users - no phone number #}
                                 <h3 class="card-name">{{ swap.names|slice:":3" }}***</h3>
-                                <span class="card-phone-masked">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-                                    </svg>
-                                    {{ swap.phone|slice:":4" }}****{{ swap.phone|slice:"-3:" }}
-                                </span>
                             {% endif %}
                         </div>
 
@@ -906,7 +944,25 @@
                                 {% endif %}
                                 {{ swap.level.name }}
                             </span>
-                            <span class="card-date">{{ swap.created_at|date:"M d, Y" }}</span>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <span class="card-date">{{ swap.created_at|date:"M d, Y" }}</span>
+                                <a href="{% url 'home:fast_swap_detail' fastswap_id=swap.id %}" class="view-detail-link">
+                                    View
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                                    </svg>
+                                </a>
+                                {% if user.is_authenticated %}
+                                <button class="bookmark-btn {% if swap.id in bookmarked_ids %}active{% endif %}" 
+                                        data-fastswap-id="{{ swap.id }}"
+                                        onclick="toggleFastSwapBookmark({{ swap.id }}, this)"
+                                        title="{% if swap.id in bookmarked_ids %}Remove from wishlist{% else %}Add to wishlist{% endif %}">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="{% if swap.id in bookmarked_ids %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2">
+                                        <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                                    </svg>
+                                </button>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
@@ -1008,5 +1064,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Toggle FastSwap bookmark
+function toggleFastSwapBookmark(fastswapId, button) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch(`/bookmarks/toggle/fastswap/${fastswapId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const svg = button.querySelector('svg');
+            if (data.action === 'added') {
+                button.classList.add('active');
+                svg.setAttribute('fill', 'currentColor');
+                button.title = 'Remove from wishlist';
+            } else {
+                button.classList.remove('active');
+                svg.setAttribute('fill', 'none');
+                button.title = 'Add to wishlist';
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
 </script>
 {% endblock %}

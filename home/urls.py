@@ -37,6 +37,12 @@ urlpatterns = [
     # FastSwap management
     path("fast-swap/add/", login_required(views.add_fast_swap), name="add_fast_swap"),
     path("fast-swap/list/", views.fast_swap_list, name="fast_swap_list"),
+    path("fast-swap/<int:fastswap_id>/", views.fast_swap_detail, name="fast_swap_detail"),
+    
+    # Bookmarks/Wishlist
+    path("bookmarks/", login_required(views.my_bookmarks), name="my_bookmarks"),
+    path("bookmarks/toggle/swap/<int:swap_id>/", login_required(views.toggle_swap_bookmark), name="toggle_swap_bookmark"),
+    path("bookmarks/toggle/fastswap/<int:fastswap_id>/", login_required(views.toggle_fastswap_bookmark), name="toggle_fastswap_bookmark"),
     
     # School management
     path("schools/", views.all_schools, name="all_schools"),
