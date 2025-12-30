@@ -7,17 +7,22 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="font-medium text-white">
-                        {% if match.profile and match.profile.first_name %}
-                            {{ match.profile.first_name }}
-                            {% if match.profile.surname %} {{ match.profile.surname }}
-                            {% elif match.profile.last_name %} {{ match.profile.last_name }}{% endif %}
-                        {% else %}
-                            {% if match.email %}
+                        {% with profile=match.profile %}
+                            {% if profile and profile.first_name %}
+                                {{ profile.first_name }}
+                                {% if profile.surname %}
+                                    {{ profile.surname }}
+                                {% elif profile.last_name %}
+                                    {{ profile.last_name }}
+                                {% endif %}
+                            {% elif match.get_full_name %}
+                                {{ match.get_full_name }}
+                            {% elif match.email %}
                                 {{ match.email|mask_email|truncatechars:20 }}
                             {% else %}
                                 User #{{ match.id }}
                             {% endif %}
-                        {% endif %}
+                        {% endwith %}
                     </h3>
                     {% if match_type == 'perfect' %}
                         <span class="mt-1 inline-block px-2 py-0.5 bg-green-900/50 text-green-300 text-xs rounded-full">Perfect Match</span>

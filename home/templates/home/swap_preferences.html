@@ -47,12 +47,6 @@
                     </h3>
                     <div class="mt-2 text-sm text-gray-300 space-y-1.5">
                         <p class="flex items-center">
-                            <span class="w-2 h-2 rounded-full {% if form.instance.open_to_all %}bg-green-400{% else %}bg-gray-500{% endif %} mr-2"></span>
-                            <span class="font-medium">Open to All:</span> 
-                            <span class="ml-1">{% if form.instance.open_to_all %}Yes - Any county{% else %}No - Specific location{% endif %}</span>
-                        </p>
-                        {% if not form.instance.open_to_all %}
-                        <p class="flex items-center">
                             <span class="w-2 h-2 rounded-full bg-teal-400 mr-2"></span>
                             <span class="font-medium">County:</span> 
                             <span class="ml-1">{{ form.instance.desired_county|default:"Not specified" }}</span>
@@ -67,20 +61,6 @@
                             <span class="font-medium">Ward:</span> 
                             <span class="ml-1">{{ form.instance.desired_ward|default:"Not specified" }}</span>
                         </p>
-                        {% endif %}
-                        <p class="flex items-center">
-                            <span class="w-2 h-2 rounded-full bg-amber-400 mr-2"></span>
-                            <span class="font-medium">Hardship Area:</span> 
-                            <span class="ml-1">
-                                {% if form.instance.is_hardship == 'Yes' %}
-                                    Willing to go
-                                {% elif form.instance.is_hardship == 'No' %}
-                                    Non-hardship only
-                                {% else %}
-                                    No preference
-                                {% endif %}
-                            </span>
-                        </p>
                     </div>
                 </div>
                 {% endif %}
@@ -88,20 +68,7 @@
                 <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-5">
                     <h3 class="text-md font-medium text-gray-200 mb-4">Update Preferences</h3>
                     
-                    <!-- Open to All Toggle -->
-                    <div class="mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-                        <label class="flex items-center cursor-pointer">
-                            <input type="checkbox" name="open_to_all" id="id_open_to_all"
-                                   {% if form.instance.open_to_all %}checked{% endif %}
-                                   class="form-checkbox h-5 w-5 text-teal-500 rounded border-gray-500 bg-gray-700 focus:ring-teal-500 focus:ring-offset-gray-800">
-                            <span class="ml-3">
-                                <span class="text-sm font-medium text-gray-200">Open to All Counties</span>
-                                <span class="block text-xs text-gray-400 mt-0.5">Check this if you're willing to swap to any county in Kenya</span>
-                            </span>
-                        </label>
-                    </div>
-                    
-                    <!-- Location Fields Container (hidden when open_to_all is checked) -->
+                    <!-- Location Fields -->
                     <div id="location-fields">
                         <!-- County Field -->
                         <div class="mb-5">
@@ -155,19 +122,52 @@
                         </div>
                     </div>
                     
-                    <!-- Hardship Preference -->
-                    <div class="mb-6">
-                        <label for="id_is_hardship" class="block text-sm font-medium text-gray-300 mb-2">
-                            Hardship Area Preference <span class="text-red-400">*</span>
-                        </label>
-                        <select name="is_hardship" id="id_is_hardship" required
-                                class="mt-1 block w-full pl-3 pr-10 py-2.5 text-base bg-gray-700 border border-gray-600 text-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm transition duration-150 hover:border-gray-500">
-                            <option value="Any" {% if form.instance.is_hardship == 'Any' %}selected{% endif %}>Any (No Preference)</option>
-                            <option value="Yes" {% if form.instance.is_hardship == 'Yes' %}selected{% endif %}>Yes, willing to go to hardship areas</option>
-                            <option value="No" {% if form.instance.is_hardship == 'No' %}selected{% endif %}>No, prefer non-hardship areas only</option>
-                        </select>
-                        <p class="mt-1 text-xs text-gray-400">Are you willing to swap to a hardship area?</p>
+                    <!-- County Selection Checkboxes -->
+                    <div class="mt-6">
+                        <h3 class="text-md font-medium text-gray-200 mb-3">Select Preferred Counties</h3>
+                        <p class="text-sm text-gray-400 mb-4">Check all counties you are open to swapping to:</p>
+                        
+                        <!-- Hidden field for the form's selected_counties -->
+                        {{ form.selected_counties }}
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-2 bg-gray-800/50 rounded-lg">
+                            {% for county in counties %}
+                            <label class="flex items-center space-x-2 p-2 hover:bg-gray-700/50 rounded cursor-pointer">
+                                <input type="checkbox" 
+                                       name="selected_counties" 
+                                       value="{{ county.id }}" 
+                                       class="county-checkbox rounded border-gray-500 text-teal-500 focus:ring-teal-500 focus:ring-offset-gray-800"
+                                       {% if county.id in selected_counties %}checked{% endif %}>
+                                <span class="text-gray-200">{{ county.name }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
                     </div>
+                    
+                    <script>
+                        // Update the hidden form field when checkboxes change
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const checkboxes = document.querySelectorAll('.county-checkbox');
+                            const hiddenField = document.querySelector('input[name="selected_counties"]');
+                            
+                            checkboxes.forEach(checkbox => {
+                                checkbox.addEventListener('change', function() {
+                                    const selectedValues = Array.from(checkboxes)
+                                        .filter(cb => cb.checked)
+                                        .map(cb => cb.value);
+                                    
+                                    // Update the hidden field
+                                    hiddenField.value = selectedValues.join(',');
+                                });
+                            });
+                            
+                            // Initialize the hidden field value
+                            const initialValues = Array.from(checkboxes)
+                                .filter(cb => cb.checked)
+                                .map(cb => cb.value);
+                            hiddenField.value = initialValues.join(',');
+                        });
+                    </script>
                     
                     <div class="flex justify-between items-center pt-2 border-t border-gray-700">
                         <a href="{% url 'users:dashboard' %}" class="text-sm text-gray-400 hover:text-gray-300 flex items-center">
@@ -264,76 +264,72 @@
 </style>
 
 <script>
-// Toggle location fields visibility based on "Open to All" checkbox
-const openToAllCheckbox = document.getElementById('id_open_to_all');
-const locationFields = document.getElementById('location-fields');
-
-function toggleLocationFields() {
-    if (openToAllCheckbox.checked) {
-        locationFields.style.display = 'none';
-        locationFields.style.opacity = '0';
-    } else {
-        locationFields.style.display = 'block';
-        locationFields.style.opacity = '1';
-    }
-}
-
-// Run on page load
-toggleLocationFields();
-
-// Run when checkbox changes
-openToAllCheckbox.addEventListener('change', toggleLocationFields);
-
-// Handle dynamic loading of constituencies based on selected county
-document.getElementById('id_county').addEventListener('change', function() {
-    const countyId = this.value;
-    const constituencySelect = document.getElementById('id_constituency');
-    const wardSelect = document.getElementById('id_ward');
-    
-    // Reset constituency and ward selects
-    constituencySelect.innerHTML = '<option value="">-- Select Constituency --</option>';
-    wardSelect.innerHTML = '<option value="">-- Select Ward --</option>';
-    
-    if (countyId) {
-        // Fetch constituencies for the selected county
-        fetch(`/schools/get-constituencies/?county=${countyId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.constituencies && data.constituencies.length > 0) {
-                    data.constituencies.forEach(constituency => {
-                        const option = document.createElement('option');
-                        option.value = constituency.id;
-                        option.textContent = constituency.name;
-                        constituencySelect.appendChild(option);
-                    });
+    // Initialize select2 for better dropdowns
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof $ !== 'undefined') {
+            $('select').select2({
+                theme: 'bootstrap4',
+                width: '100%',
+                placeholder: 'Select an option',
+                allowClear: true
+            });
+            
+            // Handle county change to update constituencies
+            $('#id_county').on('change', function() {
+                const countyId = $(this).val();
+                const $constituencySelect = $('#id_constituency');
+                const $wardSelect = $('#id_ward');
+                
+                // Reset constituency and ward selects
+                $constituencySelect.empty().append('<option value="">-- Select Constituency --</option>');
+                $wardSelect.empty().append('<option value="">-- Select Ward --</option>');
+                
+                if (countyId) {
+                    // Fetch and populate constituencies
+                    fetch(`/api/constituencies/?county_id=${countyId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(constituency => {
+                                $constituencySelect.append(
+                                    `<option value="${constituency.id}">${constituency.name}</option>`
+                                );
+                            });
+                        });
                 }
             });
-    }
-});
-
-// Handle dynamic loading of wards based on selected constituency
-document.getElementById('id_constituency').addEventListener('change', function() {
-    const constituencyId = this.value;
-    const wardSelect = document.getElementById('id_ward');
-    
-    // Reset ward select
-    wardSelect.innerHTML = '<option value="">-- Select Ward --</option>';
-    
-    if (constituencyId) {
-        // Fetch wards for the selected constituency
-        fetch(`/schools/get-wards/?constituency_id=${constituencyId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.wards && data.wards.length > 0) {
-                    data.wards.forEach(ward => {
-                        const option = document.createElement('option');
-                        option.value = ward.id;
-                        option.textContent = ward.name;
-                        wardSelect.appendChild(option);
-                    });
+            
+            // Handle constituency change to update wards
+            $('#id_constituency').on('change', function() {
+                const constituencyId = $(this).val();
+                const $wardSelect = $('#id_ward');
+                
+                // Reset ward select
+                $wardSelect.empty().append('<option value="">-- Select Ward --</option>');
+                
+                if (constituencyId) {
+                    // Fetch and populate wards
+                    fetch(`/api/wards/?constituency_id=${constituencyId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.length > 0) {
+                                data.forEach(ward => {
+                                    $wardSelect.append(
+                                        `<option value="${ward.id}" ${ward.id === '{{ selected_ward }}' ? 'selected' : ''}>
+                                            ${ward.name}
+                                        </option>`
+                                    );
+                                });
+                            }
+                        })
+                        .catch(error => console.error('Error loading wards:', error));
                 }
             });
-    }
-});
+
+            // Trigger change event if constituency is already selected
+            if ($('#id_constituency').val()) {
+                $('#id_constituency').trigger('change');
+            }
+        }
+    });
 </script>
 {% endblock %}

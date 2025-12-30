@@ -1,0 +1,133 @@
+{% extends "users/base.html" %}
+{% load static %}
+
+{% block title %}Swap Requests · TSC Swap{% endblock %}
+
+{% block content %}
+<div class="page" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-white mb-2">Swap Requests</h1>
+        <p class="text-gray-400">Manage your sent and received swap requests</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Received Requests -->
+        <div class="bg-slate-800 rounded-lg p-6 shadow">
+            <h2 class="text-lg font-semibold text-white mb-4 flex items-center">
+                <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">{{ received_requests|length }}</span>
+                Received Requests
+            </h2>
+            
+            {% if received_requests %}
+                <div class="space-y-4">
+                    {% for request in received_requests %}
+                    <div class="bg-slate-700/50 rounded-lg p-4 border border-slate-600/50">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium text-white">
+                                    {{ request.user.get_full_name|default:request.user.username }}
+                                </h3>
+                                <p class="text-xs text-gray-400">
+                                    {{ request.created_at|timesince }} ago
+                                </p>
+                            </div>
+                            <span class="px-2 py-1 text-xs rounded-full {% if request.accepted %}bg-green-900/30 text-green-400{% else %}bg-yellow-900/30 text-yellow-400{% endif %}">
+                                {% if request.accepted %}Accepted{% else %}Pending{% endif %}
+                            </span>
+                        </div>
+                        <div class="mt-3 text-sm text-gray-300">
+                            <p>Wants to swap with you</p>
+                        </div>
+                        {% if not request.accepted %}
+                        <div class="mt-3 flex space-x-2">
+                            <a href="{% url 'users:accept_swap_request' request.id %}" class="text-sm px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded">
+                                Accept
+                            </a>
+                            <a href="{% url 'users:reject_swap_request' request.id %}" class="text-sm px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded">
+                                Reject
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-200">No received requests</h3>
+                    <p class="mt-1 text-sm text-gray-400">You don't have any pending swap requests.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sent Requests -->
+        <div class="bg-slate-800 rounded-lg p-6 shadow">
+            <h2 class="text-lg font-semibold text-white mb-4 flex items-center">
+                <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">{{ sent_requests|length }}</span>
+                Sent Requests
+            </h2>
+            
+            {% if sent_requests %}
+                <div class="space-y-4">
+                    {% for request in sent_requests %}
+                    <div class="bg-slate-700/50 rounded-lg p-4 border border-slate-600/50">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium text-white">
+                                    {{ request.swap.user.get_full_name|default:request.swap.user.username }}
+                                </h3>
+                                <p class="text-xs text-gray-400">
+                                    {{ request.created_at|timesince }} ago
+                                </p>
+                            </div>
+                            <span class="px-2 py-1 text-xs rounded-full {% if request.accepted %}bg-green-900/30 text-green-400{% else %}bg-yellow-900/30 text-yellow-400{% endif %}">
+                                {% if request.accepted %}Accepted{% else %}Pending{% endif %}
+                            </span>
+                        </div>
+                        <div class="mt-3 text-sm text-gray-300">
+                            <p>You requested to swap</p>
+                        </div>
+                        {% if not request.accepted %}
+                        <div class="mt-3">
+                            <a href="{% url 'users:cancel_swap_request' request.id %}" class="text-sm px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded">
+                                Cancel Request
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-200">No sent requests</h3>
+                    <p class="mt-1 text-sm text-gray-400">You haven't sent any swap requests yet.</p>
+                    <div class="mt-4">
+                        <a href="{% url 'users:find_secondary_matches' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Find Matches
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Back to Dashboard -->
+    <div class="mt-8 text-center">
+        <a href="{% url 'users:dashboard' %}" class="inline-flex items-center text-sm font-medium text-blue-400 hover:text-blue-300">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

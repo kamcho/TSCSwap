@@ -44,6 +44,12 @@ urlpatterns = [
     path('initiate-swap/<int:user_id>/', views.initiate_swap, name='initiate_swap'),
     path('find-secondary-matches/', views.find_secondary_matches, name='find_secondary_matches'),
     
+    # Swap request management
+    path('swap-requests/', views.swap_requests, name='swap_requests'),
+    path('swap-requests/accept/<int:request_id>/', views.accept_swap_request, name='accept_swap_request'),
+    path('swap-requests/reject/<int:request_id>/', views.reject_swap_request, name='reject_swap_request'),
+    path('swap-requests/cancel/<int:request_id>/', views.cancel_swap_request, name='cancel_swap_request'),
+    
     path('dashboard/', views.dashboard, name='dashboard'),
     
     # Teaching information

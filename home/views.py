@@ -1481,26 +1481,32 @@ def swap_preferences(request):
             preference = form.save(commit=False)
             preference.user = request.user
             preference.save()
+            
+            # Save the many-to-many relationship
+            form.save_m2m()
+            
             messages.success(request, 'Your swap preferences have been updated successfully!')
             return redirect('home:swap_preferences')
     else:
         form = SwapPreferenceForm(instance=preference)
-    
+        
     # Get all counties for the template
     counties = Counties.objects.all().order_by('name')
     
     # Get selected values for form repopulation
     selected_county = preference.desired_county.id if preference.desired_county else None
     selected_constituency = preference.desired_constituency.id if preference.desired_constituency else None
+    selected_ward = preference.desired_ward.id if preference.desired_ward else None
+    selected_counties = list(preference.open_to_all.values_list('id', flat=True)) if preference.pk else []
     
     # Get constituencies and wards based on selected values
     constituencies = Constituencies.objects.none()
-    if selected_county:
-        constituencies = Constituencies.objects.filter(county_id=selected_county).order_by('name')
+    if preference.desired_county:
+        constituencies = preference.desired_county.constituencies_set.order_by('name')
     
     wards = Wards.objects.none()
-    if selected_constituency:
-        wards = Wards.objects.filter(constituency_id=selected_constituency).order_by('name')
+    if preference.desired_constituency:
+        wards = preference.desired_constituency.wards_set.order_by('name')
     
     return render(request, 'home/swap_preferences.html', {
         'form': form,
@@ -1509,8 +1515,8 @@ def swap_preferences(request):
         'wards': wards,
         'selected_county': selected_county,
         'selected_constituency': selected_constituency,
-        'selected_ward': preference.desired_ward.id if preference.desired_ward else None,
-        'open_to_all': preference.open_to_all,
+        'selected_ward': selected_ward,
+        'selected_counties': selected_counties,
         'is_hardship': preference.is_hardship,
     })
 

@@ -268,11 +268,12 @@ class SwapPreferenceForm(forms.ModelForm):
         widget=forms.Select(attrs={"class": "form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500"}),
     )
     
-    open_to_all = forms.BooleanField(
+    selected_counties = forms.ModelMultipleChoiceField(
+        queryset=Counties.objects.all().order_by('name'),
         required=False,
-        label="Open to All Counties",
-        help_text="Check this if you're willing to swap to any county in Kenya",
-        widget=forms.CheckboxInput(attrs={"class": "form-checkbox h-5 w-5 text-teal-600 rounded border-gray-300 focus:ring-teal-500"}),
+        label="Open to Counties",
+        help_text="Select all counties you're willing to swap to",
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "hidden"}),  # We'll handle the display with custom HTML
     )
     
     is_hardship = forms.ChoiceField(
@@ -285,10 +286,14 @@ class SwapPreferenceForm(forms.ModelForm):
 
     class Meta:
         model = SwapPreference
-        fields = ['county', 'constituency', 'ward', 'open_to_all', 'is_hardship']
+        fields = ['county', 'constituency', 'ward', 'is_hardship']
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Set initial selected counties
+        if self.instance.pk:
+            self.fields['selected_counties'].initial = self.instance.open_to_all.all()
         
         # Set up the querysets for constituency and ward fields
         if 'county' in self.data:
@@ -333,5 +338,7 @@ class SwapPreferenceForm(forms.ModelForm):
         
         if commit:
             instance.save()
+            # Save the many-to-many relationship
+            self.save_m2m()
         return instance
 

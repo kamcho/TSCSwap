@@ -394,8 +394,22 @@ def dashboard(request):
     active_swaps_queryset = Swaps.objects.filter(user=user, status=True)
     active_swaps_count = active_swaps_queryset.count()
     
-    # Get pending swap requests for the user's swaps
-    pending_requests = SwapRequests.objects.filter(swap__user=user, accepted=False, is_active=True).count()
+    # Get swap requests
+    # Requests sent by the user
+    sent_requests = SwapRequests.objects.filter(user=user, is_active=True).select_related(
+        'swap', 'swap__user__profile'
+    ).order_by('-created_at')
+    
+    # Requests received by the user
+    received_requests = SwapRequests.objects.filter(
+        swap__user=user, 
+        is_active=True
+    ).select_related(
+        'user__profile', 'swap'
+    ).order_by('-created_at')
+    
+    # Count of pending requests for the user's swaps
+    pending_requests = received_requests.filter(accepted=False).count()
     
     # Check profile completion status
     has_profile = hasattr(user, 'profile') and user.profile is not None
@@ -607,6 +621,8 @@ def dashboard(request):
         'active_swaps': active_swaps_count,
         'active_swaps_queryset': active_swaps_queryset,
         'pending_requests': pending_requests,
+        'sent_requests': sent_requests,
+        'received_requests': received_requests,
         'profile_complete': profile_complete_status,
         'completion_percentage': int(completion_percentage),
         'is_secondary_level': is_secondary_level,
@@ -1382,28 +1398,110 @@ def admin_delete_user_view(request, user_id):
     View to delete a user account (admin only).
     """
     if not request.user.is_staff:
-        messages.error(request, 'You do not have permission to perform this action.')
-        return redirect('home:home')
+        return HttpResponseForbidden("You don't have permission to access this page.")
     
     user_to_delete = get_object_or_404(MyUser, id=user_id)
     
-    if request.method == 'POST':
-        try:
-            # Soft delete the user
-            user_to_delete.is_active = False
-            user_to_delete.save()
-            
-            # Log out the user if they're deleting their own account
-            if user_to_delete == request.user:
-                logout(request)
-                messages.success(request, 'Your account has been deactivated.')
-                return redirect('users:login')
-                
-            messages.success(request, f'User {user_to_delete.email} has been deactivated.')
-            return redirect('users:admin_users')
-            
-        except Exception as e:
-            messages.error(request, f'Error deactivating user: {str(e)}')
-            return redirect('users:admin_edit_user', user_id=user_id)
+    # Prevent deleting superusers or staff members
+    if user_to_delete.is_superuser or user_to_delete.is_staff:
+        messages.error(request, 'Cannot delete admin or staff accounts.')
+        return redirect('users:admin_users')
     
-    return render(request, 'users/admin_confirm_delete.html', {'user_to_delete': user_to_delete})
+    if request.method == 'POST':
+        # Soft delete the user
+        user_to_delete.is_active = False
+        user_to_delete.save()
+        
+        # Log the action
+        messages.success(request, f'User {user_to_delete.email} has been deactivated.')
+        return redirect('users:admin_users')
+    
+    context = {
+        'user_to_delete': user_to_delete,
+    }
+    return render(request, 'users/admin/confirm_delete_user.html', context)
+
+@login_required
+def accept_swap_request(request, request_id):
+    """
+    View to accept a swap request.
+    """
+    swap_request = get_object_or_404(SwapRequests, id=request_id, swap__user=request.user, is_active=True, accepted=False)
+    
+    with transaction.atomic():
+        # Update the swap request
+        swap_request.accepted = True
+        swap_request.save()
+        
+        # Update the swap status
+        swap = swap_request.swap
+        swap.status = False  # Mark swap as inactive
+        swap.save()
+        
+        # Deactivate all other requests for this swap
+        SwapRequests.objects.filter(swap=swap, is_active=True, accepted=False).update(is_active=False)
+        
+        # Send notification to the requester
+        messages.success(request, 'You have accepted the swap request.')
+    
+    return redirect('users:dashboard')
+
+@login_required
+def reject_swap_request(request, request_id):
+    """
+    View to reject a swap request.
+    """
+    swap_request = get_object_or_404(SwapRequests, id=request_id, swap__user=request.user, is_active=True, accepted=False)
+    
+    with transaction.atomic():
+        # Mark the request as inactive
+        swap_request.is_active = False
+        swap_request.save()
+        
+        messages.info(request, 'You have rejected the swap request.')
+    
+    return redirect('users:dashboard')
+
+@login_required
+def cancel_swap_request(request, request_id):
+    """
+    View to cancel a swap request sent by the current user.
+    """
+    swap_request = get_object_or_404(SwapRequests, id=request_id, user=request.user, is_active=True, accepted=False)
+    
+    with transaction.atomic():
+        # Mark the request as inactive
+        swap_request.is_active = False
+        swap_request.save()
+        
+        messages.info(request, 'You have cancelled the swap request.')
+    
+    return redirect('users:dashboard')
+
+@login_required
+def swap_requests(request):
+    """
+    View to show all swap requests (sent and received).
+    """
+    # Get all active swap requests sent by the user
+    sent_requests = SwapRequests.objects.filter(
+        user=request.user, 
+        is_active=True
+    ).select_related(
+        'swap', 'swap__user__profile'
+    ).order_by('-created_at')
+    
+    # Get all active swap requests received by the user
+    received_requests = SwapRequests.objects.filter(
+        swap__user=request.user, 
+        is_active=True
+    ).select_related(
+        'user__profile', 'swap'
+    ).order_by('-created_at')
+    
+    context = {
+        'sent_requests': sent_requests,
+        'received_requests': received_requests,
+    }
+    
+    return render(request, 'users/swap_requests.html', context)

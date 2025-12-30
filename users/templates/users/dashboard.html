@@ -167,7 +167,11 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 </svg>
-                                                {{ user.profile.school.location|default:"Location not specified" }}
+                                                {% if user.profile.school.ward and user.profile.school.ward.constituency and user.profile.school.ward.constituency.county %}
+                                                    {{ user.profile.school.ward.constituency.county.name }}, {{ user.profile.school.ward.constituency.name }}, {{ user.profile.school.ward.name }}
+                                                {% else %}
+                                                    Location details incomplete
+                                                {% endif %}
                                             </span>
                                             <span class="flex items-center">
                                                 <svg class="w-3.5 h-3.5 mr-1.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -341,6 +345,106 @@
                         {% get_user_primary_match %}
                     {% endif %}
                 {% endif %}
+            </div>
+
+            <!-- Swap Requests -->
+            <div class="bg-slate-800 rounded-lg p-6 shadow mb-6">
+                <h2 class="text-lg font-semibold text-white mb-4">Swap Requests</h2>
+                
+                <!-- Received Requests -->
+                <div class="mb-6">
+                    <h3 class="text-md font-medium text-white mb-3 flex items-center">
+                        <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">{{ received_requests|length }}</span>
+                        Received Requests
+                    </h3>
+                    {% if received_requests %}
+                        <div class="space-y-3">
+                            {% for request in received_requests|slice:":3" %}
+                            <div class="bg-slate-700/50 rounded-lg p-3 border border-slate-600/50">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-medium text-white">
+                                            {{ request.user.get_full_name|default:request.user.username }}
+                                        </h4>
+                                        <p class="text-xs text-gray-400">
+                                            {{ request.created_at|timesince }} ago
+                                        </p>
+                                    </div>
+                                    <span class="px-2 py-1 text-xs rounded-full {% if request.accepted %}bg-green-900/30 text-green-400{% else %}bg-yellow-900/30 text-yellow-400{% endif %}">
+                                        {% if request.accepted %}Accepted{% else %}Pending{% endif %}
+                                    </span>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-300">
+                                    <p>Wants to swap with you</p>
+                                </div>
+                                {% if not request.accepted %}
+                                <div class="mt-3 flex space-x-2">
+                                    <a href="{% url 'users:accept_swap_request' request.id %}" class="text-xs px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded">
+                                        Accept
+                                    </a>
+                                    <a href="{% url 'users:reject_swap_request' request.id %}" class="text-xs px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded">
+                                        Reject
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if received_requests|length > 3 %}
+                            <a href="{% url 'users:swap_requests' %}" class="mt-2 inline-block text-sm text-blue-400 hover:text-blue-300">
+                                View all received requests ({{ received_requests|length }})
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-sm text-gray-400">No received requests yet.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Sent Requests -->
+                <div>
+                    <h3 class="text-md font-medium text-white mb-3 flex items-center">
+                        <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">{{ sent_requests|length }}</span>
+                        Sent Requests
+                    </h3>
+                    {% if sent_requests %}
+                        <div class="space-y-3">
+                            {% for request in sent_requests|slice:":3" %}
+                            <div class="bg-slate-700/50 rounded-lg p-3 border border-slate-600/50">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-medium text-white">
+                                            {{ request.swap.user.get_full_name|default:request.swap.user.username }}
+                                        </h4>
+                                        <p class="text-xs text-gray-400">
+                                            {{ request.created_at|timesince }} ago
+                                        </p>
+                                    </div>
+                                    <span class="px-2 py-1 text-xs rounded-full {% if request.accepted %}bg-green-900/30 text-green-400{% else %}bg-yellow-900/30 text-yellow-400{% endif %}">
+                                        {% if request.accepted %}Accepted{% else %}Pending{% endif %}
+                                    </span>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-300">
+                                    <p>You requested to swap</p>
+                                </div>
+                                {% if not request.accepted %}
+                                <div class="mt-3">
+                                    <a href="{% url 'users:cancel_swap_request' request.id %}" class="text-xs px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded">
+                                        Cancel Request
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if sent_requests|length > 3 %}
+                            <a href="{% url 'users:swap_requests' %}" class="mt-2 inline-block text-sm text-blue-400 hover:text-blue-300">
+                                View all sent requests ({{ sent_requests|length }})
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-sm text-gray-400">No sent requests yet.</p>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Quick Actions -->
