@@ -429,6 +429,7 @@
                                 </p>
                             {% endif %}
                             
+                            <!-- Debug: match.subjects = {{ match.subjects|default:"None" }} -->
                             {% if match.subjects %}
                                 <h4>Subjects</h4>
                                 <div class="match-subjects">
@@ -439,7 +440,10 @@
                                         <span class="subject-tag">+{{ match.subjects|length|add:"-4" }} more</span>
                                     {% endif %}
                                 </div>
+                            {% else %}
+                                <!-- No subjects found for this match -->
                             {% endif %}
+                            <!-- Debug: match = {{ match|default:"None" }} -->
                         </div>
                         
                         <a href="mailto:{{ match.email }}" class="contact-button">

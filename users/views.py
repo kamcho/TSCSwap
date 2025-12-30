@@ -139,13 +139,24 @@ def profile_view(request, user_id=None):
     
     # Get user's school and subjects
     school = profile.school
-    my_subjects = MySubject.objects.filter(user=request.user).first()
+    my_subjects = MySubject.objects.filter(user=user).first()
     subjects = my_subjects.subject.all() if my_subjects else []
+    
+    # Build full name from personal profile
+    name_parts = []
+    if profile.first_name:
+        name_parts.append(profile.first_name)
+    if profile.surname:
+        name_parts.append(profile.surname)
+    elif profile.last_name:  # Only use last_name if surname isn't set
+        name_parts.append(profile.last_name)
+    full_name = ' '.join(name_parts) if name_parts else user.email
     
     context = {
         'profile': profile,
         'school': school,
-        'subjects': subjects
+        'subjects': subjects,
+        'full_name': full_name
     }
     return render(request, 'users/profile.html', context)
 

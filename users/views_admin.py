@@ -161,9 +161,13 @@ def user_potential_matches(request, user_id):
             'level': school.level.name if hasattr(school, 'level') and school.level else 'N/A'
         }
 
-    # Add subjects
-    if hasattr(user, 'mysubject_set'):
-        user_data['subjects'] = [ms.subject.name for ms in user.mysubject_set.all()]
+    # Add subjects - using the same approach as in profile_view
+    my_subjects = MySubject.objects.filter(user=user).first()
+    if my_subjects:
+        user_data['subjects'] = [s.name for s in my_subjects.subject.all()]
+    else:
+        user_data['subjects'] = []
+    print(f"Debug - User {user.id} subjects: {user_data['subjects']}")
 
     # Add preferences
     if hasattr(user, 'swappreference'):
@@ -175,71 +179,102 @@ def user_potential_matches(request, user_id):
             'is_hardship': prefs.is_hardship
         }
 
-    # Find potential matches
+    # Find potential matches using the same logic as the dashboard
     potential_matches = []
     if hasattr(user, 'profile') and user.profile.school and hasattr(user.profile.school, 'level'):
-        is_secondary = 'secondary' in user.profile.school.level.name.lower() or 'high' in user.profile.school.level.name.lower()
-        
-        # Base queryset for potential matches
-        matches = MyUser.objects.filter(
-            ~Q(id=user.id), 
-            is_active=True,
-            profile__isnull=False,
-            profile__school__isnull=False
-        ).prefetch_related(
-            'profile__school__level',
-            'profile__school__ward__constituency__county',
-            'mysubject_set__subject'
-        )
-        
-        # Filter by subjects for secondary school teachers
-        if is_secondary and hasattr(user, 'mysubject_set'):
-            user_subjects = list(user.mysubject_set.values_list('subject__id', flat=True))
-            if user_subjects:
-                matches = matches.filter(
-                    mysubject__subject__in=user_subjects
+        # Only show matches if user has completed profile and preferences
+        if hasattr(user, 'swappreference'):
+            # Get user's county from school
+            user_county = user.profile.school.ward.constituency.county if hasattr(user.profile.school, 'ward') and user.profile.school.ward else None
+            
+            if user_county:
+                # Base query for potential matches
+                matches = MyUser.objects.filter(
+                    ~Q(id=user.id),
+                    is_active=True,
+                    profile__isnull=False,
+                    profile__school__isnull=False,
+                    swappreference__isnull=False
+                ).prefetch_related(
+                    'profile__school__level',
+                    'profile__school__ward__constituency__county',
+                    'mysubject_set__subject',
+                    'swappreference'
                 )
-        
-        # Prepare match data
-        for match in matches.distinct():
-            # Build full name from profile if available
-            full_name = 'No Name'
-            if hasattr(match, 'profile') and match.profile:
-                name_parts = []
-                if match.profile.first_name:
-                    name_parts.append(match.profile.first_name)
-                if match.profile.surname:
-                    name_parts.append(match.profile.surname)
-                elif match.profile.last_name:  # Only use last_name if surname isn't set
-                    name_parts.append(match.profile.last_name)
-                if name_parts:
-                    full_name = ' '.join(name_parts)
-            
-            match_data = {
-                'id': match.id,
-                'email': match.email,
-                'full_name': full_name,
-                'phone': match.profile.phone if hasattr(match, 'profile') and match.profile.phone else '-',
-                'school': None,
-                'subjects': []
-            }
-            
-            # Add school info
-            if hasattr(match, 'profile') and hasattr(match.profile, 'school') and match.profile.school:
-                school = match.profile.school
-                match_data['school'] = {
-                    'name': school.name,
-                    'ward': school.ward.name if school.ward else 'N/A',
-                    'constituency': school.ward.constituency.name if school.ward and school.ward.constituency else 'N/A',
-                    'county': school.ward.constituency.county.name if school.ward and school.ward.constituency and school.ward.constituency.county else 'N/A',
-                    'level': school.level.name if hasattr(school, 'level') and school.level else 'N/A'
-                }
-            
-            # Add subjects
-            if hasattr(match, 'mysubject_set'):
-                match_data['subjects'] = [ms.subject.name for ms in match.mysubject_set.all()]
-            
-            potential_matches.append(match_data)
+                
+                # Filter by swap preferences (county match or open to all)
+                matches = matches.filter(
+                    Q(swappreference__desired_county=user_county) |
+                    Q(swappreference__open_to_all=user_county)
+                )
+                
+                # For secondary/high school, check subject matches
+                is_secondary = 'secondary' in user.profile.school.level.name.lower() or 'high' in user.profile.school.level.name.lower()
+                if is_secondary and hasattr(user, 'mysubject_set'):
+                    user_subjects = set(MySubject.objects.filter(
+                        user=user
+                    ).values_list('subject__id', flat=True))
+                    
+                    if user_subjects:
+                        # Only include users who teach at least one of the same subjects
+                        matches = matches.filter(
+                            id__in=MySubject.objects.filter(
+                                subject__in=user_subjects
+                            ).values('user')
+                        )
+                
+                # Prepare match data for display
+                for match in matches.distinct():
+                    # Build full name from profile if available
+                    full_name = 'No Name'
+                    name_parts = []
+                    if hasattr(match, 'profile') and match.profile:
+                        if match.profile.first_name:
+                            name_parts.append(match.profile.first_name)
+                        if match.profile.surname:
+                            name_parts.append(match.profile.surname)
+                        elif match.profile.last_name:  # Only use last_name if surname isn't set
+                            name_parts.append(match.profile.last_name)
+                    
+                    if name_parts:
+                        full_name = ' '.join(name_parts)
+                    
+                    match_data = {
+                        'id': match.id,
+                        'email': match.email,
+                        'full_name': full_name,
+                        'phone': match.profile.phone if hasattr(match, 'profile') and match.profile.phone else '-',
+                        'school': None,
+                        'subjects': []
+                    }
+                    
+                    # Add school info
+                    if hasattr(match, 'profile') and hasattr(match.profile, 'school') and match.profile.school:
+                        school = match.profile.school
+                        match_data['school'] = {
+                            'name': school.name,
+                            'ward': school.ward.name if school.ward else 'N/A',
+                            'constituency': school.ward.constituency.name if school.ward and school.ward.constituency else 'N/A',
+                            'county': school.ward.constituency.county.name if school.ward and school.ward.constituency and school.ward.constituency.county else 'N/A',
+                            'level': school.level.name if hasattr(school, 'level') and school.level else 'N/A'
+                        }
+                    
+                    # Add subjects
+                    if hasattr(match, 'mysubject_set'):
+                        # Get all MySubject instances for this user
+                        my_subjects = match.mysubject_set.all()
+                        subjects = []
+                        for my_subject in my_subjects:
+                            # Get all subjects from the many-to-many relationship
+                            subjects.extend([s.name for s in my_subject.subject.all()])
+                        match_data['subjects'] = subjects
+                        print(f"Match {match.id} subjects: {subjects}")
+                    else:
+                        match_data['subjects'] = []
+                        print(f"Match {match.id} has no mysubject_set")
+                    
+                    potential_matches.append(match_data)
+                    print(f"Added match data: {match_data}")  # Debug output
 
     context = {
         'title': f'Potential Matches for {user_data["full_name"]}',
