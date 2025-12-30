@@ -9,7 +9,7 @@
                 Perfect Secondary Level Matches
             </h3>
             <div class="space-y-4">
-                {% for match in perfect_matches|slice:":3" %}
+                {% for match in perfect_matches %}
                     {% include 'users/partials/match_card.html' with match=match match_type='perfect' %}
                 {% endfor %}
             </div>
@@ -26,7 +26,7 @@
                 Possible Secondary Level Matches
             </h3>
             <div class="space-y-4">
-                {% for match in partial_matches|slice:":3" %}
+                {% for match in partial_matches %}
                     {% include 'users/partials/match_card.html' with match=match match_type='partial' %}
                 {% endfor %}
             </div>
@@ -44,12 +44,6 @@
         </div>
     {% endif %}
     
-    <!-- View All Link -->
-    {% if perfect_matches or partial_matches %}
-        <div class="mt-4 text-center">
-            <a href="{% url 'users:find_secondary_matches' %}" class="text-blue-400 hover:text-blue-300 text-sm font-medium">View All Secondary Matches</a>
-        </div>
-    {% endif %}
 {% else %}
     <!-- Show profile incomplete message -->
     <div class="text-center py-4">

@@ -58,19 +58,50 @@ def user_management(request):
         if hasattr(user, 'mysubject_set'):
             user_dict['subjects'] = [ms.subject.name for ms in user.mysubject_set.all()]
 
-        # Calculate potential matches (simplified version)
-        if hasattr(user, 'profile') and user.profile.school and hasattr(user.profile.school, 'level'):
-            is_secondary = 'secondary' in user.profile.school.level.name.lower() or 'high' in user.profile.school.level.name.lower()
-            potential_matches = MyUser.objects.filter(~Q(id=user.id), is_active=True)
-            
-            if is_secondary and hasattr(user, 'mysubject_set'):
-                user_subjects = list(user.mysubject_set.values_list('subject__id', flat=True))
-                if user_subjects:
-                    potential_matches = potential_matches.filter(
-                        mysubject__subject__in=user_subjects
-                    )
-            
-            user_dict['potential_matches'] = potential_matches.count()
+        # Calculate potential matches using the same logic as the dashboard
+        try:
+            if hasattr(user, 'profile') and user.profile.school and hasattr(user.profile.school, 'level'):
+                # Only count matches if user has completed profile and preferences
+                if hasattr(user, 'swappreference'):
+                    # Get user's county from school
+                    user_county = user.profile.school.ward.constituency.county if hasattr(user.profile.school, 'ward') and user.profile.school.ward else None
+                    
+                    if user_county:
+                        # Base query for potential matches
+                        potential_matches = MyUser.objects.filter(
+                            ~Q(id=user.id),
+                            is_active=True,
+                            profile__isnull=False,
+                            profile__school__isnull=False,
+                            swappreference__isnull=False
+                        )
+                        
+                        # Filter by swap preferences (county match or open to all)
+                        potential_matches = potential_matches.filter(
+                            Q(swappreference__desired_county=user_county) |
+                            Q(swappreference__open_to_all=user_county)
+                        )
+                        
+                        # For secondary/high school, check subject matches
+                        is_secondary = 'secondary' in user.profile.school.level.name.lower() or 'high' in user.profile.school.level.name.lower()
+                        if is_secondary and hasattr(user, 'mysubject_set'):
+                            user_subjects = set(MySubject.objects.filter(
+                                user=user
+                            ).values_list('subject__id', flat=True))
+                            
+                            if user_subjects:
+                                # Only include users who teach at least one of the same subjects
+                                potential_matches = potential_matches.filter(
+                                    id__in=MySubject.objects.filter(
+                                        subject__in=user_subjects
+                                    ).values('user')
+                                ).distinct()
+                        
+                        user_dict['potential_matches'] = potential_matches.count()
+                        
+        except Exception as e:
+            print(f"Error calculating matches for user {user.id}: {str(e)}")
+            user_dict['potential_matches'] = 0
 
         user_data.append(user_dict)
 

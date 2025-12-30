@@ -1,26 +1,30 @@
 {% load static %}
+{% load email_filters %}
 
 <div class="bg-slate-700/50 rounded-lg p-4 border {% if match_type == 'perfect' %}border-green-500/30{% else %}border-yellow-500/30{% endif %} hover:border-blue-500/50 transition-colors">
     <div class="flex items-start justify-between">
         <div class="flex-1">
             <div class="flex items-center justify-between">
-                <h3 class="font-medium text-white">
-                    {% if match.profile and match.profile.first_name %}
-                        {{ match.profile.first_name }}
-                        {% if match.profile.surname %} {{ match.profile.surname }}{% endif %}
-                        {% if match.profile.last_name %} {{ match.profile.last_name }}{% endif %}
-                    {% elif match.email %}
-                        {{ match.email|truncatechars:20 }}
-                    {% else %}
-                        User #{{ match.id }}
-                    {% endif %}
-                    
+                <div>
+                    <h3 class="font-medium text-white">
+                        {% if match.profile and match.profile.first_name %}
+                            {{ match.profile.first_name }}
+                            {% if match.profile.surname %} {{ match.profile.surname }}
+                            {% elif match.profile.last_name %} {{ match.profile.last_name }}{% endif %}
+                        {% else %}
+                            {% if match.email %}
+                                {{ match.email|mask_email|truncatechars:20 }}
+                            {% else %}
+                                User #{{ match.id }}
+                            {% endif %}
+                        {% endif %}
+                    </h3>
                     {% if match_type == 'perfect' %}
-                        <span class="ml-2 px-2 py-0.5 bg-green-900/50 text-green-300 text-xs rounded-full">Perfect Match</span>
+                        <span class="mt-1 inline-block px-2 py-0.5 bg-green-900/50 text-green-300 text-xs rounded-full">Perfect Match</span>
                     {% else %}
-                        <span class="ml-2 px-2 py-0.5 bg-yellow-900/50 text-yellow-300 text-xs rounded-full">Possible Match</span>
+                        <span class="mt-1 inline-block px-2 py-0.5 bg-yellow-900/50 text-yellow-300 text-xs rounded-full">Possible Match</span>
                     {% endif %}
-                </h3>
+                </div>
                 <div class="flex items-center space-x-2">
                     <span class="text-xs text-gray-400">
                         {% if match.profile.school and match.profile.school.ward and match.profile.school.ward.constituency and match.profile.school.ward.constituency.county %}
