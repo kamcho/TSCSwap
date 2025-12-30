@@ -24,8 +24,7 @@
                     <h1 class="text-3xl font-bold text-white mb-2">
                         {{ user.get_full_name|default:user.username }}
                     </h1>
-                    <p class="text-lg text-gray-300 mb-4">{{ user.email }}</p>
-                    <h4 class="text-sm text-gray-400 mb-4">User ID: {{ user.id }}</h4>
+                    <!-- Email and ID hidden for privacy -->
                     <!-- Role Badge -->
                     {% if user.role %}
                         <span class="inline-flex items-center px-4 py-2 bg-teal-900/30 text-teal-400 text-sm font-medium rounded-full border border-teal-800">
@@ -124,17 +123,7 @@
                     <h3 class="text-lg font-semibold text-gray-300 mb-4">Account Information</h3>
                     
                     <div class="space-y-3">
-                        <div class="flex items-center gap-3 p-3 rounded-lg bg-gray-700/50 hover:bg-gray-700 transition-colors">
-                            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-400">Email</p>
-                                <p class="text-gray-200">{{ user.email }}</p>
-                            </div>
-                        </div>
+                        <!-- Email section removed for privacy -->
                         
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -154,17 +143,7 @@
                             </div>
                         </div>
                         
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-400">Last Login</p>
-                                <p class="font-medium text-gray-200">{{ user.last_login|date:"F j, Y, g:i a"|default:"Never" }}</p>
-                            </div>
-                        </div>
+                        <!-- Last login section removed for privacy -->
                     </div>
                 </div>
             </div>

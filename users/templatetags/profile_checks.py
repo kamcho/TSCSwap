@@ -36,8 +36,8 @@ def is_profile_complete(user):
         return False
         
     # Check if user has names and phone
-    if not user.first_name or not user.last_name or not user.profile.phone:
-        print('phone')
+    if not user.profile.first_name or not (user.profile.surname or user.profile.last_name) or not user.profile.phone:
+        print('Missing name or phone in profile')
         return False
         
     # Check if user has swap preference

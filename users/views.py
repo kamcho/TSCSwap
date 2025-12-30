@@ -6,18 +6,27 @@ from django.contrib.auth import (authenticate, get_user_model, login, logout,
                                update_session_auth_hash)
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from .models import MyUser
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.html import strip_tags
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_GET
+from django.http import HttpResponseForbidden
 
 from home.models import (
     Level, Subject, MySubject, Schools, SwapPreference, 
     Counties, Constituencies, Wards, Swaps, SwapRequests
 )
 from .models import MyUser, PersonalProfile
+from .templatetags.match_helpers import get_secondary_teacher_matches
 from .forms import (
     CustomPasswordChangeForm, MyAuthenticationForm, 
     MyUserCreationForm, ProfileEditForm, UserEditForm,
@@ -108,9 +117,25 @@ def logout_view(request):
     return redirect('home:home')
 
 @login_required
-def profile_view(request):
-    # Get or create the user's profile
-    profile, created = PersonalProfile.objects.get_or_create(user=request.user)
+def profile_view(request, user_id=None):
+    """
+    View for viewing a user's profile.
+    If user_id is provided, show that user's profile. Otherwise, show the logged-in user's profile.
+    """
+    # If no user_id is provided, default to the logged-in user
+    if user_id is None:
+        user = request.user
+    else:
+        try:
+            user = MyUser.objects.get(id=user_id)
+            # If the requested user is the same as the logged-in user, redirect to their own profile
+            if user == request.user:
+                return redirect('users:profile')
+        except MyUser.DoesNotExist:
+            raise Http404("User not found")
+    
+    # Get the profile for the requested user
+    profile = get_object_or_404(PersonalProfile, user=user)
     
     # Get user's school and subjects
     school = profile.school
@@ -364,13 +389,13 @@ def dashboard(request):
     # Check profile completion status
     has_profile = hasattr(user, 'profile') and user.profile is not None
     
-    # 1. Personal Information - Check names and phone only
+    # 1. Personal Information - Check names and phone in PersonalProfile
     personal_info_complete = False
     if has_profile:
         personal_info_complete = all([
-            user.first_name,  # On User model
-            user.last_name,   # On User model
-            user.profile.phone
+            user.profile.first_name,  # First name from PersonalProfile
+            user.profile.surname or user.profile.last_name,  # Either surname or last name from PersonalProfile
+            user.profile.phone  # Phone from PersonalProfile
         ])
     
     # 2. Teaching Level Information
@@ -1253,6 +1278,94 @@ def high_school_matched_swaps(request):
 
 
 @login_required
+@login_required
+def find_secondary_matches(request):
+    """
+    View to display all secondary level teacher matches for the current user.
+    """
+    # Get the user's profile and verify they are a secondary teacher
+    if not hasattr(request.user, 'profile') or not request.user.profile.school:
+        messages.error(request, "Please complete your profile to find matches.")
+        return redirect('users:profile_completion')
+    
+    # Check if user is a secondary teacher
+    is_secondary = request.user.profile.school and hasattr(request.user.profile.school, 'level') and \
+                  ('secondary' in request.user.profile.school.level.name.lower() or 
+                   'high' in request.user.profile.school.level.name.lower())
+    
+    if not is_secondary:
+        messages.error(request, "This page is only available for secondary school teachers.")
+        return redirect('users:dashboard')
+    
+    # Get matches using the existing template tag function
+    perfect_matches, partial_matches = get_secondary_teacher_matches(request.user)
+    
+    return render(request, 'users/secondary_matches.html', {
+        'perfect_matches': perfect_matches,
+        'partial_matches': partial_matches,
+        'is_secondary': True
+    })
+
+
+@login_required
+def initiate_swap(request, user_id):
+    """
+    Initiate a swap request with another user.
+    """
+    # Get the target user using the custom user model
+    target_user = get_object_or_404(MyUser, id=user_id)
+    
+    # Prevent users from swapping with themselves
+    if target_user == request.user:
+        messages.error(request, "You cannot initiate a swap with yourself.")
+        return redirect('users:dashboard')
+    
+    # Check if the target user has a profile and school
+    if not hasattr(target_user, 'profile') or not target_user.profile.school:
+        messages.error(request, "The selected user does not have a complete profile.")
+        return redirect('users:dashboard')
+    
+    # Check if a swap already exists between these users
+    existing_swap = Swaps.objects.filter(
+        user=request.user,
+        swaprequests__user=target_user,
+        status=True
+    ).first()
+    
+    if existing_swap:
+        messages.info(request, f"You already have a pending swap request with {target_user.username}.")
+        return redirect('users:dashboard')
+    
+    try:
+        with transaction.atomic():
+            # Create a new swap for the current user
+            swap = Swaps.objects.create(
+                user=request.user,
+                gender=request.user.profile.gender if hasattr(request.user, 'profile') else 'Any',
+                boarding=request.user.profile.school.boarding if hasattr(request.user, 'profile') and hasattr(request.user.profile, 'school') else 'Any',
+                county=request.user.profile.school.ward.constituency.county if hasattr(request.user, 'profile') and hasattr(request.user.profile, 'school') and hasattr(request.user.profile.school, 'ward') else None,
+                constituency=request.user.profile.school.ward.constituency if hasattr(request.user, 'profile') and hasattr(request.user.profile, 'school') and hasattr(request.user.profile.school, 'ward') else None,
+                ward=request.user.profile.school.ward if hasattr(request.user, 'profile') and hasattr(request.user.profile, 'school') and hasattr(request.user.profile.school, 'ward') else None,
+                status=True
+            )
+            
+            # Create a swap request for the target user
+            SwapRequests.objects.create(
+                user=target_user,
+                swap=swap,
+                is_active=True
+            )
+            
+            messages.success(request, f"Swap request sent to {target_user.username} successfully!")
+            
+    except Exception as e:
+        messages.error(request, f"An error occurred while initiating the swap: {str(e)}")
+        if settings.DEBUG:
+            raise e
+    
+    return redirect('users:dashboard')
+
+
 def admin_delete_user_view(request, user_id):
     """
     View to delete a user account (admin only).

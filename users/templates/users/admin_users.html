@@ -88,11 +88,26 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
-                                    <span class="text-white font-medium">{{ user_data.user.first_name|first|upper }}{{ user_data.user.last_name|first|upper }}</span>
+                                    <span class="text-white font-medium">
+                                        {% if user_data.user.profile and user_data.user.profile.first_name %}
+                                            {{ user_data.user.profile.first_name|first|upper }}
+                                            {% if user_data.user.profile.surname %}{{ user_data.user.profile.surname|first|upper }}
+                                            {% elif user_data.user.profile.last_name %}{{ user_data.user.profile.last_name|first|upper }}
+                                            {% endif %}
+                                        {% else %}
+                                            {{ user_data.user.username|first|upper }}
+                                        {% endif %}
+                                    </span>
                                 </div>
                                 <div class="ml-4">
                                     <div class="text-sm font-medium text-white">
-                                        {{ user_data.user.get_full_name|default:user_data.user.username }}
+                                        {% if user_data.user.profile and user_data.user.profile.first_name %}
+                                            {{ user_data.user.profile.first_name }}
+                                            {% if user_data.user.profile.surname %} {{ user_data.user.profile.surname }}{% endif %}
+                                            {% if user_data.user.profile.last_name %} {{ user_data.user.profile.last_name }}{% endif %}
+                                        {% else %}
+                                            {{ user_data.user.username }}
+                                        {% endif %}
                                     </div>
                                     <div class="text-xs text-gray-400">ID: {{ user_data.user.id }}</div>
                                 </div>

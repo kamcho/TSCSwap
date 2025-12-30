@@ -81,6 +81,31 @@ LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = 'home:home'  # Updated to use the correct URL name with namespace
 LOGOUT_REDIRECT_URL = 'home:home'  # Updated to use the correct URL name with namespace
 
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'loggers': {
+        'users.templatetags.match_helpers': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',

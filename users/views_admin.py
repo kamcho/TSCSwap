@@ -18,10 +18,23 @@ def user_management(request):
     # Prepare user data for the template
     user_data = []
     for user in users:
+        # Build full name from profile if available
+        full_name = 'No Name'
+        if hasattr(user, 'profile') and user.profile:
+            name_parts = []
+            if user.profile.first_name:
+                name_parts.append(user.profile.first_name)
+            if user.profile.surname:
+                name_parts.append(user.profile.surname)
+            if user.profile.last_name and not user.profile.surname:  # Only use last_name if surname isn't set
+                name_parts.append(user.profile.last_name)
+            if name_parts:
+                full_name = ' '.join(name_parts)
+        
         user_dict = {
             'id': user.id,
             'email': user.email,
-            'full_name': user.get_full_name() or 'No Name',
+            'full_name': full_name,
             'is_active': user.is_active,
             'date_joined': user.date_joined,
             'phone': user.profile.phone if hasattr(user, 'profile') and user.profile.phone else '-',
@@ -80,11 +93,24 @@ def user_potential_matches(request, user_id):
         'mysubject_set__subject'
     ), id=user_id)
     
+    # Build full name from profile if available
+    full_name = 'No Name'
+    if hasattr(user, 'profile') and user.profile:
+        name_parts = []
+        if user.profile.first_name:
+            name_parts.append(user.profile.first_name)
+        if user.profile.surname:
+            name_parts.append(user.profile.surname)
+        elif user.profile.last_name:  # Only use last_name if surname isn't set
+            name_parts.append(user.profile.last_name)
+        if name_parts:
+            full_name = ' '.join(name_parts)
+    
     # Prepare user data
     user_data = {
         'id': user.id,
         'email': user.email,
-        'full_name': user.get_full_name() or 'No Name',
+        'full_name': full_name,
         'phone': user.profile.phone if hasattr(user, 'profile') and user.profile.phone else '-',
         'tsc_number': user.tsc_number or 'Not provided',
         'id_number': user.id_number or 'Not provided',
@@ -145,10 +171,23 @@ def user_potential_matches(request, user_id):
         
         # Prepare match data
         for match in matches.distinct():
+            # Build full name from profile if available
+            full_name = 'No Name'
+            if hasattr(match, 'profile') and match.profile:
+                name_parts = []
+                if match.profile.first_name:
+                    name_parts.append(match.profile.first_name)
+                if match.profile.surname:
+                    name_parts.append(match.profile.surname)
+                elif match.profile.last_name:  # Only use last_name if surname isn't set
+                    name_parts.append(match.profile.last_name)
+                if name_parts:
+                    full_name = ' '.join(name_parts)
+            
             match_data = {
                 'id': match.id,
                 'email': match.email,
-                'full_name': match.get_full_name() or 'No Name',
+                'full_name': full_name,
                 'phone': match.profile.phone if hasattr(match, 'profile') and match.profile.phone else '-',
                 'school': None,
                 'subjects': []

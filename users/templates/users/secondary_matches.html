@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Secondary Level Matches - TSCSwap{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-gray-900 rounded-lg shadow-lg p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-white">Secondary Level Matches</h1>
+            <a href="{% url 'users:dashboard' %}" class="text-blue-400 hover:text-blue-300">
+                &larr; Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Perfect Matches Section -->
+        {% if perfect_matches %}
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-green-400 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    Perfect Matches
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for match in perfect_matches %}
+                        {% include 'users/partials/match_card.html' with match=match match_type='perfect' %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Partial Matches Section -->
+        {% if partial_matches %}
+            <div class="mt-8">
+                <h2 class="text-xl font-semibold text-yellow-400 mb-4">
+                    <svg class="w-5 h-5 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h.01a1 1 0 100-2H10V9z" clip-rule="evenodd" />
+                    </svg>
+                    Possible Matches
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for match in partial_matches %}
+                        {% include 'users/partials/match_card.html' with match=match match_type='partial' %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- No Matches Message -->
+        {% if not perfect_matches and not partial_matches %}
+            <div class="text-center py-12">
+                <svg class="mx-auto h-16 w-16 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="mt-4 text-lg font-medium text-gray-300">No matches found</h3>
+                <p class="mt-1 text-gray-500">We couldn't find any matching secondary school teachers at the moment.</p>
+                <p class="mt-2 text-sm text-gray-500">Try updating your preferences or check back later.</p>
+                <div class="mt-6">
+                    <a href="{% url 'users:profile_edit' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Update Profile
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

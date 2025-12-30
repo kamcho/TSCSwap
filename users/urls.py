@@ -12,6 +12,7 @@ urlpatterns = [
     path('signup/', views.signup_view, name='signup'),
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
+    path('profile/<int:user_id>/', views.profile_view, name='profile_view'),
     path('profile/edit/', views.profile_edit_view, name='profile_edit'),
     path('profile/completion/', views.profile_completion_view, name='profile_completion'),
     path('password/change/', views.password_change_view, name='password_change'),
@@ -39,6 +40,10 @@ urlpatterns = [
         template_name='users/password_reset_complete.html'
     ), name='password_reset_complete'),
 
+    # Swap functionality
+    path('initiate-swap/<int:user_id>/', views.initiate_swap, name='initiate_swap'),
+    path('find-secondary-matches/', views.find_secondary_matches, name='find_secondary_matches'),
+    
     path('dashboard/', views.dashboard, name='dashboard'),
     
     # Teaching information

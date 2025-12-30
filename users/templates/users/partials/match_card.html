@@ -5,17 +5,25 @@
         <div class="flex-1">
             <div class="flex items-center justify-between">
                 <h3 class="font-medium text-white">
-                    {{ match.get_full_name|default:match.username }}
+                    {% if match.profile and match.profile.first_name %}
+                        {{ match.profile.first_name }}
+                        {% if match.profile.surname %} {{ match.profile.surname }}{% endif %}
+                        {% if match.profile.last_name %} {{ match.profile.last_name }}{% endif %}
+                    {% elif match.email %}
+                        {{ match.email|truncatechars:20 }}
+                    {% else %}
+                        User #{{ match.id }}
+                    {% endif %}
+                    
                     {% if match_type == 'perfect' %}
                         <span class="ml-2 px-2 py-0.5 bg-green-900/50 text-green-300 text-xs rounded-full">Perfect Match</span>
                     {% else %}
                         <span class="ml-2 px-2 py-0.5 bg-yellow-900/50 text-yellow-300 text-xs rounded-full">Possible Match</span>
                     {% endif %}
                 </h3>
-                <div class="flex items-center space-x-2
-                ">
+                <div class="flex items-center space-x-2">
                     <span class="text-xs text-gray-400">
-                        {% if match.profile.school %}
+                        {% if match.profile.school and match.profile.school.ward and match.profile.school.ward.constituency and match.profile.school.ward.constituency.county %}
                             {{ match.profile.school.ward.constituency.county.name }}
                         {% else %}
                             Location not set
@@ -30,19 +38,33 @@
                 </div>
             </div>
             
-            {% if match.profile.school %}
-                <p class="text-sm text-gray-300 mt-1">{{ match.profile.school.name }}</p>
-            {% endif %}
-            
-            {% if match.mysubject_set.exists %}
-                <div class="mt-2 flex flex-wrap gap-1">
-                    {% for subject in match.mysubject_set.all %}
-                        <span class="px-2 py-0.5 bg-blue-900/50 text-blue-300 text-xs rounded-full">
-                            {{ subject.subject.name }}
-                        </span>
-                    {% endfor %}
+            <div class="mt-2">
+                {% if match.profile and match.profile.school %}
+                    <p class="text-sm text-gray-300">
+                        <span class="font-medium text-white">School:</span> {{ match.profile.school.name|default:"Not specified" }}
+                    </p>
+                {% endif %}
+                
+                <!-- Subject Information -->
+                <div class="mt-1">
+                    <p class="text-sm text-gray-300">
+                        <span class="font-medium text-white">Teaches:</span>
+                        {% with mysubjects=match.mysubject_set.all %}
+                            {% if mysubjects %}
+                                {% for mysubject in mysubjects %}
+                                    {% for subject in mysubject.subject.all %}
+                                        <span class="ml-1 px-2 py-0.5 bg-blue-900/50 text-blue-300 text-xs rounded-full">
+                                            {{ subject.name }}
+                                        </span>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-gray-400 text-xs">No subjects specified</span>
+                            {% endif %}
+                        {% endwith %}
+                    </p>
                 </div>
-            {% endif %}
+            </div>
             
             {% if match_type == 'partial' and match.profile.school %}
                 <div class="mt-2 text-xs text-yellow-300">
