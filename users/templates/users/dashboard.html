@@ -276,6 +276,7 @@
             <div class="bg-slate-800 rounded-lg p-6 shadow">
                 <h2 class="text-lg font-semibold text-white mb-4">Potential Matches</h2>
                 
+                {% load match_helpers %}
                 
                 {% if not user|is_profile_complete %}
                     <div class="bg-yellow-900/10 border-l-4 border-yellow-500 p-4 mb-4">
@@ -286,28 +287,6 @@
                                 </svg>
                             </div>
                             <div class="ml-3">
-                                <!-- Debug Info (temporary) -->
-                                <div class="mb-2 p-2 bg-gray-800 rounded text-xs text-gray-300">
-                                    <p><strong>Debug Info:</strong></p>
-                                    <p>Has profile: {{ user.profile|yesno:"Yes,No" }}</p>
-                                    <p>Has school: {{ user.profile.school|yesno:"Yes,No" }}</p>
-                                    <p>Has level: {{ user.profile.level|yesno:"Yes,No" }}</p>
-                                    <p>Has names: {{ user.first_name|yesno:"Yes,No" }} {{ user.last_name|yesno:"Yes,No" }}</p>
-                                    <p>Has phone: {{ user.profile.phone|yesno:"Yes,No" }}</p>
-                                    <p>Has swap_prefs: {{ user.swap_preferences|yesno:"Yes,No" }}</p>
-                                    {% if user.swap_preferences %}
-                                        <p>open_to_all: {{ user.swap_preferences.open_to_all|yesno:"Yes,No" }}</p>
-                                        <p>desired_county: {{ user.swap_preferences.desired_county|default:"Not set" }}</p>
-                                    {% endif %}
-                                    {% if user.profile.level %}
-                                        <p>Level: {{ user.profile.level.name }}</p>
-                                        <p>Is secondary: {{ user.profile.level.name|lower|yesno:"Yes,No," }}</p>
-                                    {% endif %}
-                                    {% if user.profile.level and user.profile.level.name|lower in 'secondary/high school,high school' %}
-                                        <p>Has subjects: {{ user.mysubject_set.count|default:0 }}</p>
-                                    {% endif %}
-                                </div>
-                                
                                 <h3 class="text-sm font-medium text-yellow-200">Complete your profile to see potential matches</h3>
                                 <div class="mt-2 text-sm text-yellow-300">
                                     <p class="mb-2">Please complete the following information:</p>
@@ -318,15 +297,15 @@
                                         {% if not user.profile.school %}
                                             <li>Add your school information</li>
                                         {% endif %}
-                                        {% if not user.swap_preferences %}
+                                        {% if not user.swappreference %}
                                             <li>Set your swap preferences</li>
-                                        {% elif not user.swap_preferences.open_to_all and not user.swap_preferences.desired_county %}
+                                        {% elif not user.swappreference.open_to_all and not user.swappreference.desired_county %}
                                             <li>Configure your swap preferences (either enable 'Open to All' or select a desired county)</li>
                                         {% endif %}
                                         {% if not user.profile.level %}
                                             <li>Set your teaching level</li>
                                         {% endif %}
-                                        {% if user.profile.level and user.profile.level.name == 'Secondary/High School' and not user.mysubject_set.exists %}
+                                        {% if user.profile.level and 'secondary' in user.profile.level.name|lower and not user.mysubject_set.exists %}
                                             <li>Add at least one subject you teach</li>
                                         {% endif %}
                                     </ul>
