@@ -89,7 +89,7 @@ class PotentialSwapMatchFilter(SimpleListFilter):
                 if user_subjects:
                     # Filter matches to only include users who teach at least one of the same subjects
                     matches = matches.filter(
-                        mysubjects__subject__id__in=user_subjects
+                        mysubject_set__subject__id__in=user_subjects
                     )
             
             return matches.distinct()
@@ -140,7 +140,7 @@ def get_potential_matches_count(self, obj):
             if user_subjects:
                 # Only include users who teach at least one of the same subjects
                 potential_matches = potential_matches.filter(
-                    mysubjects__subject__in=user_subjects
+                    mysubject_set__subject__in=user_subjects
                 ).distinct()
         
         count = potential_matches.count()
@@ -197,7 +197,7 @@ class MyUserAdmin(admin.ModelAdmin):
         return qs.prefetch_related(
             'profile__school__level',
             'swappreference__open_to_all',
-            'mysubjects__subject'  # Using the correct related_name 'mysubjects' from the model
+            'mysubject_set__subject'  # Using the default related_name 'mysubject_set' for the reverse relation
         )
     
     # Using wrapper functions instead of class methods
