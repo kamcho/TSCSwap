@@ -462,6 +462,8 @@ def dashboard(request):
         has_potential_matches = False
         show_potential_matches_section = True
     else:
+        # Reset the message since profile is complete
+        potential_matches_message = None
         # User has a complete profile with school, find actual matches
         is_secondary = hasattr(user.profile.school, 'level') and ('secondary' in user.profile.school.level.name.lower() or 'high' in user.profile.school.level.name.lower())
         
@@ -516,8 +518,23 @@ def dashboard(request):
             
             potential_matches.append(match_data)
         
+        # Set flags based on whether we found any matches
+        has_potential_matches = len(potential_matches) > 0
         show_potential_matches_section = True
-        potential_matches_message = None
+        potential_matches_message = None if has_potential_matches else "No potential matches found at this time."
+
+    # Debug information
+    debug_info = {
+        'profile_complete': profile_complete,
+        'completion_percentage': completion_percentage,
+        'personal_info_complete': personal_info_complete,
+        'teaching_level_complete': teaching_level_complete,
+        'school_info_complete': school_info_complete,
+        'preferences_complete': preferences_complete,
+        'has_profile': has_profile,
+        'has_school': has_profile and hasattr(user.profile, 'school') and user.profile.school is not None,
+        'all_conditions_met': all([personal_info_complete, teaching_level_complete, school_info_complete, preferences_complete])
+    }
 
     context = {
         'user': user,
@@ -535,8 +552,9 @@ def dashboard(request):
         'swap_preference': swap_preference,
         'potential_matches': potential_matches,
         'has_potential_matches': has_potential_matches if 'has_potential_matches' in locals() else False,
-        'show_potential_matches_section': show_potential_matches_section,
-        'potential_matches_message': potential_matches_message if potential_matches_message else None,
+        'show_potential_matches_section': True,  # Always show for debugging
+        'potential_matches_message': potential_matches_message,
+        'debug_info': debug_info,
     }
     
     return render(request, 'users/dashboard.html', context)

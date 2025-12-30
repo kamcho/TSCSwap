@@ -266,24 +266,78 @@
         <!-- Right Column -->
         <div class="space-y-6">
             <!-- Potential Matches -->
-            {% if potential_matches or potential_matches_message %}
             <div class="bg-slate-800 rounded-lg p-6 shadow">
                 <h2 class="text-lg font-semibold text-white mb-4">Potential Matches</h2>
-                <div class="text-center py-4">
-                    <div class="bg-yellow-900/30 border border-yellow-800 rounded-lg p-4 mb-4">
-                        <p class="text-yellow-400 mb-2">🔒 Profile Incomplete</p>
-                        <p class="text-yellow-300 text-sm">Potential matches are only displayed for profiles that are 100% complete.</p>
-                        <p class="text-yellow-300 text-sm mt-2">Complete all sections of your profile to unlock potential matches.</p>
+                
+
+
+                {% if profile_complete %}
+                    {% if potential_matches and has_potential_matches %}
+                        <!-- Show potential matches if they exist -->
+                        <div class="space-y-4">
+                            {% for match in potential_matches %}
+                            <div class="bg-slate-700/50 p-4 rounded-lg">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h3 class="font-medium text-white">{{ match.full_name }}</h3>
+                                        {% if match.school %}
+                                        <p class="text-sm text-gray-300">{{ match.school.name }} ({{ match.school.level }})</p>
+                                        <p class="text-xs text-gray-400">{{ match.school.county }}, {{ match.school.constituency }}</p>
+                                        {% endif %}
+                                        {% if match.subjects %}
+                                        <div class="mt-2 flex flex-wrap gap-1">
+                                            {% for subject in match.subjects %}
+                                            <span class="px-2 py-1 text-xs rounded-full bg-blue-900/50 text-blue-200">
+                                                {{ subject }}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <a href="#" class="text-blue-400 hover:text-blue-300 text-sm font-medium">View Profile</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <!-- Show no matches found message when profile is complete but no matches -->
+                        <div class="text-center py-8">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-white">No potential matches found</h3>
+                            <p class="mt-1 text-sm text-gray-400">We couldn't find any potential matches based on your profile. We will automatically contact you when a match is found.</p>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <!-- Show profile incomplete message -->
+                    <div class="text-center py-4">
+                        <div class="bg-yellow-900/30 border border-yellow-800 rounded-lg p-4 mb-4">
+                            <p class="text-yellow-400 mb-2">🔒 Profile Incomplete ({{ completion_percentage }}%)</p>
+                            <p class="text-yellow-300 text-sm">
+                                {% if not personal_info_complete %}
+                                    Please complete your personal information.<br>
+                                {% endif %}
+                                {% if not teaching_level_complete %}
+                                    Please complete your teaching level and subjects.<br>
+                                {% endif %}
+                                {% if not school_info_complete %}
+                                    Please add your school information.<br>
+                                {% endif %}
+                                {% if not preferences_complete %}
+                                    Please set your swap preferences.
+                                {% endif %}
+                            </p>
+                        </div>
+                        <a href="{% url 'users:profile_edit' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            Complete Your Profile
+                        </a>
                     </div>
-                    <a href="{% url 'users:profile_edit' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                        Complete Your Profile ({{ completion_percentage }}%)
-                    </a>
-                </div>
+                {% endif %}
             </div>
-            {% endif %}
 
             <!-- Quick Actions -->
             <div class="bg-slate-800 rounded-lg p-6 shadow">
