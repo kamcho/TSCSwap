@@ -877,6 +877,13 @@ def primary_matched_swaps(request):
         else:
             print(f"[DEBUG] Teacher {i+1} missing profile or school")
     
+    # Get the primary school level object
+    try:
+        primary_level = Level.objects.get(name__iexact='Primary School')
+    except Level.DoesNotExist:
+        messages.error(request, "Primary School level not found in the system. Please add it first.")
+        return redirect('users:admin_users')
+    
     # Filter for primary school teachers
     primary_teachers = []
     for t in teachers:
@@ -886,7 +893,7 @@ def primary_matched_swaps(request):
                 t.profile.school and 
                 hasattr(t.profile.school, 'level') and 
                 t.profile.school.level and 
-                t.profile.school.level.name.lower() == 'primary'):
+                t.profile.school.level.id == primary_level.id):
                 primary_teachers.append(t)
         except Exception as e:
             print(f"[DEBUG] Error processing teacher {t.id}: {str(e)}")
@@ -951,13 +958,10 @@ def high_school_matched_swaps(request):
     
     # Get the high school level object
     try:
-        high_school_level = Level.objects.get(name__iexact='secondary')
+        high_school_level = Level.objects.get(name__iexact='Secondary/High School')
     except Level.DoesNotExist:
-        try:
-            high_school_level = Level.objects.get(name__iexact='high school')
-        except Level.DoesNotExist:
-            messages.error(request, "High school level not found in the system. Please add it first.")
-            return redirect('users:admin_users')
+        messages.error(request, "Secondary/High School level not found in the system. Please add it first.")
+        return redirect('users:admin_users')
 
     # Get all active high school teachers with their profiles, schools, and subjects
     teachers = MyUser.objects.filter(
