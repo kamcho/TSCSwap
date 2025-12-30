@@ -1,0 +1,66 @@
+{% if profile_complete %}
+    <!-- Perfect Matches -->
+    {% if perfect_matches %}
+        <div class="mb-6">
+            <h3 class="text-sm font-medium text-green-400 mb-3 flex items-center">
+                <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                Perfect Matches
+            </h3>
+            <div class="space-y-4">
+                {% for match in perfect_matches|slice:":3" %}
+                    {% include 'users/partials/match_card.html' with match=match match_type='perfect' %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Partial Matches -->
+    {% if partial_matches %}
+        <div>
+            <h3 class="text-sm font-medium text-yellow-400 mb-3 flex items-center">
+                <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                Possible Matches
+            </h3>
+            <div class="space-y-4">
+                {% for match in partial_matches|slice:":3" %}
+                    {% include 'users/partials/match_card.html' with match=match match_type='partial' %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- No Matches -->
+    {% if not perfect_matches and not partial_matches %}
+        <div class="text-center py-6">
+            <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="mt-2 text-gray-400">No potential matches found at the moment.</p>
+            <p class="mt-1 text-sm text-gray-500">Check back later or update your preferences.</p>
+        </div>
+    {% endif %}
+    
+    <!-- View All Link -->
+    {% if perfect_matches or partial_matches %}
+        <div class="mt-4 text-center">
+            <a href="{% url 'users:find_matches' %}" class="text-blue-400 hover:text-blue-300 text-sm font-medium">View All Matches</a>
+        </div>
+    {% endif %}
+{% else %}
+    <!-- Show profile incomplete message -->
+    <div class="text-center py-4">
+        <div class="bg-yellow-900/30 border border-yellow-800 rounded-lg p-4 mb-4">
+            <p class="text-yellow-400 mb-2">🔒 Profile Incomplete ({{ completion_percentage }}%)</p>
+            <p class="text-yellow-300 text-sm">
+                Complete your profile to see potential matches. Please complete all profile sections to 100%.
+            </p>
+        </div>
+        <a href="{% url 'users:profile_edit' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Complete Your Profile
+        </a>
+    </div>
+{% endif %}

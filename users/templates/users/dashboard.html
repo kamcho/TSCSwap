@@ -1,5 +1,6 @@
 {% extends "users/base.html" %}
 {% load static %}
+{% load profile_checks match_helpers %}
 
 {% block title %}Dashboard · TSC Swap{% endblock %}
 
@@ -19,8 +20,12 @@
             <div class="bg-slate-800 rounded-lg p-6 shadow">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-lg font-semibold text-white">Profile Completion</h2>
-                    <span class="px-3 py-1 rounded-full text-sm font-medium {% if profile_complete %}bg-green-900/30 text-green-400{% else %}bg-yellow-900/30 text-yellow-400{% endif %}">
-                        {{ completion_percentage }}% Complete
+                    <span class="px-3 py-1 rounded-full text-sm font-medium {% if profile_complete and user|is_profile_complete %}bg-green-900/30 text-green-400{% else %}bg-yellow-900/30 text-yellow-400{% endif %}">
+                        {% if profile_complete and user|is_profile_complete %}
+                            100% Complete
+                        {% else %}
+                            {{ completion_percentage }}% Complete
+                        {% endif %}
                     </span>
                 </div>
                 
@@ -178,6 +183,8 @@
                         {% endif %}
                     </div>
                     
+          
+
                     <!-- Subjects Section -->
                     {% if is_secondary_level %}
                     <div class="bg-slate-700/40 rounded-xl p-5 border border-slate-700/60">
@@ -269,73 +276,78 @@
             <div class="bg-slate-800 rounded-lg p-6 shadow">
                 <h2 class="text-lg font-semibold text-white mb-4">Potential Matches</h2>
                 
-
-
-                {% if profile_complete %}
-                    {% if potential_matches and has_potential_matches %}
-                        <!-- Show potential matches if they exist -->
-                        <div class="space-y-4">
-                            {% for match in potential_matches %}
-                            <div class="bg-slate-700/50 p-4 rounded-lg">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <h3 class="font-medium text-white">{{ match.full_name }}</h3>
-                                        {% if match.school %}
-                                        <p class="text-sm text-gray-300">{{ match.school.name }} ({{ match.school.level }})</p>
-                                        <p class="text-xs text-gray-400">{{ match.school.county }}, {{ match.school.constituency }}</p>
+                
+                {% if not user|is_profile_complete %}
+                    <div class="bg-yellow-900/10 border-l-4 border-yellow-500 p-4 mb-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-yellow-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <!-- Debug Info (temporary) -->
+                                <div class="mb-2 p-2 bg-gray-800 rounded text-xs text-gray-300">
+                                    <p><strong>Debug Info:</strong></p>
+                                    <p>Has profile: {{ user.profile|yesno:"Yes,No" }}</p>
+                                    <p>Has school: {{ user.profile.school|yesno:"Yes,No" }}</p>
+                                    <p>Has level: {{ user.profile.level|yesno:"Yes,No" }}</p>
+                                    <p>Has names: {{ user.first_name|yesno:"Yes,No" }} {{ user.last_name|yesno:"Yes,No" }}</p>
+                                    <p>Has phone: {{ user.profile.phone|yesno:"Yes,No" }}</p>
+                                    <p>Has swap_prefs: {{ user.swap_preferences|yesno:"Yes,No" }}</p>
+                                    {% if user.swap_preferences %}
+                                        <p>open_to_all: {{ user.swap_preferences.open_to_all|yesno:"Yes,No" }}</p>
+                                        <p>desired_county: {{ user.swap_preferences.desired_county|default:"Not set" }}</p>
+                                    {% endif %}
+                                    {% if user.profile.level %}
+                                        <p>Level: {{ user.profile.level.name }}</p>
+                                        <p>Is secondary: {{ user.profile.level.name|lower|yesno:"Yes,No," }}</p>
+                                    {% endif %}
+                                    {% if user.profile.level and user.profile.level.name|lower in 'secondary/high school,high school' %}
+                                        <p>Has subjects: {{ user.mysubject_set.count|default:0 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <h3 class="text-sm font-medium text-yellow-200">Complete your profile to see potential matches</h3>
+                                <div class="mt-2 text-sm text-yellow-300">
+                                    <p class="mb-2">Please complete the following information:</p>
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        {% if not user.first_name or not user.last_name or not user.profile.phone %}
+                                            <li>Complete your personal information (name and phone number)</li>
                                         {% endif %}
-                                        {% if match.subjects %}
-                                        <div class="mt-2 flex flex-wrap gap-1">
-                                            {% for subject in match.subjects %}
-                                            <span class="px-2 py-1 text-xs rounded-full bg-blue-900/50 text-blue-200">
-                                                {{ subject }}
-                                            </span>
-                                            {% endfor %}
-                                        </div>
+                                        {% if not user.profile.school %}
+                                            <li>Add your school information</li>
                                         {% endif %}
-                                    </div>
-                                    <a href="#" class="text-blue-400 hover:text-blue-300 text-sm font-medium">View Profile</a>
+                                        {% if not user.swap_preferences %}
+                                            <li>Set your swap preferences</li>
+                                        {% elif not user.swap_preferences.open_to_all and not user.swap_preferences.desired_county %}
+                                            <li>Configure your swap preferences (either enable 'Open to All' or select a desired county)</li>
+                                        {% endif %}
+                                        {% if not user.profile.level %}
+                                            <li>Set your teaching level</li>
+                                        {% endif %}
+                                        {% if user.profile.level and user.profile.level.name == 'Secondary/High School' and not user.mysubject_set.exists %}
+                                            <li>Add at least one subject you teach</li>
+                                        {% endif %}
+                                    </ul>
                                 </div>
                             </div>
-                            {% endfor %}
                         </div>
-                    {% else %}
-                        <!-- Show no matches found message when profile is complete but no matches -->
-                        <div class="text-center py-8">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-white">No potential matches found</h3>
-                            <p class="mt-1 text-sm text-gray-400">We couldn't find any potential matches based on your profile. We will automatically contact you when a match is found.</p>
+                        <div class="mt-4">
+                            <a href="{% url 'users:profile_edit' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Complete Your Profile
+                            </a>
                         </div>
-                    {% endif %}
-                {% else %}
-                    <!-- Show profile incomplete message -->
-                    <div class="text-center py-4">
-                        <div class="bg-yellow-900/30 border border-yellow-800 rounded-lg p-4 mb-4">
-                            <p class="text-yellow-400 mb-2">🔒 Profile Incomplete ({{ completion_percentage }}%)</p>
-                            <p class="text-yellow-300 text-sm">
-                                {% if not personal_info_complete %}
-                                    Please complete your personal information.<br>
-                                {% endif %}
-                                {% if not teaching_level_complete %}
-                                    Please complete your teaching level and subjects.<br>
-                                {% endif %}
-                                {% if not school_info_complete %}
-                                    Please add your school information.<br>
-                                {% endif %}
-                                {% if not preferences_complete %}
-                                    Please set your swap preferences.
-                                {% endif %}
-                            </p>
-                        </div>
-                        <a href="{% url 'users:profile_edit' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                            Complete Your Profile
-                        </a>
                     </div>
+                {% else %}
+                    {% if is_secondary_level %}
+                        {% get_user_secondary_match %}
+                    {% else %}
+                        {% get_user_primary_match %}
+                    {% endif %}
                 {% endif %}
             </div>
 

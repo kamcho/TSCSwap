@@ -374,38 +374,64 @@ def dashboard(request):
         ])
     
     # 2. Teaching Level Information
-    teaching_level_complete = False
+    teaching_level_complete = has_profile and hasattr(user.profile, 'level') and user.profile.level is not None
     is_secondary_level = False
-    if has_profile and user.profile.level:
-        user_level = user.profile.level
-        is_secondary_level = user_level.name == "Secondary/High School"
-        
-        if is_secondary_level:
-            # For secondary, need at least one subject
-            teaching_level_complete = user.mysubject_set.exists()
-        else:
-            # For primary, just need level set
-            teaching_level_complete = True
+    
+    if teaching_level_complete and hasattr(user.profile.level, 'name'):
+        level_name = user.profile.level.name.lower()
+        is_secondary_level = 'secondary' in level_name or 'high' in level_name
     
     # 3. School Information
-    school_info_complete = has_profile and user.profile.school is not None
+    school_info_complete = bool(has_profile and hasattr(user.profile, 'school') and user.profile.school is not None)
     
-    # 4. Swap Preferences
-    swap_preference = None
+    # 4. Swap Preferences - Check using the correct related name
     try:
-        swap_preference = SwapPreference.objects.get(user=request.user)
-    except SwapPreference.DoesNotExist:
-        pass
+        # Try both possible related names
+        swap_preference = user.swappreference if hasattr(user, 'swappreference') else None
+        if swap_preference is None and hasattr(user, 'swap_preferences'):
+            swap_preference = user.swap_preferences
+        
+        preferences_complete = swap_preference is not None
+        
+        # Debug output
+        print("\n=== DEBUG: Profile Completion Status ===")
+        print(f"Has profile: {has_profile}")
+        print(f"Personal info complete: {personal_info_complete}")
+        print(f"Teaching level complete: {teaching_level_complete}")
+        print(f"School info complete: {school_info_complete}")
+        print(f"Swap preference object: {swap_preference}")
+        print(f"Swap preference exists: {swap_preference is not None}")
+        print(f"User has swap_preferences attr: {hasattr(user, 'swap_preferences')}")
+        print(f"User has swappreference attr: {hasattr(user, 'swappreference')}")
+        if hasattr(user, 'swap_preferences'):
+            print(f"swap_preferences type: {type(user.swap_preferences)}")
+        print("===================================\n")
+    except Exception as e:
+        print(f"Error checking swap preferences: {e}")
+        swap_preference = None
+        preferences_complete = False
     
-    # Preferences complete if exists AND has at least county or is open_to_all
-    preferences_complete = swap_preference is not None and (
-        swap_preference.open_to_all or swap_preference.desired_county is not None
-    )
+    # Debug information for completion checks
+    debug_checks = {
+        'has_profile': has_profile,
+        'swap_preference_exists': swap_preference is not None,
+        'swap_preference_open_to_all': getattr(swap_preference, 'open_to_all', None) if swap_preference else None,
+        'swap_preference_desired_county': getattr(swap_preference, 'desired_county', None) if swap_preference else None,
+        'preferences_complete': preferences_complete,
+        'personal_info_complete': personal_info_complete,
+        'teaching_level_complete': teaching_level_complete,
+        'school_info_complete': school_info_complete,
+        'has_swap_preference': swap_preference is not None,
+        'preferences_complete': preferences_complete,
+        'user_level': getattr(user.profile, 'level.name', 'No level') if has_profile and hasattr(user.profile, 'level') else 'No level',
+        'has_school': has_profile and hasattr(user.profile, 'school') and user.profile.school is not None,
+        'has_phone': has_profile and hasattr(user.profile, 'phone') and bool(user.profile.phone),
+    }
     
     # Calculate completion percentage (4 sections, 25% each)
-    completion_percentage = 0
-    completed_sections = 0
+    completion_percentage = 0.0
     total_sections = 4  # personal_info, teaching_level, school_info, preferences
+    completed_sections = 0
 
     if personal_info_complete:
         completion_percentage += 25.0
@@ -453,12 +479,10 @@ def dashboard(request):
     has_potential_matches = False
     
     # Only show potential matches if profile is 100% complete
-    if not all([personal_info_complete, teaching_level_complete, school_info_complete, preferences_complete]):
+    from users.templatetags.profile_checks import is_profile_complete
+    
+    if not is_profile_complete(user):
         potential_matches_message = "Complete your profile to see potential matches. Please complete all profile sections to 100%."
-        has_potential_matches = False
-        show_potential_matches_section = True
-    elif not has_profile or not hasattr(user.profile, 'school') or not user.profile.school:
-        potential_matches_message = "Please add your school information to see potential matches."
         has_potential_matches = False
         show_potential_matches_section = True
     else:
@@ -525,36 +549,51 @@ def dashboard(request):
 
     # Debug information
     debug_info = {
-        'profile_complete': profile_complete,
+        'profile_complete': is_profile_complete(user),
         'completion_percentage': completion_percentage,
-        'personal_info_complete': personal_info_complete,
-        'teaching_level_complete': teaching_level_complete,
-        'school_info_complete': school_info_complete,
-        'preferences_complete': preferences_complete,
-        'has_profile': has_profile,
         'has_school': has_profile and hasattr(user.profile, 'school') and user.profile.school is not None,
-        'all_conditions_met': all([personal_info_complete, teaching_level_complete, school_info_complete, preferences_complete])
+        'has_level': has_profile and hasattr(user.profile, 'level') and user.profile.level is not None,
+        'has_swap_preference': hasattr(user, 'swap_preferences') and user.swap_preferences is not None,
+        'has_subjects': hasattr(user, 'mysubject_set') and user.mysubject_set.count() > 0
     }
 
+    # Prepare context with all required variables
+    # Ensure we have the latest completion status
+    profile_complete_status = all([
+        personal_info_complete,
+        teaching_level_complete,
+        school_info_complete,
+        preferences_complete
+    ])
+    
     context = {
         'user': user,
         'active_swaps': active_swaps_count,
         'active_swaps_queryset': active_swaps_queryset,
         'pending_requests': pending_requests,
-        'profile_complete': profile_complete,
+        'profile_complete': profile_complete_status,
         'completion_percentage': int(completion_percentage),
-        'personal_info_complete': personal_info_complete,
-        'teaching_level_complete': teaching_level_complete,
-        'school_info_complete': school_info_complete,
-        'preferences_complete': preferences_complete,
         'is_secondary_level': is_secondary_level,
         'subscription': subscription_status,
         'swap_preference': swap_preference,
-        'potential_matches': potential_matches,
-        'has_potential_matches': has_potential_matches if 'has_potential_matches' in locals() else False,
-        'show_potential_matches_section': True,  # Always show for debugging
+        'potential_matches': potential_matches if profile_complete_status else [],
+        'has_potential_matches': has_potential_matches if profile_complete_status and 'has_potential_matches' in locals() else False,
+        'show_potential_matches_section': True,
         'potential_matches_message': potential_matches_message,
-        'debug_info': debug_info,
+        'debug_info': debug_checks,
+        
+        # Completion status for each section - ensure these are booleans
+        'personal_info_complete': bool(personal_info_complete),
+        'teaching_level_complete': bool(teaching_level_complete),
+        'school_info_complete': bool(school_info_complete),
+        'preferences_complete': bool(preferences_complete),  # Force boolean
+        
+        # Debug info
+        'has_profile': has_profile,
+        'has_phone': has_profile and hasattr(user.profile, 'phone') and bool(user.profile.phone),
+        'has_level': has_profile and hasattr(user.profile, 'level') and user.profile.level is not None,
+        'has_school': has_profile and hasattr(user.profile, 'school') and user.profile.school is not None,
+        'has_swap_preference': swap_preference is not None,
     }
     
     return render(request, 'users/dashboard.html', context)
