@@ -3,7 +3,6 @@ from itertools import combinations
 
 from django.contrib import messages
 from django.contrib.auth import (authenticate, get_user_model, login, logout,
-from home.models import Swaps, SwapRequests
                                update_session_auth_hash)
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -14,7 +13,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_http_methods, require_GET
 
-from home.models import Level, Subject, MySubject, Schools, SwapPreference, Counties, Constituencies, Wards
+from home.models import (
+    Level, Subject, MySubject, Schools, SwapPreference, 
+    Counties, Constituencies, Wards, Swaps, SwapRequests
+)
 from .models import MyUser, PersonalProfile
 from .forms import (
     CustomPasswordChangeForm, MyAuthenticationForm, 
