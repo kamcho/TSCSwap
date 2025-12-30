@@ -11,304 +11,280 @@
         <p class="text-gray-400">Here's what's happening with your account today.</p>
     </div>
 
-    <!-- Stats Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Active Swaps -->
-        <div class="bg-slate-800 rounded-lg p-6 shadow">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-500/20 text-blue-400 mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-400">Active Swaps</p>
-                    <h3 class="text-2xl font-bold text-white">{{ active_swaps }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pending Requests -->
-        <div class="bg-slate-800 rounded-lg p-6 shadow">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-yellow-500/20 text-yellow-400 mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-400">Pending Requests</p>
-                    <h3 class="text-2xl font-bold text-white">{{ pending_requests }}</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Subscription Status -->
-        <div class="bg-slate-800 rounded-lg p-6 shadow">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-purple-500/20 text-purple-400 mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-400">Subscription</p>
-                    <h3 class="text-2xl font-bold {% if subscription.is_active %}text-green-400{% else %}text-yellow-400{% endif %}">
-                        {% if subscription.type == 'None' %}Inactive{% else %}{{ subscription.type|title }}{% endif %}
-                    </h3>
-                    {% if subscription.is_active %}
-                        <p class="text-xs text-gray-400">Expires {{ subscription.expiry_date }} ({{ subscription.days_remaining }} days left)</p>
-                    {% else %}
-                        <p class="text-xs text-yellow-400">Inactive</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile Completion -->
-        <div class="bg-slate-800 rounded-lg p-6 shadow">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-500/20 text-green-400 mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-400">Profile Complete</p>
-                    <h3 class="text-2xl font-bold text-white">
-                        {% if profile_complete %}
-                            <span class="text-green-400">Complete</span>
-                        {% else %}
-                            <span class="text-yellow-400">Incomplete</span>
-                        {% endif %}
-                    </h3>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Main Content -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left Column -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Recent Activity -->
+            <!-- Profile Completion -->
             <div class="bg-slate-800 rounded-lg p-6 shadow">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-white">Recent Activity</h2>
-                    <a href="#" class="text-sm text-blue-400 hover:text-blue-300">View All</a>
+                    <h2 class="text-lg font-semibold text-white">Profile Completion</h2>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium {% if profile_complete %}bg-green-900/30 text-green-400{% else %}bg-yellow-900/30 text-yellow-400{% endif %}">
+                        {{ completion_percentage }}% Complete
+                    </span>
                 </div>
-                <div class="space-y-4">
-                    <div class="flex items-start">
-                        <div class="p-2 bg-blue-500/20 rounded-full mr-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-white">Welcome to TSC Swap</p>
-                            <p class="text-xs text-gray-400">Just now</p>
-                        </div>
+                
+                <div class="mb-4">
+                    <div class="w-full bg-gray-700 rounded-full h-2.5">
+                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ completion_percentage }}%"></div>
                     </div>
-                    <!-- Add more activity items here -->
                 </div>
+
+                <ul class="space-y-3 text-sm">
+                    <!-- Personal Information -->
+                    <li class="flex items-center">
+                        {% if personal_info_complete %}
+                            <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="text-gray-300">Personal Information</span>
+                        {% else %}
+                            <svg class="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                            <a href="{% url 'users:profile_edit' %}#personal" class="text-blue-400 hover:text-blue-300">Complete Personal Information</a>
+                        {% endif %}
+                    </li>
+
+                    <!-- Teaching Information -->
+                    <li class="flex items-center">
+                        {% if teaching_level_complete %}
+                            <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="text-gray-300">Teaching Level</span>
+                        {% else %}
+                            <svg class="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                            <a href="{% url 'users:profile_edit' %}#teaching" class="text-blue-400 hover:text-blue-300">Set Teaching Level</a>
+                        {% endif %}
+                    </li>
+
+                    <!-- School Information -->
+                    <li class="flex items-center">
+                        {% if user.profile.school %}
+                            <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="text-gray-300">School Information</span>
+                        {% else %}
+                            <svg class="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                            <a href="{% url 'users:profile_edit' %}#school" class="text-blue-400 hover:text-blue-300">Add School Information</a>
+                        {% endif %}
+                    </li>
+
+                    <!-- Swap Preferences -->
+                    <li class="flex items-center">
+                        {% if preferences_complete %}
+                            <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span class="text-gray-300">Swap Preferences</span>
+                        {% else %}
+                            <svg class="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                            <a href="{% url 'users:profile_edit' %}#preferences" class="text-blue-400 hover:text-blue-300">Set Up Swap Preferences</a>
+                        {% endif %}
+                    </li>
+                </ul>
+
+                {% if not profile_complete %}
+                <div class="mt-6">
+                    <a href="{% url 'users:profile_edit' %}" class="block w-full text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Complete Your Profile
+                    </a>
+                </div>
+                {% endif %}
             </div>
 
             <!-- Teaching Profile -->
-            <div class="bg-slate-800 rounded-lg p-6 shadow">
-                <h2 class="text-lg font-semibold text-white mb-4">My Teaching Profile</h2>
-                <div class="space-y-6">
-                    <!-- School Information - Full Width -->
-                    <div class="bg-slate-700/50 p-6 rounded-lg w-full">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-sm font-medium text-gray-300 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            <div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden">
+                <!-- Profile Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-5">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-white/10 rounded-lg">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m-1-7h1m-1 4h1m4-4h1m-1 4h1m4-4h1m-1 4h1m-5-10v5a1 1 0 01-1 1h-2a1 1 0 01-1-1V7m4 0h4"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-xl font-bold text-white">My Teaching Profile</h2>
+                        </div>
+                        <span class="px-3 py-1 text-xs font-medium rounded-full bg-white/20 text-white/90">
+                            {% if is_secondary_level %}Secondary Teacher{% else %}Primary Teacher{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Profile Content -->
+                <div class="p-6 space-y-6">
+                    <!-- School Information -->
+                    <div class="bg-slate-700/40 rounded-xl p-5 border border-slate-700/60">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-blue-300 uppercase tracking-wider flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m-1-7h1m-1 4h1m4-4h1m-1 4h1m4-4h1m-1 4h1m-5-10v5a1 1 0 01-1 1h-2a1 1 0 01-1-1V7m4 0h4"/>
                                 </svg>
                                 School Information
                             </h3>
-                            {% if not user.profile.school %}
-                            <button id="changeSchoolBtn" class="text-xs text-blue-400 hover:text-blue-300">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                            </button>
-                            {% endif %}
                         </div>
                         
-                        <!-- School Search Form (initially hidden) -->
-                        <div id="schoolSearchContainer" class="hidden mb-4">
-                            <div class="relative">
-                                <input type="text" id="schoolSearchInput" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Search by school name or location...">
-                                <div id="schoolSearchResults" class="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-lg hidden">
-                                    <div class="max-h-60 overflow-y-auto">
-                                        <!-- Search results will be populated here -->
+                        {% if user.profile.school %}
+                            <div class="space-y-3">
+                                <div class="flex items-start space-x-3">
+                                    <div class="p-2 bg-blue-500/10 rounded-lg">
+                                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m-1-7h1m-1 4h1m4-4h1m-1 4h1m4-4h1m-1 4h1m-5-10v5a1 1 0 01-1 1h-2a1 1 0 01-1-1V7m4 0h4"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-white">{{ user.profile.school.name }}</h4>
+                                        <div class="flex flex-wrap gap-3 mt-1.5 text-sm text-gray-300">
+                                            <span class="flex items-center">
+                                                <svg class="w-3.5 h-3.5 mr-1.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                {{ user.profile.school.location|default:"Location not specified" }}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="w-3.5 h-3.5 mr-1.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
+                                                {{ user.profile.school.get_gender_display }}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <svg class="w-3.5 h-3.5 mr-1.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                                </svg>
+                                                {{ user.profile.school.get_boarding_display }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-2 flex justify-end">
-                                <button id="cancelSchoolSearch" class="text-xs text-gray-400 hover:text-gray-300 mr-3">Cancel</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Current School Info -->
-                        <div id="currentSchoolInfo">
-                            <svg class="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m-1-7h1m-1 4h1m4-4h1m-1 4h1m4-4h1m-1 4h1m-5-10v5a1 1 0 01-1 1h-2a1 1 0 01-1-1V7m4 0h4"/>
-                            </svg>
-                            Current School
-                        </h3>
-                        {% if user.profile.school %}
-                            <p class="text-white font-medium text-lg mb-1">{{ user.profile.school.name }}</p>
-                            <div class="flex items-center space-x-3 text-sm text-gray-300">
-                                <span class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                    {{ user.profile.school.get_gender_display }}
-                                </span>
-                                <span class="flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                                    </svg>
-                                    {{ user.profile.school.get_boarding_display }}
-                                </span>
-                            </div><br>
                         {% else %}
-                            <p class="text-yellow-400 mb-2">No school information available</p>
-                            <a href="{% url 'home:create_school' %}" class="inline-flex items-center text-sm text-blue-400 hover:text-blue-300">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            <div class="text-center py-6">
+                                <svg class="mx-auto h-10 w-10 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
-                                Add school information
-                            </a>
+                                <p class="mt-2 text-yellow-400 font-medium">No school information available</p>
+                                <p class="text-sm text-gray-400 mt-1">Update your profile to add your school details</p>
+                            </div>
                         {% endif %}
                     </div>
                     
-                    <!-- Subjects Taught - Only for Secondary/High School teachers -->
+                    <!-- Subjects Section -->
                     {% if is_secondary_level %}
-                    <div class="bg-slate-700/50 p-6 rounded-lg w-full">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-sm font-medium text-gray-300 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    <div class="bg-slate-700/40 rounded-xl p-5 border border-slate-700/60">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-purple-300 uppercase tracking-wider flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                 </svg>
                                 Subjects Taught
                             </h3>
+                            <span class="text-xs font-medium text-purple-400">{{ user.mysubject_set.count }} subjects</span>
                         </div>
                         
                         {% if user.mysubject_set.exists %}
-                            <ul class="space-y-2 mt-2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {% for mysubject in user.mysubject_set.all %}
                                     {% with subjects=mysubject.subject.all %}
                                         {% for subject in subjects %}
-                                            <li class="flex items-center justify-between bg-slate-800/50 p-3 rounded hover:bg-slate-700/70 transition-colors duration-200">
-                                                <div class="flex-1">
-                                                    <div class="flex items-center justify-between">
-                                                        <span class="text-sm font-medium text-white">{{ subject.name }}</span>
+                                            <div class="bg-slate-800/60 p-3 rounded-lg border border-slate-700/50 hover:border-blue-500/30 transition-colors">
+                                                <div class="flex items-start justify-between">
+                                                    <div>
+                                                        <h4 class="font-medium text-white">{{ subject.name }}</h4>
+                                                        <div class="flex flex-wrap gap-2 mt-1.5">
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-900/40 text-blue-300">
+                                                                {{ subject.curriculum.name }}
+                                                            </span>
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-900/40 text-purple-300">
+                                                                {{ subject.level.name }}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <div class="mt-1 flex items-center space-x-2 text-xs text-gray-400">
-                                                        <span>{{ subject.curriculum.name }}</span>
-                                                        <span>•</span>
-                                                        <span>{{ subject.level.name }}</span>
-                                                    </div>
+                                                    <span class="text-xs text-gray-500">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </span>
                                                 </div>
-                                            </li>
+                                            </div>
                                         {% endfor %}
                                     {% endwith %}
                                 {% endfor %}
-                            </ul>
+                            </div>
                         {% else %}
-                            <div class="mt-2 text-center py-6">
-                                <svg class="mx-auto h-10 w-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="text-center py-6">
+                                <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
-                                <p class="mt-2 text-sm text-gray-400">No subjects added yet</p>
-                                <a href="{% url 'home:create_mysubject' %}" class="mt-3 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-400 bg-blue-900/20 hover:bg-blue-900/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                                    <svg class="-ml-0.5 mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                    Add Subjects
-                                </a>
+                                <p class="mt-3 text-gray-400">No subjects added to your profile</p>
+                                <p class="text-sm text-gray-500 mt-1">Add your teaching subjects to help us find better matches</p>
                             </div>
                         {% endif %}
+                    </div>
                     {% else %}
                     <!-- Primary School - No subjects needed -->
-                    <div class="bg-slate-700/50 p-6 rounded-lg w-full">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-sm font-medium text-gray-300 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    <div class="bg-slate-700/40 rounded-xl p-5 border border-slate-700/60">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-purple-300 uppercase tracking-wider flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                 </svg>
-                                Subjects
+                                Primary School
                             </h3>
-                            <span class="px-2 py-0.5 text-xs rounded-full bg-green-500/20 text-green-400">
-                                Not Required
+                            <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-green-500/20 text-green-400">
+                                All Subjects
                             </span>
                         </div>
-                        <div class="flex items-center gap-3 p-4 bg-blue-900/20 border border-blue-700/30 rounded-lg">
-                            <svg class="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            <p class="text-sm text-gray-300">
-                                As a Primary School teacher, subject selection is not required for your profile.
-                            </p>
+                        <div class="flex items-center gap-4 p-4 bg-blue-900/10 rounded-lg border border-blue-800/30">
+                            <div class="p-2 bg-blue-500/10 rounded-lg">
+                                <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-white">Primary School Teacher</h4>
+                                <p class="text-sm text-gray-400 mt-0.5">You teach all subjects for your grade level</p>
+                            </div>
                         </div>
                     </div>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Your Active Swaps -->
-            <div class="bg-slate-800 rounded-lg p-6 shadow">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold text-white">Your Active Swaps</h2>
-                    <a href="{% url 'home:create_swap' %}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        New Swap
-                    </a>
-                </div>
-                
-                {% if active_swaps > 0 %}
-                    <!-- List of Active Swaps -->
-                    <div class="space-y-4">
-                        {% for swap in active_swaps_queryset %}
-                        <div class="bg-slate-700 p-4 rounded-lg">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <h3 class="font-medium text-white">Swap #{{ swap.id }}</h3>
-                                    <p class="text-sm text-gray-400">
-                                        {% if swap.ward %}{{ swap.ward }}, {% endif %}
-                                        {% if swap.constituency %}{{ swap.constituency }}, {% endif %}
-                                        {{ swap.county }}
-                                    </p>
-                                    <p class="text-xs text-gray-500 mt-1">Created on {{ swap.created_at|date:"M d, Y" }}</p>
-                                </div>
-                                <a href="{% url 'home:swap_detail' swap.id %}" class="text-blue-400 hover:text-blue-300 text-sm font-medium">
-                                    View Details
-                                </a>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <!-- No Active Swaps -->
-                    <div class="text-center py-8">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        <p class="text-gray-400 mb-4">No active swaps yet</p>
-                        <a href="{% url 'home:create_swap' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Create Your First Swap
-                        </a>
-                    </div>
-                {% endif %}
-            </div>
+         
         </div>
 
         <!-- Right Column -->
         <div class="space-y-6">
+            <!-- Potential Matches -->
+            {% if potential_matches_message %}
+            <div class="bg-slate-800 rounded-lg p-6 shadow">
+                <h2 class="text-lg font-semibold text-white mb-4">Potential Matches</h2>
+                <div class="text-center py-4">
+                    <div class="bg-yellow-900/30 border border-yellow-800 rounded-lg p-4 mb-4">
+                        <p class="text-yellow-400 mb-2">🔒 Profile Incomplete</p>
+                        <p class="text-yellow-300 text-sm">Potential matches are only displayed for profiles that are 100% complete.</p>
+                        <p class="text-yellow-300 text-sm mt-2">Complete all sections of your profile to unlock potential matches.</p>
+                    </div>
+                    <a href="{% url 'users:profile_edit' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Complete Your Profile ({{ completion_percentage }}%)
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Quick Actions -->
             <div class="bg-slate-800 rounded-lg p-6 shadow">
                 <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
@@ -361,371 +337,14 @@
                 </div>
             </div>
 
-            <!-- Profile Completion -->
-            <div class="bg-slate-800 rounded-lg p-6 shadow">
-                <h2 class="text-lg font-semibold text-white mb-4">Profile Completion</h2>
-                <div class="mb-4">
-                    <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-400">Profile Strength</span>
-                        <span class="font-medium">
-                            {% if profile_complete %}
-                                <span class="text-green-400">Complete ({{ completion_percentage }}%)</span>
-                            {% else %}
-                                <span class="text-yellow-400">Incomplete ({{ completion_percentage }}%)</span>
-                            {% endif %}
-                        </span>
-                    </div>
-                    <div class="w-full bg-slate-700 rounded-full h-2 mb-4">
-                        <div class="h-2 rounded-full transition-all duration-300 ease-in-out
-                            {% if completion_percentage < 30 %}bg-red-500
-                            {% elif completion_percentage < 70 %}bg-yellow-500
-                            {% else %}bg-green-500{% endif %}" 
-                            style="width: {{ completion_percentage }}%;">
-                        </div>
-                    </div>
-                
-                    <ul class="space-y-3 text-sm">
-                        <!-- Personal Information -->
-                        <li class="flex items-center">
-                            {% if personal_info_complete %}
-                                <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="text-gray-400 line-through">Personal Information</span>
-                            {% else %}
-                                <svg class="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                </svg>
-                                <a href="{% url 'users:profile_edit' %}" class="text-blue-400 hover:text-blue-300">
-                                    Complete Personal Information
-                                    <span class="text-xs text-gray-500 ml-1">(Name, Phone, Gender)</span>
-                                </a>
-                            {% endif %}
-                        </li>
-                        
-                        <!-- Teaching Information -->
-                        <li class="flex items-center">
-                            {% if teaching_info_complete %}
-                                <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="text-gray-400 line-through">Teaching Information</span>
-                            {% else %}
-                                <svg class="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                </svg>
-                                <div class="flex flex-col">
-                                    <a href="{% url 'users:select_teaching_info' %}" class="text-blue-400 hover:text-blue-300">
-                                        Complete Teaching Information
-                                    </a>
-                                    <span class="text-xs text-gray-500">
-                                        {% if not user.profile.level %}
-                                            ⚠️ Level not set
-                                        {% elif not user.profile.school %}
-                                            ✓ Level set | ⚠️ School not set
-                                        {% elif is_secondary_level and not user.mysubject_set.exists %}
-                                            ✓ Level & School set | ⚠️ Subjects not set
-                                        {% endif %}
-                                    </span>
-                                </div>
-                            {% endif %}
-                        </li>
-                        
-                        <!-- Profile Picture -->
-                        <li class="flex items-center">
-                            {% if profile_picture_complete %}
-                                <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="text-gray-400 line-through">Profile Picture</span>
-                            {% else %}
-                                <svg class="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                </svg>
-                                <a href="{% url 'users:profile_edit' %}" class="text-blue-400 hover:text-blue-300">
-                                    Add Profile Picture
-                                </a>
-                            {% endif %}
-                        </li>
-                        
-                        <!-- Swap Preferences -->
-                        <li class="flex items-center">
-                            {% if preferences_complete %}
-                                <svg class="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                </svg>
-                                <span class="text-gray-400 line-through">Swap Preferences</span>
-                            {% else %}
-                                <svg class="w-4 h-4 text-yellow-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                </svg>
-                                <a href="{% url 'home:swap_preferences' %}" class="text-blue-400 hover:text-blue-300">
-                                    Set Swap Preferences
-                                </a>
-                            {% endif %}
-                        </li>
-                    </ul>
-                    <!-- Swap Preferences Details Section -->
-                    <div class="mt-6 pt-4 border-t border-gray-700">
-                        <h3 class="text-sm font-medium text-gray-300 mb-3 flex items-center">
-                            <svg class="w-5 h-5 mr-2 {% if preferences_complete %}text-green-400{% else %}text-yellow-400{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Swap Preferences Details
-                            {% if preferences_complete %}
-                                <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-green-500/20 text-green-400">
-                                    Complete
-                                </span>
-                            {% else %}
-                                <span class="ml-2 px-2 py-0.5 text-xs rounded-full bg-yellow-500/20 text-yellow-400">
-                                    Not Set
-                                </span>
-                            {% endif %}
-                        </h3>
-                        {% if swap_preference %}
-                            <div class="mt-2 text-sm text-gray-300 space-y-1">
-                                {% if swap_preference.desired_county %}
-                                    <p class="flex items-center">
-                                        <span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span>
-                                        <span class="font-medium">County:</span> 
-                                        <span class="ml-1">{{ swap_preference.desired_county.name }}</span>
-                                    </p>
-                                {% endif %}
-                                {% if swap_preference.desired_constituency %}
-                                    <p class="flex items-center">
-                                        <span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span>
-                                        <span class="font-medium">Constituency:</span> 
-                                        <span class="ml-1">{{ swap_preference.desired_constituency.name }}</span>
-                                    </p>
-                                {% endif %}
-                                {% if swap_preference.desired_ward %}
-                                    <p class="flex items-center">
-                                        <span class="w-2 h-2 rounded-full bg-green-400 mr-2"></span>
-                                        <span class="font-medium">Ward:</span> 
-                                        <span class="ml-1">{{ swap_preference.desired_ward.name }}</span>
-                                    </p>
-                                {% endif %}
-                                <div class="pt-2">
-                                    <a href="{% url 'home:swap_preferences' %}" class="text-blue-400 hover:text-blue-300 text-sm flex items-center">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                        Edit Preferences
-                                    </a>
-                                </div>
-                            </div>
-                        {% else %}
-                            <p class="mt-2 text-sm text-gray-400">You haven't set your swap preferences yet.</p>
-                            <a href="{% url 'home:swap_preferences' %}" class="mt-2 inline-flex items-center text-sm text-blue-400 hover:text-blue-300">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                Set Preferences
-                            </a>
-                        {% endif %}
-                    </div>
-
-                    <div class="mt-6">
-                        <a href="{% url 'users:profile_edit' %}" class="block w-full text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Complete Your Profile
-                        </a>
-                    </div>
-            </div>
-        </div>
+        
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const schoolSearchContainer = document.getElementById('schoolSearchContainer');
-    const currentSchoolInfo = document.getElementById('currentSchoolInfo');
-    const changeSchoolBtn = document.getElementById('changeSchoolBtn');
-    const cancelSchoolSearch = document.getElementById('cancelSchoolSearch');
-    const schoolSearchInput = document.getElementById('schoolSearchInput');
-    const schoolSearchResults = document.getElementById('schoolSearchResults');
-    const schoolLoading = document.getElementById('schoolLoading');
-    
-    let searchTimeout;
-    
-    // Toggle school search form
-    function toggleSchoolSearch(show) {
-        if (show) {
-            schoolSearchContainer.classList.remove('hidden');
-            currentSchoolInfo.classList.add('hidden');
-            schoolSearchInput.focus();
-        } else {
-            schoolSearchContainer.classList.add('hidden');
-            currentSchoolInfo.classList.remove('hidden');
-            schoolSearchInput.value = '';
-            schoolSearchResults.classList.add('hidden');
-        }
-    }
-    
-    // Handle school search
-    function handleSchoolSearch() {
-        const query = schoolSearchInput.value.trim();
-        const resultsContainer = schoolSearchResults.querySelector('div');
-        
-        // Clear previous timeout
-        clearTimeout(searchTimeout);
-        
-        // Show loading state
-        resultsContainer.innerHTML = '<div class="p-3 text-sm text-gray-400">Searching for schools...</div>';
-        schoolSearchResults.classList.remove('hidden');
-        
-        if (query.length < 2) {
-            resultsContainer.innerHTML = '<div class="p-3 text-sm text-gray-400">Type at least 2 characters to search for a school</div>';
-            return;
-        }
-        
-        // Set a new timeout with debounce
-        searchTimeout = setTimeout(() => {
-            // Add a timestamp to prevent caching issues
-            const timestamp = new Date().getTime();
-            fetch(`/schools/search/?q=${encodeURIComponent(query)}&_=${timestamp}`, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json',
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0'
-                },
-                cache: 'no-store'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                    const resultsContainer = schoolSearchResults.querySelector('div');
-                    resultsContainer.innerHTML = '';
-                    
-                    // Debug log
-                    console.log('Search results:', data);
-                    
-                    // Clear loading/previous results
-                    resultsContainer.innerHTML = '';
-                    
-                    if (data.status === 'error') {
-                        resultsContainer.innerHTML = `
-                            <div class="p-3 text-sm text-red-400">
-                                Error: ${data.error || 'Failed to load schools. Please try again.'}
-                            </div>
-                        `;
-                        console.error('Search error:', data.error);
-                        return;
-                    }
-                    
-                    if (!data.schools || data.schools.length === 0) {
-                        resultsContainer.innerHTML = `
-                            <div class="p-3 text-sm text-gray-400">
-                                No schools found matching "${query}". Try a different name.
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    data.schools.forEach(school => {
-                        const schoolElement = document.createElement('div');
-                        schoolElement.className = 'p-3 hover:bg-slate-700 cursor-pointer border-b border-slate-700 last:border-0 transition-colors duration-200';
-                        schoolElement.setAttribute('data-school-id', school.id);
-                        schoolElement.innerHTML = `
-                            <div class="font-medium text-white">${school.name}</div>
-                            <div class="text-xs text-gray-400 mb-1">${school.location}</div>
-                            <div class="flex flex-wrap gap-1">
-                                <span class="text-xs px-2 py-0.5 bg-blue-900/50 text-blue-300 rounded">${school.type}</span>
-                                <span class="text-xs px-2 py-0.5 bg-purple-900/50 text-purple-300 rounded">${school.gender}</span>
-                                <span class="text-xs px-2 py-0.5 bg-green-900/50 text-green-300 rounded">${school.boarding}</span>
-                            </div>
-                        `;
-                        schoolElement.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            attachSchool(school.id);
-                        });
-                        resultsContainer.appendChild(schoolElement);
-                    });
-                    
-                    schoolSearchResults.classList.remove('hidden');
-                })
-                .catch(error => {
-                    console.error('Error searching schools:', error);
-                    const resultsContainer = schoolSearchResults.querySelector('div');
-                    resultsContainer.innerHTML = `
-                        <div class="p-3 text-sm text-red-400">
-                            Error: Failed to search for schools. Please try again later.
-                        </div>
-                    `;
-                });
-        }, 300); // 300ms debounce
-    }
-    
-    // Attach school to user profile
-    function attachSchool(schoolId) {
-        schoolLoading.classList.remove('hidden');
-        schoolSearchResults.classList.add('hidden');
-        
-        const formData = new FormData();
-        formData.append('school_id', schoolId);
-        
-        fetch('/schools/attach/', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Reload the page to show updated school info
-                window.location.reload();
-            } else {
-                alert(data.error || 'Failed to attach school');
-                schoolLoading.classList.add('hidden');
-            }
-        })
-        .catch(error => {
-            console.error('Error attaching school:', error);
-            alert('An error occurred. Please try again.');
-            schoolLoading.classList.add('hidden');
-        });
-    }
-    
-    // Helper function to get CSRF token
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    
-    // Event listeners
-    changeSchoolBtn.addEventListener('click', () => toggleSchoolSearch(true));
-    cancelSchoolSearch.addEventListener('click', () => toggleSchoolSearch(false));
-    schoolSearchInput.addEventListener('input', handleSchoolSearch);
-    
-    // Close search results when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!schoolSearchContainer.contains(e.target) && e.target !== changeSchoolBtn) {
-            schoolSearchResults.classList.add('hidden');
-        }
-    });
-});
+// School search functionality has been removed as per requirements
 </script>
 {% endblock %}
 

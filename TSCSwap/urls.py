@@ -27,6 +27,7 @@ sitemaps = {
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("admin-dashboard/", include('users.urls_admin')),  # Custom admin dashboard
     path("", include("home.urls")),
     path("users/", include("users.urls")),
     path("payments/", include("payments.urls")),

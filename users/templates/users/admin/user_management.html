@@ -1,0 +1,216 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}User Management - TSC Swap{% endblock %}
+
+{% block extra_css %}
+<style>
+    .user-management {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        color: #e2e8f0;
+        background-color: #1a202c;
+        min-height: 100vh;
+    }
+    .stats-container {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    .stat-card {
+        background: #2d3748;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        flex: 1;
+        min-width: 200px;
+        color: #e2e8f0;
+    }
+    .stat-card h3 {
+        margin-top: 0;
+        color: #e2e8f0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    .stat-card p {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0.5rem 0 0;
+        color: #ffffff;
+    }
+    .table-container {
+        background: #2d3748;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        overflow: hidden;
+    }
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .user-table th, .user-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #4a5568;
+        color: #e2e8f0;
+    }
+    .user-table th {
+        background-color: #2d3748;
+        color: #a0aec0;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid #4a5568;
+    }
+    .user-table tr:hover {
+        background-color: #4a5568;
+    }
+    .status-active {
+        color: #38a169;
+        font-weight: 600;
+    }
+    .status-inactive {
+        color: #e53e3e;
+        font-weight: 600;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .badge-primary {
+        background-color: #2b6cb0;
+        color: #ebf8ff;
+    }
+    .badge-secondary {
+        background-color: #4a5568;
+        color: #e2e8f0;
+        border: 1px solid #718096;
+    }
+    .text-muted {
+        color: #718096;
+    }
+    .action-buttons a {
+        color: #63b3ed;
+        text-decoration: none;
+        margin-right: 1rem;
+        font-size: 0.875rem;
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+    .action-buttons a.btn-view-matches {
+        background-color: #2b6cb0;
+        color: white;
+        padding: 0.25rem 0.75rem;
+    }
+    .action-buttons a.btn-view-matches:hover {
+        background-color: #2c5282;
+        text-decoration: none;
+    }
+    .action-buttons a:hover {
+        text-decoration: underline;
+    }
+    @media (max-width: 1024px) {
+        .user-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="user-management">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">User Management</h1>
+    
+    <div class="stats-container">
+        <div class="stat-card">
+            <h3>Total Users</h3>
+            <p>{{ total_users }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Active Users</h3>
+            <p>{{ active_users }}</p>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>School</th>
+                    <th>Location</th>
+                    <th>Level</th>
+                    <th>Subjects</th>
+                    <th>Potential Matches</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.phone }}</td>
+                    <td>
+                        {% if user.school %}
+                            {{ user.school.name }}
+                        {% else %}
+                            <span class="text-muted">No school</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.school %}
+                            {{ user.school.ward }}, {{ user.school.constituency }}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>{% if user.school %}{{ user.school.level }}{% else %}-{% endif %}</td>
+                    <td>
+                        {% if user.subjects %}
+                            {% for subject in user.subjects|slice:":2" %}
+                                <span class="badge badge-secondary">{{ subject }}</span>
+                            {% endfor %}
+                            {% if user.subjects|length > 2 %}
+                                <span class="badge badge-secondary">+{{ user.subjects|length|add:"-2" }} more</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.potential_matches > 0 %}
+                            <span class="badge badge-primary">{{ user.potential_matches }} matches</span>
+                        {% else %}
+                            <span class="text-muted">None</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="{% if user.is_active %}status-active{% else %}status-inactive{% endif %}">
+                            {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </td>
+                    <td class="action-buttons">
+                        <a href="{% url 'users_admin:user_potential_matches' user.id %}" class="btn-view-matches">View Matches</a>
+                        <a href="{% url 'admin:users_myuser_change' user.id %}" target="_blank">Edit</a>
+                        <a href="{% url 'admin:users_myuser_delete' user.id %}" target="_blank">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

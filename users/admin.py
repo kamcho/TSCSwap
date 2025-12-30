@@ -182,15 +182,93 @@ get_school_level_wrapper.short_description = 'School Level'
 
 @admin.register(MyUser)
 class MyUserAdmin(admin.ModelAdmin):
+    def get_profile_completion_percentage(self, obj):
+        """Calculate profile completion percentage based on required fields"""
+        total_fields = 0
+        completed_fields = 0
+        
+        # Check personal information
+        if hasattr(obj, 'profile'):
+            profile = obj.profile
+            
+            # Personal Info (3 fields - first_name, last_name, phone)
+            personal_info_fields = [
+                obj.first_name,  # Using user's first_name
+                obj.last_name,   # Using user's last_name
+                profile.phone
+            ]
+            total_fields += len(personal_info_fields)
+            completed_fields += sum(1 for field in personal_info_fields if field)
+            
+            # Teaching Level
+            total_fields += 1
+            if profile.level:
+                completed_fields += 1
+            
+            # School Information
+            total_fields += 1
+            if profile.school:
+                completed_fields += 1
+        
+        # Check swap preferences
+        total_fields += 1
+        try:
+            swap_pref = obj.swappreference
+            if swap_pref.open_to_all.exists() or swap_pref.desired_county:
+                completed_fields += 1
+        except SwapPreference.DoesNotExist:
+            pass
+        
+        # Calculate percentage (4 sections total, 25% each)
+        if total_fields > 0:
+            percentage = (completed_fields / total_fields) * 100
+            return f"{min(round(percentage), 100)}%"
+        return "0%"
+    get_profile_completion_percentage.short_description = 'Profile Complete'
     list_display = (
         'email', 
         'get_full_name',
-        'get_phone_number',  # Add phone number to the list display
-        get_school_level_wrapper,
-        get_school_location_wrapper,
-        get_potential_matches_count_wrapper,
+        'get_phone_number',
+        'get_profile_completion_percentage',
+        'get_school_level',
+        'get_school_location',
+        'get_potential_matches_count',
         'is_active'
     )
+    
+    def get_phone_number(self, obj):
+        if hasattr(obj, 'profile') and obj.profile.phone:
+            return obj.profile.phone
+        return "-"
+    get_phone_number.short_description = 'Phone'
+    
+    def get_school_level(self, obj):
+        if hasattr(obj, 'profile') and hasattr(obj.profile, 'school') and obj.profile.school and hasattr(obj.profile.school, 'level'):
+            return obj.profile.school.level.name
+        return "No level set"
+    get_school_level.short_description = 'School Level'
+    
+    def get_school_location(self, obj):
+        if hasattr(obj, 'profile') and hasattr(obj.profile, 'school') and obj.profile.school:
+            school = obj.profile.school
+            location_parts = []
+            if school.ward:
+                location_parts.append(school.ward.name)
+                if school.ward.constituency:
+                    location_parts.append(school.ward.constituency.name)
+                    if school.ward.constituency.county:
+                        location_parts.append(school.ward.constituency.county.name)
+            return ', '.join(location_parts) if location_parts else 'No location set'
+        return 'No school set'
+    get_school_location.short_description = 'School Location'
+    
+    def get_potential_matches_count(self, obj):
+        # This is a simplified version - you might want to implement the full logic here
+        try:
+            return obj.potential_matches_count
+        except AttributeError:
+            return 0
+    get_potential_matches_count.short_description = 'Potential Matches'
     list_filter = ('role', 'is_active', 'is_staff', 'date_joined')
     search_fields = ('email', 'first_name', 'last_name')
     ordering = ('-date_joined',)

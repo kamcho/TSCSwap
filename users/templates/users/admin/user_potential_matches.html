@@ -1,0 +1,453 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - TSC Swap{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<style>
+    /* User Info Section */
+    .user-info-section {
+        background: #2d3748;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .user-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .info-block {
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-block h3 {
+        color: #a0aec0;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #4a5568;
+    }
+    
+    .info-item {
+        margin-bottom: 0.75rem;
+    }
+    
+    .info-label {
+        color: #a0aec0;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .info-value {
+        color: #e2e8f0;
+        font-weight: 500;
+    }
+    
+    /* Matches Section */
+    .matches-section {
+        margin-top: 2rem;
+    }
+    
+    .matches-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    /* Match Cards */
+    .match-card {
+        background: #2d3748;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid #4a5568;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .match-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .match-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #4a5568;
+    }
+    
+    .match-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #4a5568;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+        color: #e2e8f0;
+    }
+    
+    .match-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.25rem 0;
+        color: #e2e8f0;
+    }
+    
+    .match-email {
+        font-size: 0.875rem;
+        color: #a0aec0;
+        margin: 0;
+    }
+    
+    .match-details {
+        margin-bottom: 1.5rem;
+    }
+    
+    .match-school {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #e2e8f0;
+    }
+    
+    .match-location {
+        font-size: 0.875rem;
+        color: #a0aec0;
+        margin-bottom: 1rem;
+    }
+    
+    .match-subjects {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .subject-tag {
+        background: #4a5568;
+        color: #e2e8f0;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+    }
+    
+    .contact-button {
+        display: block;
+        width: 100%;
+        text-align: center;
+        background: #4299e1;
+        color: white;
+        padding: 0.5rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+    
+    .contact-button:hover {
+        background: #3182ce;
+        color: white;
+    }
+    
+    .user-potential-matches {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        color: #e2e8f0;
+        background-color: #1a202c;
+        min-height: 100vh;
+    }
+    .back-link {
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        color: #63b3ed;
+        text-decoration: none;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+    .user-card {
+        background: #2d3748;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .user-card h2 {
+        margin-top: 0;
+        color: #e2e8f0;
+        border-bottom: 1px solid #4a5568;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .info-section {
+        background: #2d3748;
+        border-radius: 8px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .info-section h3 {
+        margin-top: 0;
+        color: #a0aec0;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #4a5568;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    .info-item {
+        margin-bottom: 0.75rem;
+    }
+    .info-label {
+        color: #a0aec0;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    .info-value {
+        color: #e2e8f0;
+        font-weight: 500;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .badge-primary {
+        background-color: #2b6cb0;
+        color: #ebf8ff;
+    }
+    .badge-secondary {
+        background-color: #4a5568;
+        color: #e2e8f0;
+    }
+    .matches-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    .match-card {
+        background: #2d3748;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: transform 0.2s;
+    }
+    .match-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    .match-card h3 {
+        margin-top: 0;
+        color: #e2e8f0;
+        border-bottom: 1px solid #4a5568;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .no-matches {
+        text-align: center;
+        padding: 2rem;
+        color: #a0aec0;
+        font-style: italic;
+    }
+    .contact-button {
+        display: inline-block;
+        background-color: #2b6cb0;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        margin-top: 1rem;
+        transition: background-color 0.2s;
+    }
+    .contact-button:hover {
+        background-color: #2c5282;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="user-potential-matches">
+    <a href="{% url 'users_admin:user_management' %}" class="back-link">← Back to User Management</a>
+    
+    <!-- User Information Section -->
+    <div class="user-info-section">
+        <h2>{{ user.full_name }}</h2>
+        
+        <div class="user-info-grid">
+            <!-- Personal Information -->
+            <div class="info-block">
+                <h3>Personal Information</h3>
+                <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">{{ user.email }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Phone</div>
+                    <div class="info-value">{{ user.phone }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">TSC Number</div>
+                    <div class="info-value">{{ user.tsc_number|default:"Not provided" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">ID Number</div>
+                    <div class="info-value">{{ user.id_number|default:"Not provided" }}</div>
+                </div>
+            </div>
+            
+            <!-- School Information -->
+            <div class="info-block">
+                <h3>Current School</h3>
+                {% if user.school %}
+                    <div class="info-item">
+                        <div class="info-label">School Name</div>
+                        <div class="info-value">{{ user.school.name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Level</div>
+                        <div class="info-value">{{ user.school.level }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Location</div>
+                        <div class="info-value">
+                            {{ user.school.ward }}, {{ user.school.constituency }}
+                            <div class="text-muted">{{ user.school.county }}</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="info-value">No school information available</div>
+                {% endif %}
+            </div>
+            
+            <!-- Subjects -->
+            <div class="info-block">
+                <h3>Subjects</h3>
+                {% if user.subjects %}
+                    <div class="subject-tags">
+                        {% for subject in user.subjects %}
+                            <span class="subject-tag">{{ subject }}</span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="info-value">No subjects listed</div>
+                {% endif %}
+            </div>
+            
+            <!-- Preferences -->
+            <div class="info-block">
+                <h3>Swap Preferences</h3>
+                <div class="info-item">
+                    <div class="info-label">Desired County</div>
+                    <div class="info-value">{{ user.preferences.desired_county|default:"Any" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Desired Constituency</div>
+                    <div class="info-value">{{ user.preferences.desired_constituency|default:"Any" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Open To</div>
+                    <div class="info-value">
+                        {% if user.preferences.open_to_all %}
+                            {{ user.preferences.open_to_all }}
+                        {% else %}
+                            <span class="text-muted">Not specified</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Hardship Area</div>
+                    <div class="info-value">
+                        {% if user.preferences.is_hardship %}
+                            <span class="badge badge-hardship">Hardship Area</span>
+                        {% else %}
+                            <span class="badge badge-non-hardship">Non-Hardship</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Potential Matches Section -->
+    <div class="matches-section">
+        <h2>Potential Matches ({{ potential_matches|length }})</h2>
+        
+        {% if has_matches %}
+            <div class="matches-grid">
+                {% for match in potential_matches %}
+                    <div class="match-card">
+                        <div class="match-header">
+                            <div class="match-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h3 class="match-name">{{ match.full_name }}</h3>
+                                <p class="match-email">{{ match.email }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="match-details">
+                            {% if match.school %}
+                                <p class="match-school">{{ match.school.name }}</p>
+                                <p class="match-location">
+                                    <i class="fas fa-map-marker-alt"></i> 
+                                    {{ match.school.ward }}, {{ match.school.county }}
+                                </p>
+                                <p class="match-level">
+                                    <i class="fas fa-graduation-cap"></i> 
+                                    {{ match.school.level }}
+                                </p>
+                            {% endif %}
+                            
+                            {% if match.subjects %}
+                                <h4>Subjects</h4>
+                                <div class="match-subjects">
+                                    {% for subject in match.subjects|slice:":4" %}
+                                        <span class="subject-tag">{{ subject }}</span>
+                                    {% endfor %}
+                                    {% if match.subjects|length > 4 %}
+                                        <span class="subject-tag">+{{ match.subjects|length|add:"-4" }} more</span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <a href="mailto:{{ match.email }}" class="contact-button">
+                            <i class="fas fa-envelope"></i> Contact {{ match.full_name|slice:":10" }}{% if match.full_name|length > 10 %}...{% endif %}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-matches">
+                <p>No potential matches found for this user.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

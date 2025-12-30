@@ -50,12 +50,7 @@
                         </svg>
                         Edit Profile
                     </a>
-                    <a href="{% url 'users:password_change' %}" class="bg-white border-2 border-teal-600 text-teal-600 hover:bg-teal-50 px-6 py-3 rounded-lg font-semibold transition duration-300 flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7 7m6-7a6 6 0 00-7-7m7 7H3"/>
-                        </svg>
-                        Change Password
-                    </a>
+                
                 </div>
             </div>
         </div>
@@ -175,42 +170,6 @@
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 p-8">
-            <h2 class="text-2xl font-bold text-white mb-6">Quick Actions</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <a href="{% url 'home:all_swaps' %}" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white p-6 rounded-xl transition duration-300 shadow-lg hover:shadow-xl">
-                    <div class="text-center">
-                        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                        </svg>
-                        <h3 class="text-lg font-semibold mb-2">View Swaps</h3>
-                        <p class="text-sm opacity-90">Browse available swaps</p>
-                    </div>
-                </a>
-                
-                <a href="{% url 'home:create_swap' %}" class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white p-6 rounded-xl transition duration-300 shadow-lg hover:shadow-xl">
-                    <div class="text-center">
-                        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                        </svg>
-                        <h3 class="text-lg font-semibold mb-2">Create Swap</h3>
-                        <p class="text-sm opacity-90">Share your favorite destinations</p>
-                    </div>
-                </a>
-                
-                <a href="{% url 'home:home' %}" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white p-6 rounded-xl transition duration-300 shadow-lg hover:shadow-xl">
-                    <div class="text-center">
-                        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                        </svg>
-                        <h3 class="text-lg font-semibold mb-2">Go Home</h3>
-                        <p class="text-sm opacity-90">Return to homepage</p>
-                    </div>
-                </a>
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %} 

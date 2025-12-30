@@ -364,43 +364,33 @@ def dashboard(request):
     # Check profile completion status
     has_profile = hasattr(user, 'profile') and user.profile is not None
     
-    # Personal Information - Core fields only (name, phone, gender)
-    # first_name and last_name are on the User model, phone and gender on Profile
+    # 1. Personal Information - Check names and phone only
     personal_info_complete = False
     if has_profile:
         personal_info_complete = all([
             user.first_name,  # On User model
             user.last_name,   # On User model
-            user.profile.phone,
-            user.profile.gender,
+            user.profile.phone
         ])
     
-    # Teaching Information - Different requirements based on level
-    teaching_info_complete = False
+    # 2. Teaching Level Information
+    teaching_level_complete = False
     is_secondary_level = False
     if has_profile and user.profile.level:
         user_level = user.profile.level
+        is_secondary_level = user_level.name == "Secondary/High School"
         
-        # Check if user is Secondary/High School level
-        if user_level.name == "Secondary/High School":
-            is_secondary_level = True
-            # Secondary teachers need: level, school, AND subjects
-            teaching_info_complete = all([
-                user.profile.level,
-                user.profile.school,
-                user.mysubject_set.exists()
-            ])
+        if is_secondary_level:
+            # For secondary, need at least one subject
+            teaching_level_complete = user.mysubject_set.exists()
         else:
-            # Primary teachers only need: level and school (no subjects required)
-            teaching_info_complete = all([
-                user.profile.level,
-                user.profile.school
-            ])
+            # For primary, just need level set
+            teaching_level_complete = True
     
-    # Profile Picture
-    profile_picture_complete = has_profile and bool(user.profile.profile_picture)
+    # 3. School Information
+    school_info_complete = has_profile and user.profile.school is not None
     
-    # Swap Preferences
+    # 4. Swap Preferences
     swap_preference = None
     try:
         swap_preference = SwapPreference.objects.get(user=request.user)
@@ -414,18 +404,37 @@ def dashboard(request):
     
     # Calculate completion percentage (4 sections, 25% each)
     completion_percentage = 0
+    completed_sections = 0
+    total_sections = 4  # personal_info, teaching_level, school_info, preferences
+
     if personal_info_complete:
-        completion_percentage += 25
-    if teaching_info_complete:
-        completion_percentage += 25
-    if profile_picture_complete:
-        completion_percentage += 25
+        completion_percentage += 25.0
+        completed_sections += 1
+    if teaching_level_complete:
+        completion_percentage += 25.0
+        completed_sections += 1
+    if school_info_complete:
+        completion_percentage += 25.0
+        completed_sections += 1
     if preferences_complete:
-        completion_percentage += 25
-        
-    # Overall profile complete if all sections are complete
-    profile_complete = all([personal_info_complete, teaching_info_complete, profile_picture_complete, preferences_complete])
-    
+        completion_percentage += 25.0
+        completed_sections += 1
+
+    # Round to 2 decimal places
+    completion_percentage = round(completion_percentage, 2)
+
+    # Overall profile complete if all required sections are complete
+    profile_complete = all([
+        personal_info_complete,
+        teaching_level_complete,
+        school_info_complete,
+        preferences_complete
+    ])
+
+    # Ensure completion percentage is 100% when all required sections are complete
+    if profile_complete:
+        completion_percentage = 100.00
+
     # Get subscription status
     subscription = getattr(user, 'my_subscription', None)
     has_active_subscription = subscription.is_active if subscription else False
@@ -437,6 +446,79 @@ def dashboard(request):
         'days_remaining': subscription.days_remaining if subscription else 0,
     }
     
+    # Initialize potential matches
+    potential_matches = []
+    show_potential_matches_section = True
+    potential_matches_message = None
+    has_potential_matches = False
+    
+    # Only show potential matches if profile is 100% complete
+    if not profile_complete:
+        potential_matches_message = "Complete your profile to see potential matches. Please complete all profile sections to 100%."
+        has_potential_matches = False
+        show_potential_matches_section = False
+    elif not has_profile or not hasattr(user.profile, 'school') or not user.profile.school:
+        potential_matches_message = "Please add your school information to see potential matches."
+        has_potential_matches = False
+        show_potential_matches_section = False
+    else:
+        # User has a complete profile with school, find actual matches
+        is_secondary = hasattr(user.profile.school, 'level') and ('secondary' in user.profile.school.level.name.lower() or 'high' in user.profile.school.level.name.lower())
+        
+        # Base queryset for potential matches
+        matches = MyUser.objects.filter(
+            ~Q(id=user.id), 
+            is_active=True,
+            profile__isnull=False,
+            profile__school__isnull=False
+        ).prefetch_related(
+            'profile__school__level',
+            'profile__school__ward__constituency__county',
+            'mysubject_set__subject'
+        )
+        
+        # Filter by subjects for secondary school teachers
+        if is_secondary and hasattr(user, 'mysubject_set'):
+            user_subjects = list(user.mysubject_set.values_list('subject__id', flat=True))
+            if user_subjects:
+                matches = matches.filter(
+                    mysubject__subject__in=user_subjects
+                )
+        
+        # Limit to 5 matches for the dashboard
+        matches = matches.distinct()[:5]
+        
+        # Prepare match data
+        for match in matches:
+            match_data = {
+                'id': match.id,
+                'email': match.email,
+                'full_name': match.get_full_name() or 'No Name',
+                'phone': match.profile.phone if hasattr(match, 'profile') and match.profile.phone else '-',
+                'school': None,
+                'subjects': []
+            }
+            
+            # Add school info
+            if hasattr(match, 'profile') and hasattr(match.profile, 'school') and match.profile.school:
+                school = match.profile.school
+                match_data['school'] = {
+                    'name': school.name,
+                    'ward': school.ward.name if school.ward else 'N/A',
+                    'constituency': school.ward.constituency.name if school.ward and school.ward.constituency else 'N/A',
+                    'county': school.ward.constituency.county.name if school.ward and school.ward.constituency and school.ward.constituency.county else 'N/A',
+                    'level': school.level.name if hasattr(school, 'level') and school.level else 'N/A'
+                }
+            
+            # Add subjects
+            if hasattr(match, 'mysubject_set'):
+                match_data['subjects'] = [ms.subject.name for ms in match.mysubject_set.all()]
+            
+            potential_matches.append(match_data)
+        
+        show_potential_matches_section = True
+        potential_matches_message = None
+
     context = {
         'user': user,
         'active_swaps': active_swaps_count,
@@ -445,13 +527,16 @@ def dashboard(request):
         'profile_complete': profile_complete,
         'completion_percentage': int(completion_percentage),
         'personal_info_complete': personal_info_complete,
-        'teaching_info_complete': teaching_info_complete,
-        'profile_picture_complete': profile_picture_complete,
+        'teaching_level_complete': teaching_level_complete,
+        'school_info_complete': school_info_complete,
         'preferences_complete': preferences_complete,
         'is_secondary_level': is_secondary_level,
         'subscription': subscription_status,
         'swap_preference': swap_preference,
-        'preferences_complete': preferences_complete,
+        'potential_matches': potential_matches,
+        'has_potential_matches': has_potential_matches if 'has_potential_matches' in locals() else False,
+        'show_potential_matches_section': show_potential_matches_section,
+        'potential_matches_message': potential_matches_message if potential_matches_message else None,
     }
     
     return render(request, 'users/dashboard.html', context)
