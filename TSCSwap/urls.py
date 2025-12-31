@@ -35,6 +35,12 @@ urlpatterns = [
     path("sitemap.xml", sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 ]
 
+# Custom error handlers (must be at module level, not in urlpatterns)
+handler400 = 'home.error_views.handler400'
+handler403 = 'home.error_views.handler403'
+handler404 = 'home.error_views.handler404'
+handler500 = 'home.error_views.handler500'
+
 # Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

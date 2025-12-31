@@ -3,10 +3,13 @@ from django.contrib.auth.decorators import login_required
 
 from . import views, views_schools
 from .api_views import ConstituencyAPIView, WardAPIView
+from .error_views import error_page
 
 app_name = 'home'
 
 urlpatterns = [
+    # Error page (for testing and direct access)
+    path("error/", error_page, name="error_page"),
     # Regular views
     path("", views.landing_page, name="home"),
     path("mysubject/new/", login_required(views.create_mysubject), name="create_mysubject"),

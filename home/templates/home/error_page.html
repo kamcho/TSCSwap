@@ -1,0 +1,188 @@
+{% extends 'users/base.html' %}
+{% load static %}
+
+{% block title %}{{ error_title }} - TSC Swap{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #030711 0%, #050816 100%);
+    }
+    
+    .error-content {
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .error-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: rgba(239, 68, 68, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .error-icon svg {
+        width: 40px;
+        height: 40px;
+        color: #ef4444;
+    }
+    
+    .error-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 1rem;
+    }
+    
+    .error-message {
+        font-size: 1.125rem;
+        color: #94a3b8;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .error-status {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    
+    .error-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn-dashboard {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: #3b82f6;
+        color: #ffffff;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-dashboard:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+    }
+    
+    .btn-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: transparent;
+        color: #94a3b8;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-home:hover {
+        background: rgba(148, 163, 184, 0.1);
+        color: #ffffff;
+        border-color: rgba(148, 163, 184, 0.5);
+    }
+    
+    @media (max-width: 640px) {
+        .error-content {
+            padding: 2rem 1.5rem;
+        }
+        
+        .error-title {
+            font-size: 1.5rem;
+        }
+        
+        .error-message {
+            font-size: 1rem;
+        }
+        
+        .error-actions {
+            flex-direction: column;
+        }
+        
+        .btn-dashboard,
+        .btn-home {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <div class="error-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+        </div>
+        
+        <h1 class="error-title">{{ error_title }}</h1>
+        
+        <div class="error-status">Error {{ status_code }}</div>
+        
+        <p class="error-message">{{ error_message }}</p>
+        
+        <div class="error-actions">
+            {% if user and user.is_authenticated %}
+                <a href="{% url 'users:dashboard' %}" class="btn-dashboard">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Go to Dashboard
+                </a>
+            {% else %}
+                <a href="{% url 'users:login' %}" class="btn-dashboard">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                    </svg>
+                    Go to Login
+                </a>
+            {% endif %}
+            
+            <a href="{% url 'home:home' %}" class="btn-home">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+                Go to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
