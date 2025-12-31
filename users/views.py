@@ -438,6 +438,7 @@ def password_change_view(request):
     
     return render(request, 'users/password_change.html', {'form': form})
 
+@login_required
 def dashboard(request):
     """User dashboard with overview of user's swaps and requests"""
     user = request.user

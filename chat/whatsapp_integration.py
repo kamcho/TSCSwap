@@ -273,6 +273,172 @@ def mask_phone_number(phone: str) -> str:
     
     return masked
 
+def find_triangle_swaps_for_whatsapp(asking_user, location: str, user_level) -> str:
+    """
+    Find triangle swaps that include the asking user and format for WhatsApp.
+    
+    Args:
+        asking_user: The User object who is asking for swaps
+        location: Location name (optional, for filtering)
+        user_level: The Level object of the asking user
+    
+    Returns:
+        Formatted string with triangle swap opportunities, or empty string if none found
+    """
+    try:
+        from home.triangle_swap_utils import (
+            find_triangle_swaps_primary,
+            find_triangle_swaps_secondary,
+            get_current_county,
+            get_user_subjects
+        )
+        from home.models import MyUser, Counties
+        from users.models import PersonalProfile
+        
+        # Check if user has complete profile and swap preferences
+        if not hasattr(asking_user, 'profile') or not asking_user.profile.school:
+            return ""
+        
+        if not hasattr(asking_user, 'swappreference') or not asking_user.swappreference:
+            return ""
+        
+        # Determine if user is primary or secondary
+        user_school_level = asking_user.profile.school.level
+        is_secondary = user_school_level and ('secondary' in user_school_level.name.lower() or 'high' in user_school_level.name.lower())
+        
+        # Get all teachers at the same level with complete profiles
+        # Note: Include the asking user in the queryset so they can be part of triangle swaps
+        # Note: For triangle swaps, we don't filter by location upfront because
+        # triangle swaps involve circular exchanges, and the location might be relevant
+        # to any teacher in the triangle (current location or desired location)
+        teachers = MyUser.objects.filter(
+            is_active=True,
+            role='Teacher',
+            profile__isnull=False,
+            profile__school__isnull=False,
+            profile__school__level=user_school_level,
+            swappreference__isnull=False
+        ).select_related(
+            'profile__school__ward__constituency__county',
+            'swappreference__desired_county'
+        ).prefetch_related(
+            'swappreference__open_to_all'
+        )
+        
+        # Find triangle swaps
+        if is_secondary:
+            all_triangles = find_triangle_swaps_secondary(teachers)
+        else:
+            all_triangles = find_triangle_swaps_primary(teachers)
+        
+        # Filter triangles that include the asking user
+        user_triangles = []
+        for teacher_a, teacher_b, teacher_c in all_triangles:
+            if asking_user.id in [teacher_a.id, teacher_b.id, teacher_c.id]:
+                # Get locations
+                county_a = get_current_county(teacher_a)
+                county_b = get_current_county(teacher_b)
+                county_c = get_current_county(teacher_c)
+                
+                # If location is provided, check if any teacher in the triangle is in that location
+                # (either current location or desired location)
+                if location:
+                    counties = Counties.objects.filter(name__icontains=location)
+                    if counties.exists():
+                        county_ids = set(counties.values_list('id', flat=True))
+                        triangle_counties = set()
+                        if county_a:
+                            triangle_counties.add(county_a.id)
+                        if county_b:
+                            triangle_counties.add(county_b.id)
+                        if county_c:
+                            triangle_counties.add(county_c.id)
+                        
+                        # Check desired counties too
+                        for teacher in [teacher_a, teacher_b, teacher_c]:
+                            if hasattr(teacher, 'swappreference') and teacher.swappreference:
+                                if teacher.swappreference.desired_county:
+                                    triangle_counties.add(teacher.swappreference.desired_county.id)
+                                triangle_counties.update(
+                                    teacher.swappreference.open_to_all.values_list('id', flat=True)
+                                )
+                        
+                        # Only include if location matches any county in the triangle
+                        if not triangle_counties.intersection(county_ids):
+                            continue
+                
+                # Determine the user's position in the triangle
+                if asking_user.id == teacher_a.id:
+                    user_position = "A"
+                elif asking_user.id == teacher_b.id:
+                    user_position = "B"
+                else:
+                    user_position = "C"
+                
+                # Get common subjects for secondary teachers
+                common_subjects_text = ""
+                if is_secondary:
+                    subjects_a = get_user_subjects(teacher_a)
+                    subjects_b = get_user_subjects(teacher_b)
+                    subjects_c = get_user_subjects(teacher_c)
+                    common_subjects = subjects_a.intersection(subjects_b).intersection(subjects_c)
+                    if common_subjects:
+                        from home.models import Subject
+                        subject_names = Subject.objects.filter(id__in=common_subjects).values_list('name', flat=True)
+                        common_subjects_text = f"\n📚 Common Subjects: {', '.join(subject_names[:3])}"
+                        if len(subject_names) > 3:
+                            common_subjects_text += f" +{len(subject_names) - 3} more"
+                
+                user_triangles.append({
+                    'teacher_a': teacher_a,
+                    'teacher_b': teacher_b,
+                    'teacher_c': teacher_c,
+                    'county_a': county_a.name if county_a else 'Unknown',
+                    'county_b': county_b.name if county_b else 'Unknown',
+                    'county_c': county_c.name if county_c else 'Unknown',
+                    'user_position': user_position,
+                    'common_subjects': common_subjects_text
+                })
+        
+        # Format for WhatsApp (limit to 3 triangles)
+        if not user_triangles:
+            return ""
+        
+        formatted_triangles = []
+        formatted_triangles.append("🔺 *Triangle Swap Opportunities*\n")
+        formatted_triangles.append("Found circular swap opportunities where 3 teachers exchange locations:\n")
+        
+        for i, triangle in enumerate(user_triangles[:3], 1):  # Limit to 3 triangles
+            teacher_a = triangle['teacher_a']
+            teacher_b = triangle['teacher_b']
+            teacher_c = triangle['teacher_c']
+            county_a = triangle['county_a']
+            county_b = triangle['county_b']
+            county_c = triangle['county_c']
+            user_pos = triangle['user_position']
+            common_subjects = triangle['common_subjects']
+            
+            # Get names
+            name_a = teacher_a.get_full_name() or teacher_a.email.split('@')[0]
+            name_b = teacher_b.get_full_name() or teacher_b.email.split('@')[0]
+            name_c = teacher_c.get_full_name() or teacher_c.email.split('@')[0]
+            
+            formatted_triangles.append(f"*Triangle {i}:*\n")
+            formatted_triangles.append(f"🔄 {name_a} ({county_a}) → {name_b} ({county_b}) → {name_c} ({county_c}) → {name_a}{common_subjects}\n")
+        
+        if len(user_triangles) > 3:
+            formatted_triangles.append(f"\n... and {len(user_triangles) - 3} more triangle swap(s) available!")
+        
+        formatted_triangles.append("\n💡 *How it works:*")
+        formatted_triangles.append("All three teachers exchange locations in a circular pattern, so everyone gets their desired location!")
+        
+        return "\n".join(formatted_triangles)
+        
+    except Exception as e:
+        import traceback
+        print(f"Error finding triangle swaps for WhatsApp: {str(e)}\n{traceback.format_exc()}")
+        return ""
+
 def format_swap_results(matching_profiles, location: str, user_level) -> str:
     """Format swap results for WhatsApp response. Returns up to 10 results with masked phones."""
     try:
@@ -541,8 +707,18 @@ Detected Intent: {intent_name} ✅
         try:
             matching_users = find_swaps_by_location(location, user_level, user)
             
+            # Find triangle swaps if location is provided
+            triangle_swaps_text = ""
+            if location:
+                triangle_swaps_text = find_triangle_swaps_for_whatsapp(user, location, user_level)
+            
+            # Build response
             if matching_users:
                 response = format_swap_results(matching_users, location, user_level)
+                
+                # Append triangle swaps if found
+                if triangle_swaps_text:
+                    response += f"\n\n━━━━━━━━━━━━━━━━━━━━\n\n{triangle_swaps_text}"
             else:
                 response = f"""🔍 *Finding Swap Opportunities*
 
@@ -550,13 +726,17 @@ Detected Intent: {intent_name} ✅
 📍 Location: {location or 'Any location'}
 📚 Level: {user_level.name if user_level else 'Not set'}
 
-❌ No matching swaps found.
+❌ No direct matching swaps found.
 
 I couldn't find any teachers in {location or 'your specified location'} who teach at the same level as you ({user_level.name if user_level else 'your level'}).
 
 Try:
 • Searching in a different location
 • Checking if your teaching level is correctly set in your profile"""
+                
+                # Append triangle swaps if found
+                if triangle_swaps_text:
+                    response += f"\n\n━━━━━━━━━━━━━━━━━━━━\n\n{triangle_swaps_text}"
             
             return response
             
