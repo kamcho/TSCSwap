@@ -110,10 +110,11 @@
                                         {% if user_data.profile %}
                                             {% if user_data.profile.first_name %}
                                                 {{ user_data.profile.first_name }}
+                                                {% if user_data.profile.last_name %}
+                                                    {{ user_data.profile.last_name }}
+                                                {% endif %}
                                                 {% if user_data.profile.surname %}
                                                     {{ user_data.profile.surname }}
-                                                {% elif user_data.profile.last_name %}
-                                                    {{ user_data.profile.last_name }}
                                                 {% endif %}
                                             {% else %}
                                                 {{ user_data.user.email }}

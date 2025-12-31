@@ -169,12 +169,19 @@ def profile_edit_view(request):
         form = ProfileEditForm(
             request.POST, 
             request.FILES, 
-            instance=request.user,
-            initial={'phone': profile.phone, 'gender': profile.gender}
+            instance=profile,
+            initial={
+                'first_name': request.user.first_name,
+                'last_name': request.user.last_name,
+                'surname': getattr(profile, 'surname', ''),
+                'phone': profile.phone, 
+                'gender': profile.gender
+            }
         )
         
         if form.is_valid():
-            user = form.save(commit=False)
+            # Save profile with all fields
+            profile = form.save(commit=False)
             
             # Handle profile picture upload
             if 'profile_picture' in request.FILES:
@@ -183,13 +190,14 @@ def profile_edit_view(request):
             elif form.cleaned_data.get('profile_picture-clear'):
                 profile.profile_picture.delete(save=False)
             
-            # Update profile fields
-            profile.phone = form.cleaned_data.get('phone')
-            profile.gender = form.cleaned_data.get('gender')
-            
-            # Save both user and profile
-            user.save()
+            # Save the profile
             profile.save()
+            
+            # Also update the User model's first_name and last_name for compatibility
+            user = request.user
+            user.first_name = form.cleaned_data.get('first_name', '')
+            user.last_name = form.cleaned_data.get('last_name', '')
+            user.save()
             
             # Update session with new profile picture if it exists
             if hasattr(profile, 'profile_picture') and profile.profile_picture:
@@ -201,8 +209,11 @@ def profile_edit_view(request):
             messages.error(request, 'Please correct the errors below.')
     else:
         form = ProfileEditForm(
-            instance=request.user,
+            instance=profile,
             initial={
+                'first_name': request.user.first_name,
+                'last_name': request.user.last_name,
+                'surname': getattr(profile, 'surname', ''),
                 'phone': profile.phone,
                 'gender': profile.gender,
                 'profile_picture': profile.profile_picture if hasattr(profile, 'profile_picture') else None
