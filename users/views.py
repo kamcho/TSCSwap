@@ -799,6 +799,7 @@ def admin_users_view(request):
         
         user_data.append({
             'user': user,
+            'profile': profile,  # Add the profile to the user_data
             'completion_percentage': completion_score,
             'has_active_subscription': hasattr(user, 'subscription') and user.subscription.is_active,
             'has_personal_profile': has_personal_profile,
