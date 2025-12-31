@@ -89,13 +89,13 @@
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center">
                                     <span class="text-white font-medium">
-                                        {% if user_data.user.profile %}
-                                            {% if user_data.user.profile.first_name %}
-                                                {{ user_data.user.profile.first_name|first|upper }}
-                                                {% if user_data.user.profile.surname %}
-                                                    {{ user_data.user.profile.surname|first|upper }}
-                                                {% elif user_data.user.profile.last_name %}
-                                                    {{ user_data.user.profile.last_name|first|upper }}
+                                        {% if user_data.profile %}
+                                            {% if user_data.profile.first_name %}
+                                                {{ user_data.profile.first_name|first|upper }}
+                                                {% if user_data.profile.surname %}
+                                                    {{ user_data.profile.surname|first|upper }}
+                                                {% elif user_data.profile.last_name %}
+                                                    {{ user_data.profile.last_name|first|upper }}
                                                 {% endif %}
                                             {% else %}
                                                 {{ user_data.user.email|first|upper }}
@@ -107,13 +107,13 @@
                                 </div>
                                 <div class="ml-4">
                                     <div class="text-sm font-medium text-white">
-                                        {% if user_data.user.profile %}
-                                            {% if user_data.user.profile.first_name %}
-                                                {{ user_data.user.profile.first_name }}
-                                                {% if user_data.user.profile.surname %}
-                                                    {{ user_data.user.profile.surname }}
-                                                {% elif user_data.user.profile.last_name %}
-                                                    {{ user_data.user.profile.last_name }}
+                                        {% if user_data.profile %}
+                                            {% if user_data.profile.first_name %}
+                                                {{ user_data.profile.first_name }}
+                                                {% if user_data.profile.surname %}
+                                                    {{ user_data.profile.surname }}
+                                                {% elif user_data.profile.last_name %}
+                                                    {{ user_data.profile.last_name }}
                                                 {% endif %}
                                             {% else %}
                                                 {{ user_data.user.email }}
