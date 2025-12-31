@@ -145,30 +145,25 @@
         <table class="user-table">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>School</th>
+                    <th>User</th>
+                    <th>Contact</th>
                     <th>Location</th>
                     <th>Level</th>
                     <th>Subjects</th>
                     <th>Potential Matches</th>
-                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for user in users %}
                 <tr>
-                    <td>{{ user.full_name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.phone }}</td>
                     <td>
-                        {% if user.school %}
-                            {{ user.school.name }}
-                        {% else %}
-                            <span class="text-muted">No school</span>
-                        {% endif %}
+                        <div class="font-medium">{{ user.full_name }}</div>
+                        <div class="text-sm text-gray-400">ID: {{ user.id }}</div>
+                    </td>
+                    <td>
+                        <div>{{ user.email }}</div>
+                        <div class="text-sm text-gray-400">{{ user.phone|default:'' }}</div>
                     </td>
                     <td>
                         {% if user.school %}
@@ -197,15 +192,30 @@
                             <span class="text-muted">None</span>
                         {% endif %}
                     </td>
-                    <td>
-                        <span class="{% if user.is_active %}status-active{% else %}status-inactive{% endif %}">
-                            {% if user.is_active %}Active{% else %}Inactive{% endif %}
-                        </span>
-                    </td>
-                    <td class="action-buttons">
-                        <a href="{% url 'users_admin:user_potential_matches' user.id %}" class="btn-view-matches">View Matches</a>
-                        <a href="{% url 'admin:users_myuser_change' user.id %}" target="_blank">Edit</a>
-                        <a href="{% url 'admin:users_myuser_delete' user.id %}" target="_blank">Delete</a>
+                   
+                    <td class="action-buttons space-y-2">
+                        <a href="{% url 'users_admin:user_potential_matches' user.id %}" class="block w-full text-center py-1 px-3 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm mb-2">
+                            View Matches
+                        </a>
+                        {% if not user.profile_complete and user.phone %}
+                            {% with message="Hello "|add:user.full_name|default:"there"|add:",%0A%0AWelcome to Find a Swap! We're grateful to have you in our community.%0A%0AWe noticed you haven't completed setting up your account. To start receiving swap matches, please complete the following:%0A%0A- "|add:user.missing_fields|join:"%0A- "|urlencode %}
+                            <a href="https://wa.me/{{ user.phone|slice:'1:' }}?text={{ message }}" 
+                               target="_blank" 
+                               class="block w-full text-center py-1 px-3 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                               title="Send WhatsApp message">
+                                WhatsApp
+                            </a>
+                            {% endwith %}
+                        {% endif %}
+                            {% with message="Hello "|add:user.full_name|default:"there"|add:",%0A%0AWelcome to Find a Swap! We're grateful to have you in our community.%0A%0AWe noticed you haven't completed setting up your account. To start receiving swap matches, please complete the following:%0A%0A"|add:user.missing_fields|join:"%0A- "|urlencode %}
+                            <a href="https://wa.me/{{ user.phone|slice:'1:' }}?text={{ message }}" 
+                               target="_blank" 
+                               class="block w-full text-center py-1 px-3 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                               title="Send WhatsApp message">
+                                WhatsApp
+                            </a>
+                            {% endwith %}
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

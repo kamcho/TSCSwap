@@ -27,6 +27,62 @@ from home.models import (
     Counties, Constituencies, Wards, Swaps, SwapRequests
 )
 from .models import MyUser, PersonalProfile
+
+def get_whatsapp_message(user, completion_data):
+    """
+    Generate a WhatsApp message based on user's profile completion status.
+    
+    Args:
+        user: The user object
+        completion_data: Dictionary containing completion data from get_profile_completion_data()
+        
+    Returns:
+        str: The formatted WhatsApp message
+    """
+    # Base URL for WhatsApp
+    base_message = ""
+    
+    if completion_data['percentage'] < 100:
+        # Incomplete profile message
+        base_message = "Hello {name},\n\n"
+        base_message += "I'm Kevin Gitundu, Administrator at Find A Swap. 😊\n\n"
+        base_message += "We noticed your profile is only {percentage}% complete. "
+        base_message += "To help us find the best swap matches for you, please complete your profile by adding:\n\n"
+        
+        # Add missing fields
+        missing_fields = []
+        if not completion_data['has_basic_info']:
+            missing_fields.append("Basic information (name, contact details)")
+        if not completion_data['has_school_link']:
+            missing_fields.append("School information")
+        if not completion_data['has_level']:
+            missing_fields.append("Teaching level")
+        if not completion_data['has_swap_prefs']:
+            missing_fields.append("Swap preferences (desired location)")
+        if completion_data.get('subject_required', False) and not completion_data['has_subjects']:
+            missing_fields.append("Subjects you teach")
+            
+        base_message += "• " + "\n• ".join(missing_fields)
+        base_message += "\n\nComplete your profile now: {profile_url}"
+    else:
+        # Complete profile message
+        base_message = "Hello {name},\n\n"
+        base_message += "I'm Kevin Gitundu, Administrator at Find A Swap. 😊\n\n"
+        base_message += "Thank you for completing your profile! We're actively looking for suitable swap matches for you. "
+        base_message += "We'll notify you as soon as we find potential matches.\n\n"
+        base_message += "You can check for new matches in your dashboard: {dashboard_url}\n\n"
+        base_message += "If you have any questions, feel free to reach out!"
+    
+    # Format the message with user's name and profile URL
+    profile_url = f"www.tscswap.com{reverse('users:profile_edit')}"
+    dashboard_url = f"www.tscswap.com{reverse('users:dashboard')}"
+    
+    return base_message.format(
+        name=user.get_full_name() or 'there',
+        percentage=completion_data['percentage'],
+        profile_url=profile_url,
+        dashboard_url=dashboard_url
+    )
 from .templatetags.match_helpers import get_secondary_teacher_matches
 from .forms import (
     CustomPasswordChangeForm, MyAuthenticationForm, 
@@ -887,6 +943,20 @@ def admin_users_view(request):
         # Use our helper function to get completion data
         completion = get_profile_completion_data(user, profile)
         
+        # Generate WhatsApp message
+        whatsapp_message = get_whatsapp_message(user, completion)
+        # URL encode the message for WhatsApp
+        import urllib.parse
+        encoded_message = urllib.parse.quote(whatsapp_message)
+        
+        # Get phone number from profile if available
+        phone_number = profile.phone if profile and hasattr(profile, 'phone') and profile.phone else ''
+        # Clean phone number (remove spaces, dashes, etc.)
+        phone_number = ''.join(filter(str.isdigit, str(phone_number)))
+        # Add country code if not present (assuming Kenya +254)
+        if phone_number and not phone_number.startswith('254') and len(phone_number) == 9:
+            phone_number = f'254{phone_number}'
+        
         # Get user's subscription status
         has_active_subscription = hasattr(user, 'subscription') and user.subscription.is_active
         
@@ -901,7 +971,9 @@ def admin_users_view(request):
             'is_superuser': user.is_superuser,
             'date_joined': user.date_joined,
             'last_login': user.last_login,
-            'subscription': getattr(user, 'subscription', None)
+            'subscription': getattr(user, 'subscription', None),
+            'whatsapp_url': f'https://wa.me/{phone_number}?text={encoded_message}' if phone_number else None,
+            'has_phone': bool(phone_number)
         })
     
     # Calculate statistics
