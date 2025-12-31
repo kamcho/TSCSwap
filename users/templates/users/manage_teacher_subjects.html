@@ -55,9 +55,81 @@
                     </div>
                 </div>
                 
-                <!-- Swap Preferences Section -->
+                <!-- Current Swap Preferences -->
                 <div class="mt-8 pt-6 border-t border-gray-600">
-                    <h3 class="text-lg font-medium text-white mb-4">Swap Preferences</h3>
+                    <h3 class="text-lg font-medium text-white mb-4">Current Swap Preferences</h3>
+                    
+                    <div class="bg-gray-800 rounded-lg p-4 mb-6 border border-gray-600">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-400 mb-1">Current Location</h4>
+                                <p class="text-white">
+                                    {% if teacher.profile.school %}
+                                        {{ teacher.profile.school.name }}<br>
+                                        {% if teacher.profile.school.ward %}
+                                            {{ teacher.profile.school.ward.name }}, 
+                                            {% if teacher.profile.school.ward.constituency %}
+                                                {{ teacher.profile.school.ward.constituency.name }}, 
+                                                {% if teacher.profile.school.ward.constituency.county %}
+                                                    {{ teacher.profile.school.ward.constituency.county.name }} County
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-gray-400">Not set</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-400 mb-1">Desired Swap Location</h4>
+                                <p class="text-white">
+                                    {% if swap_pref.desired_ward %}
+                                        {{ swap_pref.desired_ward.name }}, 
+                                        {% if swap_pref.desired_ward.constituency %}
+                                            {{ swap_pref.desired_ward.constituency.name }}, 
+                                            {% if swap_pref.desired_ward.constituency.county %}
+                                                {{ swap_pref.desired_ward.constituency.county.name }} County
+                                            {% endif %}
+                                        {% endif %}
+                                    {% elif swap_pref.desired_constituency %}
+                                        {{ swap_pref.desired_constituency.name }}, 
+                                        {% if swap_pref.desired_constituency.county %}
+                                            {{ swap_pref.desired_constituency.county.name }} County
+                                        {% endif %}
+                                    {% elif swap_pref.desired_county %}
+                                        {{ swap_pref.desired_county.name }} County
+                                    {% else %}
+                                        <span class="text-gray-400">No specific preference</span>
+                                    {% endif %}
+                                </p>
+                                
+                                {% if swap_pref.open_to_all.exists %}
+                                    <div class="mt-2">
+                                        <h4 class="text-sm font-medium text-gray-400 mb-1">Open to All In:</h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            {% for county in swap_pref.open_to_all.all %}
+                                                <span class="px-2 py-1 bg-blue-900 text-blue-100 text-xs rounded-full">
+                                                    {{ county.name }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="mt-2">
+                                    <h4 class="text-sm font-medium text-gray-400 mb-1">Hardship Preference:</h4>
+                                    <span class="text-white">
+                                        {{ swap_pref.get_is_hardship_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                <!-- Edit Swap Preferences Section -->
+                <div class="mt-8 pt-6 border-t border-gray-600">
+                    <h3 class="text-lg font-medium text-white mb-4">Update Swap Preferences</h3>
                     
                     <div class="space-y-4">
                         <!-- Desired County -->
@@ -68,9 +140,9 @@
                                 <option value="">--- Select a county ---</option>
                                 {% for county in counties %}
                                     <option value="{{ county.id }}" 
-                                            {% if swap_pref.desired_county_id == county.id|stringformat:"s" %}selected{% endif %}>
-                                        {{ county.name }}
-                                    </option>
+                                        {% if swap_pref.desired_county_id and swap_pref.desired_county_id|stringformat:'s' == county.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ county.name }}
+                                </option>
                                 {% endfor %}
                             </select>
                         </div>

@@ -13,30 +13,13 @@
             </div>
         </div>
 
-        <!-- Swap Management Section -->
-        <div class="mb-6 p-4 bg-gray-700 rounded-lg shadow">
-            <h2 class="text-lg font-semibold text-white mb-3">Swap Management</h2>
-            <div class="flex flex-wrap gap-4">
-                <a href="{% url 'users:primary_matched_swaps' %}" 
-                   class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
-                    Primary School Swaps
-                </a>
-                <a href="{% url 'users:high_school_matched_swaps' %}" 
-                   class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">
-                    High School Swaps
-                </a>
-            </div>
-        </div>
+   
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="bg-gray-700 p-4 rounded-lg shadow border-l-4 border-blue-500">
                 <div class="text-sm font-medium text-gray-300">Total Users</div>
                 <div class="text-2xl font-bold text-white">{{ total_users }}</div>
-            </div>
-            <div class="bg-gray-700 p-4 rounded-lg shadow border-l-4 border-green-500">
-                <div class="text-sm font-medium text-gray-300">Active Subscriptions</div>
-                <div class="text-2xl font-bold text-white">{{ active_subscriptions }}</div>
             </div>
             <div class="bg-gray-700 p-4 rounded-lg shadow border-l-4 border-yellow-500">
                 <div class="text-sm font-medium text-gray-300">Avg. Profile Completion</div>
@@ -78,7 +61,6 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Joined</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Profile Completion</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Subscription</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -138,7 +120,28 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="w-full" x-data="{ showTooltip: false }" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false">
+                            <div class="text-sm text-gray-200">{{ user_data.user.date_joined|date:"M d, Y" }}</div>
+                            <div class="text-xs text-gray-400">{{ user_data.user.date_joined|timesince }} ago</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="w-full cursor-help relative inline-block" 
+                                 x-data="{ showTooltip: false, tooltipX: 0, tooltipY: 0 }" 
+                                 @mousemove.self="
+                                    tooltipX = $event.pageX + 15;
+                                    tooltipY = $event.pageY + 15;
+                                    // Keep tooltip within viewport
+                                    const tooltipWidth = 320; // 20rem = 320px
+                                    const tooltipHeight = 300; // Approximate height
+                                    
+                                    if (tooltipX + tooltipWidth > window.innerWidth) {
+                                        tooltipX = $event.pageX - tooltipWidth - 10;
+                                    }
+                                    if (tooltipY + tooltipHeight > window.innerHeight) {
+                                        tooltipY = $event.pageY - tooltipHeight - 10;
+                                    }
+                                 "
+                                 @mouseenter="showTooltip = true" 
+                                 @mouseleave="showTooltip = false">
                                 <div class="flex items-center">
                                     <div class="w-16 text-right mr-2 text-sm font-medium {% if user_data.completion_percentage == 100 %}text-green-400{% else %}text-yellow-400{% endif %}">
                                         {{ user_data.completion_percentage|floatformat:0 }}%
@@ -149,15 +152,117 @@
                                         </div>
                                     </div>
                                 </div>
+                                
+                                <!-- Tooltip -->
+                                <div x-show="showTooltip" 
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 scale-95"
+                                     x-transition:enter-end="opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 scale-100"
+                                     x-transition:leave-end="opacity-0 scale-95"
+                                     class="fixed z-[9999] w-80 bg-gray-800 text-white text-sm rounded-lg shadow-xl p-4 border border-gray-600 pointer-events-none"
+                                     x-cloak
+                                     :style="`top: ${tooltipY}px; left: ${tooltipX}px; transform-origin: top left;`">
+                                    <div class="font-bold text-base mb-3 text-gray-200">Profile Completion Details</div>
+                                    <div class="space-y-2.5">
+                                        <div class="flex justify-between items-center">
+                                            <span class="flex items-center min-w-[120px]">
+                                                {% if user_data.completion_data.has_basic_info %}
+                                                    <svg class="w-4 h-4 text-green-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                    </svg>
+                                                {% else %}
+                                                    <svg class="w-4 h-4 text-red-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                    </svg>
+                                                {% endif %}
+                                                Basic Info
+                                            </span>
+                                            <span class="{% if user_data.completion_data.has_basic_info %}text-green-400{% else %}text-red-400{% endif %}">
+                                                {{ user_data.completion_data.has_basic_info|yesno:"Complete,Incomplete" }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <span class="flex items-center min-w-[120px]">
+                                                {% if user_data.completion_data.has_school_link %}
+                                                    <svg class="w-4 h-4 text-green-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                    </svg>
+                                                {% else %}
+                                                    <svg class="w-4 h-4 text-red-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                    </svg>
+                                                {% endif %}
+                                                School Link
+                                            </span>
+                                            <span class="{% if user_data.completion_data.has_school_link %}text-green-400{% else %}text-red-400{% endif %}">
+                                                {{ user_data.completion_data.has_school_link|yesno:"Complete,Incomplete" }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <span class="flex items-center min-w-[120px]">
+                                                {% if user_data.completion_data.has_level %}
+                                                    <svg class="w-4 h-4 text-green-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                    </svg>
+                                                {% else %}
+                                                    <svg class="w-4 h-4 text-red-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                    </svg>
+                                                {% endif %}
+                                                Level Set
+                                            </span>
+                                            <span class="{% if user_data.completion_data.has_level %}text-green-400{% else %}text-red-400{% endif %}">
+                                                {{ user_data.completion_data.has_level|yesno:"Complete,Incomplete" }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center">
+                                            <span class="flex items-center min-w-[120px]">
+                                                {% if user_data.completion_data.has_swap_prefs %}
+                                                    <svg class="w-4 h-4 text-green-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                    </svg>
+                                                {% else %}
+                                                    <svg class="w-4 h-4 text-red-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                    </svg>
+                                                {% endif %}
+                                                Swap Preferences
+                                            </span>
+                                            <span class="{% if user_data.completion_data.has_swap_prefs %}text-green-400{% else %}text-red-400{% endif %}">
+                                                {{ user_data.completion_data.has_swap_prefs|yesno:"Complete,Incomplete" }}
+                                            </span>
+                                        </div>
+                                        
+                                        {% if user_data.completion_data.subject_required %}
+                                        <div class="flex justify-between items-center">
+                                            <span class="flex items-center min-w-[120px]">
+                                                {% if user_data.completion_data.has_subjects %}
+                                                    <svg class="w-4 h-4 text-green-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                    </svg>
+                                                {% else %}
+                                                    <svg class="w-4 h-4 text-red-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                    </svg>
+                                                {% endif %}
+                                                Subjects
+                                            </span>
+                                            <span class="{% if user_data.completion_data.has_subjects %}text-green-400{% else %}text-red-400{% endif %}">
+                                                {{ user_data.completion_data.has_subjects|yesno:"Complete,Incomplete" }}
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            {% if user_data.has_active_subscription %}
-                                <span class="px-2 py-1 bg-green-900 text-green-200 text-xs rounded-full">Active</span>
-                                <div class="text-xs text-gray-400 mt-1">Since {{ user_data.user.subscription.start_date|date:"M d, Y" }}</div>
-                            {% else %}
-                                <span class="px-2 py-1 bg-red-900 text-red-200 text-xs rounded-full">Inactive</span>
-                            {% endif %}
                         </td>
+                        
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                             <a href="{% url 'users:admin_edit_user' user_data.user.id %}" class="text-blue-400 hover:text-blue-300">Edit</a>
                             {% if user_data.user.role == 'Teacher' %}
