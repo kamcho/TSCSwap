@@ -3,6 +3,7 @@ Custom error handlers for TSCSwap application.
 """
 from django.shortcuts import render
 from django.http import HttpResponseServerError, HttpResponseNotFound, HttpResponseForbidden
+from django.utils import timezone
 import logging
 
 logger = logging.getLogger(__name__)
@@ -46,11 +47,63 @@ def error_page(request, error_type='server_error', exception=None):
     if exception:
         logger.error(f"{error_info['title']}: {str(exception)}", exc_info=True)
     
+    # Save error to database
+    try:
+        from home.models import ErrorLog
+        import traceback
+        
+        # Get user (may be AnonymousUser)
+        user = None
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            user = request.user
+        
+        # Get exception details
+        exception_type = None
+        exception_message = str(exception) if exception else error_info['message']
+        exception_traceback = None
+        
+        if exception:
+            exception_type = type(exception).__name__
+            try:
+                exception_traceback = traceback.format_exc()
+            except:
+                pass
+        
+        # Get IP address
+        ip_address = None
+        if hasattr(request, 'META'):
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip_address = x_forwarded_for.split(',')[0].strip()
+            else:
+                ip_address = request.META.get('REMOTE_ADDR')
+        
+        # Get user agent
+        user_agent = request.META.get('HTTP_USER_AGENT', '')[:500] if hasattr(request, 'META') else ''
+        
+        # Create error log entry
+        ErrorLog.objects.create(
+            user=user,
+            error_type=error_type,
+            error_message=exception_message[:1000] if len(exception_message) > 1000 else exception_message,
+            page_url=request.build_absolute_uri()[:500] if hasattr(request, 'build_absolute_uri') else None,
+            request_path=request.path[:500] if hasattr(request, 'path') else None,
+            request_method=request.method if hasattr(request, 'method') else None,
+            status_code=error_info['status_code'],
+            exception_type=exception_type,
+            traceback=exception_traceback[:5000] if exception_traceback and len(exception_traceback) > 5000 else exception_traceback,
+            user_agent=user_agent,
+            ip_address=ip_address,
+        )
+    except Exception as e:
+        # If saving error log fails, just log it (don't break error page)
+        logger.error(f"Failed to save error log: {str(e)}")
+    
     context = {
         'error_title': error_info['title'],
         'error_message': error_info['message'],
         'status_code': error_info['status_code'],
-        'user': request.user if hasattr(request, 'user') else None,
+        'user': user if 'user' in locals() else (request.user if hasattr(request, 'user') else None),
     }
     
     return render(request, 'home/error_page.html', context, status=error_info['status_code'])

@@ -44,6 +44,46 @@ class ErrorHandlingMiddleware:
             }
         )
         
+        # Save error to database (error_page will handle this, but we can also do it here for middleware exceptions)
+        try:
+            from home.models import ErrorLog
+            import traceback
+            
+            # Get user (may be AnonymousUser)
+            user = None
+            if hasattr(request, 'user') and request.user.is_authenticated:
+                user = request.user
+            
+            # Get IP address
+            ip_address = None
+            if hasattr(request, 'META'):
+                x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                if x_forwarded_for:
+                    ip_address = x_forwarded_for.split(',')[0].strip()
+                else:
+                    ip_address = request.META.get('REMOTE_ADDR')
+            
+            # Get user agent
+            user_agent = request.META.get('HTTP_USER_AGENT', '')[:500] if hasattr(request, 'META') else ''
+            
+            # Create error log entry
+            ErrorLog.objects.create(
+                user=user,
+                error_type='exception',
+                error_message=str(exception)[:1000],
+                page_url=request.build_absolute_uri()[:500] if hasattr(request, 'build_absolute_uri') else None,
+                request_path=request.path[:500] if hasattr(request, 'path') else None,
+                request_method=request.method if hasattr(request, 'method') else None,
+                status_code=500,
+                exception_type=type(exception).__name__,
+                traceback=traceback.format_exc()[:5000],
+                user_agent=user_agent,
+                ip_address=ip_address,
+            )
+        except Exception as e:
+            # If saving error log fails, just log it (don't break error handling)
+            logger.error(f"Failed to save error log in middleware: {str(e)}")
+        
         # Redirect to error page
         try:
             from django.shortcuts import render

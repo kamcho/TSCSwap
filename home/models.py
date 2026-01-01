@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 User = settings.AUTH_USER_MODEL
 # Create your models here.
@@ -209,3 +210,119 @@ class Bookmark(models.Model):
         elif self.bookmark_type == 'fastswap' and self.fast_swap:
             return f"{self.user} bookmarked fastswap #{self.fast_swap.id}"
         return f"{self.user} bookmark"
+
+
+class ErrorLog(models.Model):
+    """
+    Model to store error logs for debugging and monitoring.
+    Captures user, error time, page/URL, and error details.
+    """
+    ERROR_TYPES = (
+        ('server_error', 'Server Error (500)'),
+        ('not_found', 'Not Found (404)'),
+        ('forbidden', 'Forbidden (403)'),
+        ('bad_request', 'Bad Request (400)'),
+        ('exception', 'Unhandled Exception'),
+    )
+    
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='error_logs',
+        help_text='User who encountered the error (null for anonymous users)'
+    )
+    error_type = models.CharField(
+        max_length=20, 
+        choices=ERROR_TYPES, 
+        default='exception',
+        help_text='Type of error that occurred'
+    )
+    error_message = models.TextField(
+        help_text='Error message or exception details'
+    )
+    page_url = models.URLField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text='URL/page where the error occurred'
+    )
+    request_path = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text='Request path where error occurred'
+    )
+    request_method = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True,
+        help_text='HTTP method (GET, POST, etc.)'
+    )
+    status_code = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text='HTTP status code'
+    )
+    exception_type = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text='Type of exception (e.g., ValueError, AttributeError)'
+    )
+    traceback = models.TextField(
+        null=True,
+        blank=True,
+        help_text='Full traceback for debugging (only in development)'
+    )
+    user_agent = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text='User agent/browser information'
+    )
+    ip_address = models.GenericIPAddressField(
+        null=True,
+        blank=True,
+        help_text='IP address of the user'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text='When the error occurred'
+    )
+    resolved = models.BooleanField(
+        default=False,
+        help_text='Whether this error has been resolved'
+    )
+    resolved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='When the error was marked as resolved'
+    )
+    notes = models.TextField(
+        null=True,
+        blank=True,
+        help_text='Admin notes about this error'
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Error Log'
+        verbose_name_plural = 'Error Logs'
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['error_type']),
+            models.Index(fields=['resolved']),
+            models.Index(fields=['user']),
+        ]
+    
+    def __str__(self):
+        user_str = self.user.email if self.user else 'Anonymous'
+        return f"{self.error_type} - {user_str} - {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+    
+    def mark_resolved(self):
+        """Mark this error as resolved."""
+        self.resolved = True
+        self.resolved_at = timezone.now()
+        self.save(update_fields=['resolved', 'resolved_at'])
