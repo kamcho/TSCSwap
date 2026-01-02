@@ -1054,11 +1054,14 @@ def admin_users_view(request):
         
         # Get phone number from profile if available
         phone_number = profile.phone if profile and hasattr(profile, 'phone') and profile.phone else ''
-        # Clean phone number (remove spaces, dashes, etc.)
-        phone_number = ''.join(filter(str.isdigit, str(phone_number)))
-        # Add country code if not present (assuming Kenya +254)
-        if phone_number and not phone_number.startswith('254') and len(phone_number) == 9:
-            phone_number = f'254{phone_number}'
+        # Normalize phone number to use Kenya country code 254
+        if phone_number:
+            # Import normalize function
+            from chat.whatsapp_integration import normalize_phone_number
+            # Normalize: if starts with 0, replace with 254
+            normalized_phone = normalize_phone_number(phone_number)
+            # Store normalized phone for display
+            phone_number = normalized_phone
         
         # Get user's subscription status
         has_active_subscription = hasattr(user, 'subscription') and user.subscription.is_active
@@ -1075,6 +1078,7 @@ def admin_users_view(request):
             'date_joined': user.date_joined,
             'last_login': user.last_login,
             'subscription': getattr(user, 'subscription', None),
+            'phone_number': phone_number,  # Store normalized phone number
             'whatsapp_url': f'https://wa.me/{phone_number}?text={encoded_message}' if phone_number else None,
             'has_phone': bool(phone_number)
         })

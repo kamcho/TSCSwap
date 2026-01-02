@@ -146,11 +146,11 @@ def normalize_phone_number(phone: str) -> str:
     
     # Handle Kenyan phone numbers
     # If it starts with 0 (local format), replace with 254
-    if normalized.startswith('0') and len(normalized) == 10:
+    if normalized.startswith('0'):
         normalized = '254' + normalized[1:]
     
-    # If it's 9 digits starting with 7 (without leading 0), add 254
-    if len(normalized) == 9 and normalized.startswith('7'):
+    # If it doesn't start with 254 and is 9 digits (typically starting with 7), add 254 prefix
+    if not normalized.startswith('254') and len(normalized) == 9:
         normalized = '254' + normalized
     
     return normalized
