@@ -16,6 +16,10 @@ def find_matches(user):
     if not user.profile.school:
         return MyUser.objects.none()
     
+    # Check teacher's level (NOT school level - teachers can have different level than their current school)
+    if not user.profile.level:
+        return MyUser.objects.none()
+    
     try:
         user_prefs = user.swappreference
     except:
@@ -23,7 +27,7 @@ def find_matches(user):
 
     # User's current details
     user_school = user.profile.school
-    user_level = user_school.level
+    user_level = user.profile.level  # IMPORTANT: Use teacher's level, not school's level!
     
     # Check ward/constituency/county exist
     if not user_school.ward:
@@ -48,8 +52,8 @@ def find_matches(user):
         ~Q(id=user.id),
         is_active=True,
         profile__isnull=False,
+        profile__level=user_level,  # Match by TEACHER's level, not school level
         profile__school__isnull=False,
-        profile__school__level=user_level,
         profile__school__ward__isnull=False,
         profile__school__ward__constituency__isnull=False,
         profile__school__ward__constituency__county__isnull=False,
@@ -57,7 +61,7 @@ def find_matches(user):
     ).select_related(
         'profile__school__ward__constituency__county',
         'swappreference__desired_county',
-        'profile__school__level'
+        'profile__level'  # Select teacher's level
     ).prefetch_related(
         'swappreference__open_to_all'
     )

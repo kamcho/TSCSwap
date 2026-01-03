@@ -33,6 +33,7 @@ class Command(BaseCommand):
                     data['has_profile'] = True
                     data['school'] = str(user.profile.school.name) if user.profile.school else None
                     data['school_level'] = str(user.profile.school.level.name) if user.profile.school and user.profile.school.level else None
+                    data['teacher_level'] = str(user.profile.level.name) if user.profile.level else None  # IMPORTANT: Teacher's actual level
                     
                     # Current location
                     if user.profile.school and user.profile.school.ward:
@@ -50,12 +51,14 @@ class Command(BaseCommand):
                     data['has_profile'] = False
                     data['school'] = None
                     data['school_level'] = None
+                    data['teacher_level'] = None
                     data['current_county'] = None
                     data['current_county_id'] = None
             except Exception as e:
                 data['has_profile'] = False
                 data['school'] = None
                 data['school_level'] = None
+                data['teacher_level'] = None
                 data['current_county'] = None
                 data['profile_error'] = str(e)
             
@@ -122,23 +125,25 @@ class Command(BaseCommand):
         print(f"  Secondary teachers: {secondary}/{len(users_data)}")
         
         # Show potential match pairs
-        matchable_users = [u for u in users_data if u.get('current_county') and u.get('desired_county')]
-        print(f"\n📊 MATCHABLE USERS (have both current & desired county): {len(matchable_users)}")
+        matchable_users = [u for u in users_data if u.get('current_county') and u.get('desired_county') and u.get('teacher_level')]
+        print(f"\n📊 MATCHABLE USERS (have location data AND teacher level): {len(matchable_users)}")
         
         if len(matchable_users) >= 2:
             print("\nLooking for potential matches...")
             matches_found = 0
             for i, user_a in enumerate(matchable_users):
                 for user_b in matchable_users[i+1:]:
-                    if (user_a['current_county'] == user_b['desired_county'] and 
+                    # Check if levels match AND locations are reciprocal
+                    if (user_a['teacher_level'] == user_b['teacher_level'] and
+                        user_a['current_county'] == user_b['desired_county'] and 
                         user_a['desired_county'] == user_b['current_county']):
                         matches_found += 1
                         print(f"\n  ✅ MATCH #{matches_found}:")
-                        print(f"     {user_a['email']}: {user_a['current_county']} → {user_a['desired_county']}")
-                        print(f"     {user_b['email']}: {user_b['current_county']} → {user_b['desired_county']}")
+                        print(f"     {user_a['email']} ({user_a['teacher_level']}): {user_a['current_county']} → {user_a['desired_county']}")
+                        print(f"     {user_b['email']} ({user_b['teacher_level']}): {user_b['current_county']} → {user_b['desired_county']}")
             
             if matches_found == 0:
                 print("  ❌ No valid 2-way matches found in production data!")
-                print("     (This explains why matching works locally but not in production)")
+                print("     (Check if users have same teacher level and reciprocal county preferences)")
         
         print("="*80 + "\n")
