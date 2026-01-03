@@ -1,0 +1,85 @@
+14:            {% if user.profile and user.profile.first_name %}
+16:            {% if user.profile.surname %} {{ user.profile.surname }}{% endif %}
+17:            {% if user.profile.last_name %} {{ user.profile.last_name }}{% endif %}
+24:            {% endif %}!
+38:                        class="px-3 py-1 rounded-full text-sm font-medium {% if profile_complete and user|is_profile_complete %}bg-green-900/30 text-green-400{% else %}bg-yellow-900/30 text-yellow-400{% endif %}">
+39:                        {% if profile_complete and user|is_profile_complete %}
+43:                        {% endif %}
+57:                            {% if personal_info_complete %}
+73:                            {% endif %}
+77:                            <span>{% if personal_info_complete %}Update{% else %}Complete{% endif %}</span>
+88:                            {% if teaching_level_complete %}
+104:                            {% endif %}
+108:                            <span>{% if teaching_level_complete %}Update{% else %}Set{% endif %}</span>
+119:                            {% if user.profile.school %}
+135:                            {% endif %}
+150:                            {% if preferences_complete %}
+166:                            {% endif %}
+170:                            <span>{% if preferences_complete %}Update{% else %}Set Up{% endif %}</span>
+179:                {% if not profile_complete %}
+186:                {% endif %}
+204:                            {% if is_secondary_level %}Secondary Teacher{% else %}Primary Teacher{% endif %}
+223:                        {% if user.profile.school %}
+244:                                            {% if user.profile.school.ward and user.profile.school.ward.constituency and                                             user.profile.school.ward.constituency.county %}
+250:                                            {% endif %}
+282:                        {% endif %}
+288:                    {% if is_secondary_level %}
+305:                        {% if user.mysubject_set.exists %}
+349:                        {% endif %}
+381:                    {% endif %}
+385:            {% if has_chat_history %}
+422:                                {% if chat.response %}
+441:                                {% endif %}
+448:                {% if chat_history|length >= 20 %}
+452:                {% endif %}
+454:            {% endif %}
+466:                {% if not user|is_profile_complete %}
+483:                                    {% if not user.first_name or not user.last_name or not user.profile.phone %}
+485:                                    {% endif %}
+486:                                    {% if not user.profile.school %}
+488:                                    {% endif %}
+489:                                    {% if not user.swappreference %}
+494:                                    {% endif %}
+495:                                    {% if not user.profile.level %}
+497:                                    {% endif %}
+498:                                    {% if user.profile.level and 'secondary' in user.profile.level.name|lower and not                                     user.mysubject_set.exists %}
+500:                                    {% endif %}
+518:                {% if has_potential_matches %}
+525:                    <a href="{% if is_secondary_level %}{% url 'users:find_secondary_matches' %}{% else %}{% url 'users:find_primary_matches' %}{% endif %}"
+539:                {% endif %}
+543:            {% if profile_complete and has_triangle_swaps %}
+568:                                    class="w-12 h-12 rounded-full {% if triangle.teacher_a.is_current_user %}bg-blue-600{% else %}bg-slate-600{% endif %} flex items-center justify-center text-white font-semibold">
+571:                                <span class="text-xs text-gray-400 mt-1">{% if triangle.teacher_a.is_current_user                                     %}You{% else %}{{ triangle.teacher_a.name|truncatewords:2 }}{% endif %}</span>
+579:                                    class="w-12 h-12 rounded-full {% if triangle.teacher_b.is_current_user %}bg-blue-600{% else %}bg-slate-600{% endif %} flex items-center justify-center text-white font-semibold">
+582:                                <span class="text-xs text-gray-400 mt-1">{% if triangle.teacher_b.is_current_user                                     %}You{% else %}{{ triangle.teacher_b.name|truncatewords:2 }}{% endif %}</span>
+590:                                    class="w-12 h-12 rounded-full {% if triangle.teacher_c.is_current_user %}bg-blue-600{% else %}bg-slate-600{% endif %} flex items-center justify-center text-white font-semibold">
+593:                                <span class="text-xs text-gray-400 mt-1">{% if triangle.teacher_c.is_current_user                                     %}You{% else %}{{ triangle.teacher_c.name|truncatewords:2 }}{% endif %}</span>
+600:                            <span class="text-gray-400">{% if triangle.teacher_a.is_current_user %}You{% else %}{{                                 triangle.teacher_a.name|truncatewords:1 }}{% endif %} (A)</span>
+604:                            <span class="text-gray-400">{% if triangle.teacher_b.is_current_user %}You{% else %}{{                                 triangle.teacher_b.name|truncatewords:1 }}{% endif %} (B)</span>
+608:                            <span class="text-gray-400">{% if triangle.teacher_c.is_current_user %}You{% else %}{{                                 triangle.teacher_c.name|truncatewords:1 }}{% endif %} (C)</span>
+613:                    {% if is_secondary_level and triangle.common_subjects %}
+622:                    {% endif %}
+626:            {% endif %}
+639:                    {% if received_requests %}
+646:                                        {% if request.requester.get_full_name %}
+649:                                        {{ request.requester.profile.first_name }}{% if                                         request.requester.profile.surname %} {{ request.requester.profile.surname }}{%                                         elif request.requester.profile.last_name %} {{                                         request.requester.profile.last_name }}{% endif %}
+652:                                        {% endif %}
+659:                                    class="px-2 py-1 text-xs rounded-full {% if request.accepted %}bg-green-900/30 text-green-400{% else %}bg-yellow-900/30 text-yellow-400{% endif %}">
+660:                                    {% if request.accepted %}Accepted{% else %}Pending{% endif %}
+666:                            {% if not request.accepted %}
+677:                            {% endif %}
+681:                    {% if received_requests|length > 3 %}
+686:                    {% endif %}
+689:                    {% endif %}
+699:                    {% if sent_requests %}
+706:                                        {% if request.target.get_full_name %}
+709:                                        {{ request.target.profile.first_name }}{% if request.target.profile.surname %}
+711:                                        {{ request.target.profile.last_name }}{% endif %}
+714:                                        {% endif %}
+721:                                    class="px-2 py-1 text-xs rounded-full {% if request.accepted %}bg-green-900/30 text-green-400{% else %}bg-yellow-900/30 text-yellow-400{% endif %}">
+722:                                    {% if request.accepted %}Accepted{% else %}Pending{% endif %}
+728:                            {% if not request.accepted %}
+735:                            {% endif %}
+739:                    {% if sent_requests|length > 3 %}
+744:                    {% endif %}
+747:                    {% endif %}

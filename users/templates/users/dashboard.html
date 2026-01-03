@@ -241,11 +241,8 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
-                                            {% if user.profile.school.ward and user.profile.school.ward.constituency and
-                                            user.profile.school.ward.constituency.county %}
-                                            {{ user.profile.school.ward.constituency.county.name }}, {{
-                                            user.profile.school.ward.constituency.name }}, {{
-                                            user.profile.school.ward.name }}
+                                            {% if user.profile.school.ward and user.profile.school.ward.constituency and user.profile.school.ward.constituency.county %}
+                                            {{ user.profile.school.ward.constituency.county.name }}, {{user.profile.school.ward.constituency.name }}
                                             {% else %}
                                             Location details incomplete
                                             {% endif %}
@@ -393,8 +390,7 @@
                         </svg>
                         Chat History
                     </h2>
-                    <span class="text-xs text-gray-400">{{ chat_history|length }} conversation{{
-                        chat_history|length|pluralize }}</span>
+                    <span class="text-xs text-gray-400">{{ chat_history|length }} conversation{{ chat_history|length|pluralize }}</span>
                 </div>
 
                 <div class="space-y-4 max-h-96 overflow-y-auto chat-history-scrollbar">
@@ -489,16 +485,14 @@
                                     {% endif %}
                                     {% if not user.swappreference %}
                                     <li>Set your swap preferences</li>
-                                    {% elif not user.swappreference.open_to_all and not
-                                    user.swappreference.desired_county %}
+                                    {% elif not user.swappreference.open_to_all and not user.swappreference.desired_county %}
                                     <li>Configure your swap preferences (either enable 'Open to All' or select a desired
                                         county)</li>
                                     {% endif %}
                                     {% if not user.profile.level %}
                                     <li>Set your teaching level</li>
                                     {% endif %}
-                                    {% if user.profile.level and 'secondary' in user.profile.level.name|lower and not
-                                    user.mysubject_set.exists %}
+                                    {% if user.profile.level and 'secondary' in user.profile.level.name|lower and not user.mysubject_set.exists %}
                                     <li>Add at least one subject you teach</li>
                                     {% endif %}
                                 </ul>
@@ -518,6 +512,7 @@
                         </a>
                     </div>
                 </div>
+                {% else %}
                 {% if has_potential_matches %}
                 <div class="space-y-4">
                     {% for match in potential_matches %}
@@ -525,7 +520,7 @@
                     {% endfor %}
                 </div>
                 <div class="mt-4 text-center">
-                    <a href="{% if is_secondary_level %}{% url 'users:find_secondary_matches' %}{% else %}{% url 'users:find_primary_matches' %}{% endfor %}"
+                    <a href="{% if is_secondary_level %}{% url 'users:find_secondary_matches' %}{% else %}{% url 'users:find_primary_matches' %}{% endif %}"
                         class="text-blue-400 hover:text-blue-300 text-sm font-medium">View All Matches</a>
                 </div>
                 {% else %}
@@ -539,6 +534,7 @@
                     <p class="mt-1 text-sm text-gray-500">We only show matches that perfectly align with your
                         preferences and subjects.</p>
                 </div>
+                {% endif %}
                 {% endif %}
             </div>
 
@@ -571,8 +567,8 @@
                                     class="w-12 h-12 rounded-full {% if triangle.teacher_a.is_current_user %}bg-blue-600{% else %}bg-slate-600{% endif %} flex items-center justify-center text-white font-semibold">
                                     A
                                 </div>
-                                <span class="text-xs text-gray-400 mt-1">{% if triangle.teacher_a.is_current_user
-                                    %}You{% else %}{{ triangle.teacher_a.name|truncatewords:2 }}{% endif %}</span>
+                                <span class="text-xs text-gray-400 mt-1">{% if triangle.teacher_a.is_current_user %}
+                                    You{% else %}{{ triangle.teacher_a.name|truncatewords:2 }}{% endif %}</span>
                             </div>
                             <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -583,8 +579,7 @@
                                     class="w-12 h-12 rounded-full {% if triangle.teacher_b.is_current_user %}bg-blue-600{% else %}bg-slate-600{% endif %} flex items-center justify-center text-white font-semibold">
                                     B
                                 </div>
-                                <span class="text-xs text-gray-400 mt-1">{% if triangle.teacher_b.is_current_user
-                                    %}You{% else %}{{ triangle.teacher_b.name|truncatewords:2 }}{% endif %}</span>
+                                <span class="text-xs text-gray-400 mt-1">{% if triangle.teacher_b.is_current_user                                     %}You{% else %}{{ triangle.teacher_b.name|truncatewords:2 }}{% endif %}</span>
                             </div>
                             <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -595,8 +590,7 @@
                                     class="w-12 h-12 rounded-full {% if triangle.teacher_c.is_current_user %}bg-blue-600{% else %}bg-slate-600{% endif %} flex items-center justify-center text-white font-semibold">
                                     C
                                 </div>
-                                <span class="text-xs text-gray-400 mt-1">{% if triangle.teacher_c.is_current_user
-                                    %}You{% else %}{{ triangle.teacher_c.name|truncatewords:2 }}{% endif %}</span>
+                                <span class="text-xs text-gray-400 mt-1">{% if triangle.teacher_c.is_current_user                                     %}You{% else %}{{ triangle.teacher_c.name|truncatewords:2 }}{% endif %}</span>
                             </div>
                         </div>
                     </div>
@@ -645,8 +639,7 @@
                 <!-- Received Requests -->
                 <div class="mb-6">
                     <h3 class="text-md font-medium text-white mb-3 flex items-center">
-                        <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">{{
-                            received_requests|length }}</span>
+                        <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">{{ received_requests|length }}</span>
                         Received Requests
                     </h3>
                     {% if received_requests %}
@@ -658,10 +651,9 @@
                                     <h4 class="font-medium text-white">
                                         {% if request.requester.get_full_name %}
                                         {{ request.requester.get_full_name }}
-                                        {% elif request.requester.profile.first_name %}
-                                        {{ request.requester.profile.first_name }}{% if
-                                        request.requester.profile.surname %} {{ request.requester.profile.surname }}{%
-                                        elif request.requester.profile.last_name %} {{
+                                        {% elif request.requester.profile.first_name %} {{
+                                        request.requester.profile.first_name }}{% if request.requester.profile.surname                                         %} {{ request.requester.profile.surname }}{% elif
+                                        request.requester.profile.last_name %} {{
                                         request.requester.profile.last_name }}{% endif %}
                                         {% else %}
                                         {{ request.requester.username|default:request.requester.email }}
@@ -708,8 +700,7 @@
                 <!-- Sent Requests -->
                 <div>
                     <h3 class="text-md font-medium text-white mb-3 flex items-center">
-                        <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">{{
-                            sent_requests|length }}</span>
+                        <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mr-2">{{ sent_requests|length }}</span>
                         Sent Requests
                     </h3>
                     {% if sent_requests %}
