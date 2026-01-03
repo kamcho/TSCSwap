@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Q
 from home.models import MySubject, Subject, SwapPreference, Schools
+from home.matching import find_matches
 from .models import MyUser
 
 @staff_member_required
@@ -93,47 +94,10 @@ def user_management(request):
             print(f"Error calculating triangle swaps for user {user.id}: {str(e)}")
             user_dict['triangle_swaps'] = 0
 
-        # Calculate potential matches using the same logic as the dashboard
+        # Calculate potential matches using the central logic
         try:
-            if hasattr(user, 'profile') and user.profile.school and hasattr(user.profile.school, 'level'):
-                # Only count matches if user has completed profile and preferences
-                if hasattr(user, 'swappreference'):
-                    # Get user's county from school
-                    user_county = user.profile.school.ward.constituency.county if hasattr(user.profile.school, 'ward') and user.profile.school.ward else None
-                    
-                    if user_county:
-                        # Base query for potential matches
-                        potential_matches = MyUser.objects.filter(
-                            ~Q(id=user.id),
-                            is_active=True,
-                            profile__isnull=False,
-                            profile__school__isnull=False,
-                            swappreference__isnull=False
-                        )
-                        
-                        # Filter by swap preferences (county match or open to all)
-                        potential_matches = potential_matches.filter(
-                            Q(swappreference__desired_county=user_county) |
-                            Q(swappreference__open_to_all=user_county)
-                        )
-                        
-                        # For secondary/high school, check subject matches
-                        is_secondary = 'secondary' in user.profile.school.level.name.lower() or 'high' in user.profile.school.level.name.lower()
-                        if is_secondary and hasattr(user, 'mysubject_set'):
-                            user_subjects = set(MySubject.objects.filter(
-                                user=user
-                            ).values_list('subject__id', flat=True))
-                            
-                            if user_subjects:
-                                # Only include users who teach at least one of the same subjects
-                                potential_matches = potential_matches.filter(
-                                    id__in=MySubject.objects.filter(
-                                        subject__in=user_subjects
-                                    ).values('user')
-                                ).distinct()
-                        
-                        user_dict['potential_matches'] = potential_matches.count()
-                        
+            # use find_matches to ensure consistency with dashboard and individual view
+            user_dict['potential_matches'] = find_matches(user).count()
         except Exception as e:
             print(f"Error calculating matches for user {user.id}: {str(e)}")
             user_dict['potential_matches'] = 0
@@ -214,108 +178,168 @@ def user_potential_matches(request, user_id):
             'is_hardship': prefs.is_hardship
         }
 
-    # Find potential matches using the same logic as the dashboard
+    # Find potential matches using the central matching logic
     potential_matches = []
-    if hasattr(user, 'profile') and user.profile.school and hasattr(user.profile.school, 'level'):
-        # Only show matches if user has completed profile and preferences
-        if hasattr(user, 'swappreference'):
-            # Get user's county from school
-            user_county = user.profile.school.ward.constituency.county if hasattr(user.profile.school, 'ward') and user.profile.school.ward else None
+    
+    try:
+        matches = find_matches(user)
+        
+        # Prepare match data for display
+        for match in matches:
+            # Build full name from profile if available
+            full_name = 'No Name'
+            name_parts = []
+            if hasattr(match, 'profile') and match.profile:
+                if match.profile.first_name:
+                    name_parts.append(match.profile.first_name)
+                if match.profile.surname:
+                    name_parts.append(match.profile.surname)
+                elif match.profile.last_name:  # Only use last_name if surname isn't set
+                    name_parts.append(match.profile.last_name)
             
-            if user_county:
-                # Base query for potential matches
-                matches = MyUser.objects.filter(
-                    ~Q(id=user.id),
-                    is_active=True,
-                    profile__isnull=False,
-                    profile__school__isnull=False,
-                    swappreference__isnull=False
-                ).prefetch_related(
-                    'profile__school__level',
-                    'profile__school__ward__constituency__county',
-                    'mysubject_set__subject',
-                    'swappreference'
-                )
+            if name_parts:
+                full_name = ' '.join(name_parts)
+            
+            match_data = {
+                'id': match.id,
+                'email': match.email,
+                'full_name': full_name,
+                'phone': match.profile.phone if hasattr(match, 'profile') and match.profile.phone else '-',
+                'school': None,
+                'subjects': []
+            }
+            
+            # Add school info
+            if hasattr(match, 'profile') and hasattr(match.profile, 'school') and match.profile.school:
+                school = match.profile.school
+                match_data['school'] = {
+                    'name': school.name,
+                    'ward': school.ward.name if school.ward else 'N/A',
+                    'constituency': school.ward.constituency.name if school.ward and school.ward.constituency else 'N/A',
+                    'county': school.ward.constituency.county.name if school.ward and school.ward.constituency and school.ward.constituency.county else 'N/A',
+                    'level': school.level.name if hasattr(school, 'level') and school.level else 'N/A'
+                }
+            
+            # Add subjects
+            if hasattr(match, 'mysubject_set'):
+                # Get all MySubject instances for this user
+                my_subjects = match.mysubject_set.all()
+                subjects = []
+                for my_subject in my_subjects:
+                    # Get all subjects from the many-to-many relationship
+                    subjects.extend([s.name for s in my_subject.subject.all()])
+                match_data['subjects'] = subjects
+            else:
+                match_data['subjects'] = []
+            
+            potential_matches.append(match_data)
+            
+    except Exception as e:
+        print(f"Error finding matches for {user.email}: {e}")
+    # Find triangle matches
+    triangle_matches = []
+    try:
+        from home.triangle_swap_utils import find_triangle_swaps_primary, find_triangle_swaps_secondary
+        
+        if hasattr(user, 'profile') and user.profile.school and hasattr(user.profile.school, 'level') and hasattr(user, 'swappreference'):
+            user_level = user.profile.school.level
+            is_secondary = 'secondary' in user_level.name.lower() or 'high' in user_level.name.lower()
+            
+            # Get all teachers at the same level (needed for triangle search)
+            # This replicates logic from user_management view
+            teachers = MyUser.objects.filter(
+                is_active=True,
+                role='Teacher',
+                profile__isnull=False,
+                profile__school__isnull=False,
+                profile__school__level=user_level,
+                swappreference__isnull=False
+            ).select_related(
+                'profile__school__ward__constituency__county',
+                'swappreference__desired_county',
+                'profile__school__level'
+            ).prefetch_related(
+                'swappreference__open_to_all',
+                'mysubject_set__subject'
+            ).distinct()
+            
+            # Find all triangles
+            if is_secondary:
+                all_triangles = find_triangle_swaps_secondary(teachers)
+            else:
+                all_triangles = find_triangle_swaps_primary(teachers)
+            
+            # Filter for triangles involving this user
+            for triangle in all_triangles:
+                teacher_a, teacher_b, teacher_c = triangle
                 
-                # Filter by swap preferences (county match or open to all)
-                matches = matches.filter(
-                    Q(swappreference__desired_county=user_county) |
-                    Q(swappreference__open_to_all=user_county)
-                )
+                # Check if user is in this triangle
+                user_in_triangle = False
+                teachers_ordered = [] # Will order as User -> Next -> Next
                 
-                # For secondary/high school, check subject matches
-                is_secondary = 'secondary' in user.profile.school.level.name.lower() or 'high' in user.profile.school.level.name.lower()
-                if is_secondary and hasattr(user, 'mysubject_set'):
-                    user_subjects = set(MySubject.objects.filter(
-                        user=user
-                    ).values_list('subject__id', flat=True))
-                    
-                    if user_subjects:
-                        # Only include users who teach at least one of the same subjects
-                        matches = matches.filter(
-                            id__in=MySubject.objects.filter(
-                                subject__in=user_subjects
-                            ).values('user')
-                        )
+                if teacher_a.id == user.id:
+                    user_in_triangle = True
+                    teachers_ordered = [teacher_b, teacher_c] # The two OTHER teachers
+                elif teacher_b.id == user.id:
+                    user_in_triangle = True
+                    teachers_ordered = [teacher_c, teacher_a]
+                elif teacher_c.id == user.id:
+                    user_in_triangle = True
+                    teachers_ordered = [teacher_a, teacher_b]
                 
-                # Prepare match data for display
-                for match in matches.distinct():
-                    # Build full name from profile if available
-                    full_name = 'No Name'
-                    name_parts = []
-                    if hasattr(match, 'profile') and match.profile:
-                        if match.profile.first_name:
-                            name_parts.append(match.profile.first_name)
-                        if match.profile.surname:
-                            name_parts.append(match.profile.surname)
-                        elif match.profile.last_name:  # Only use last_name if surname isn't set
-                            name_parts.append(match.profile.last_name)
-                    
-                    if name_parts:
-                        full_name = ' '.join(name_parts)
-                    
-                    match_data = {
-                        'id': match.id,
-                        'email': match.email,
-                        'full_name': full_name,
-                        'phone': match.profile.phone if hasattr(match, 'profile') and match.profile.phone else '-',
-                        'school': None,
-                        'subjects': []
-                    }
-                    
-                    # Add school info
-                    if hasattr(match, 'profile') and hasattr(match.profile, 'school') and match.profile.school:
-                        school = match.profile.school
-                        match_data['school'] = {
-                            'name': school.name,
-                            'ward': school.ward.name if school.ward else 'N/A',
-                            'constituency': school.ward.constituency.name if school.ward and school.ward.constituency else 'N/A',
-                            'county': school.ward.constituency.county.name if school.ward and school.ward.constituency and school.ward.constituency.county else 'N/A',
-                            'level': school.level.name if hasattr(school, 'level') and school.level else 'N/A'
+                if user_in_triangle:
+                    # Process these 2 matches for display
+                    triangle_data = []
+                    for match in teachers_ordered:
+                        match_info = {
+                            'id': match.id,
+                            'full_name': 'Unknown',
+                            'email': match.email,
+                            'phone': '-',
+                            'school': None,
+                            'subjects': []
                         }
+                        
+                        # Name
+                        if hasattr(match, 'profile') and match.profile:
+                            name_parts = []
+                            if match.profile.first_name: name_parts.append(match.profile.first_name)
+                            if match.profile.surname: name_parts.append(match.profile.surname)
+                            elif match.profile.last_name: name_parts.append(match.profile.last_name)
+                            if name_parts: match_info['full_name'] = ' '.join(name_parts)
+                            
+                            if match.profile.phone: match_info['phone'] = match.profile.phone
+                            
+                            if match.profile.school:
+                                school = match.profile.school
+                                match_info['school'] = {
+                                    'name': school.name,
+                                    'county': school.ward.constituency.county.name if school.ward and school.ward.constituency and school.ward.constituency.county else 'N/A'
+                                }
+                        
+                        # Subjects
+                        if hasattr(match, 'mysubject_set'):
+                            subjects = []
+                            for ms in match.mysubject_set.all():
+                                subjects.extend([s.name for s in ms.subject.all()])
+                            match_info['subjects'] = subjects
+                            
+                        triangle_data.append(match_info)
                     
-                    # Add subjects
-                    if hasattr(match, 'mysubject_set'):
-                        # Get all MySubject instances for this user
-                        my_subjects = match.mysubject_set.all()
-                        subjects = []
-                        for my_subject in my_subjects:
-                            # Get all subjects from the many-to-many relationship
-                            subjects.extend([s.name for s in my_subject.subject.all()])
-                        match_data['subjects'] = subjects
-                        print(f"Match {match.id} subjects: {subjects}")
-                    else:
-                        match_data['subjects'] = []
-                        print(f"Match {match.id} has no mysubject_set")
-                    
-                    potential_matches.append(match_data)
-                    print(f"Added match data: {match_data}")  # Debug output
+                    triangle_matches.append(triangle_data)
+
+    except Exception as e:
+        print(f"Error finding triangle matches for {user.email}: {e}")
+
 
     context = {
         'title': f'Potential Matches for {user_data["full_name"]}',
         'user': user_data,
         'potential_matches': potential_matches,
-        'has_matches': len(potential_matches) > 0
+        'triangle_matches': triangle_matches,
+        'has_matches': len(potential_matches) > 0 or len(triangle_matches) > 0,
+        'has_mutual_matches': len(potential_matches) > 0,
+        'has_triangle_matches': len(triangle_matches) > 0
     }
     
     return render(request, 'users/admin/user_potential_matches.html', context)

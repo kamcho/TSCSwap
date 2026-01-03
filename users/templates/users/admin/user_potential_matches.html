@@ -6,13 +6,12 @@
 {% block extra_css %}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 <style>
-    
     .dashboard-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1.5rem;
     }
-    
+
     .dashboard-card {
         background: transparent;
         border: 1px solid rgba(148, 163, 184, 0.2);
@@ -20,12 +19,12 @@
         padding: 1.5rem;
         transition: all 0.3s ease;
     }
-    
+
     .dashboard-card:hover {
         border-color: rgba(59, 130, 246, 0.4);
         transform: translateY(-2px);
     }
-    
+
     .dashboard-card-header {
         display: flex;
         align-items: center;
@@ -33,7 +32,7 @@
         padding-bottom: 1rem;
         border-bottom: 1px solid rgba(148, 163, 184, 0.15);
     }
-    
+
     .dashboard-card-title {
         font-size: 1rem;
         font-weight: 600;
@@ -42,11 +41,11 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
-    
+
     .dashboard-card-content {
         color: #e2e8f0;
     }
-    
+
     .dashboard-info-row {
         display: flex;
         justify-content: space-between;
@@ -54,11 +53,11 @@
         padding: 0.75rem 0;
         border-bottom: 1px solid rgba(148, 163, 184, 0.1);
     }
-    
+
     .dashboard-info-row:last-child {
         border-bottom: none;
     }
-    
+
     .dashboard-label {
         color: #94a3b8;
         font-size: 0.8125rem;
@@ -66,15 +65,15 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
-    
+
     .dashboard-value {
         color: #ffffff;
         font-weight: 500;
         font-size: 0.9375rem;
         text-align: right;
     }
-    
-    
+
+
     .info-item {
         margin-bottom: 1rem;
         padding: 0.75rem;
@@ -82,7 +81,7 @@
         border-radius: 6px;
         border-left: 3px solid rgba(59, 130, 246, 0.3);
     }
-    
+
     .info-label {
         color: #94a3b8;
         font-size: 0.75rem;
@@ -91,25 +90,25 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
-    
+
     .info-value {
         color: #ffffff;
         font-weight: 500;
         font-size: 0.9375rem;
     }
-    
+
     /* Matches Section */
     .matches-section {
         margin-top: 2rem;
     }
-    
+
     .matches-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 1.5rem;
         margin-top: 1.5rem;
     }
-    
+
     /* Match Cards */
     .match-card {
         background: transparent;
@@ -118,13 +117,13 @@
         border: 1px solid rgba(148, 163, 184, 0.2);
         transition: all 0.3s ease;
     }
-    
+
     .match-card:hover {
         transform: translateY(-4px);
         border-color: rgba(59, 130, 246, 0.5);
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     }
-    
+
     .match-header {
         display: flex;
         align-items: center;
@@ -132,7 +131,7 @@
         padding-bottom: 1rem;
         border-bottom: 1px solid rgba(148, 163, 184, 0.15);
     }
-    
+
     .match-avatar {
         width: 56px;
         height: 56px;
@@ -146,35 +145,36 @@
         font-size: 1.5rem;
         color: #60a5fa;
     }
-    
+
     .match-name {
         font-size: 1.125rem;
         font-weight: 700;
         margin: 0 0 0.25rem 0;
         color: #ffffff;
     }
-    
+
     .match-email {
         font-size: 0.8125rem;
         color: #94a3b8;
         margin: 0;
     }
-    
+
     .match-details {
         margin-bottom: 1.5rem;
     }
-    .match-details .space-y-3 > * + * {
+
+    .match-details .space-y-3>*+* {
         margin-top: 0.75rem;
     }
-    
-    
+
+
     .match-subjects {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
         margin-bottom: 1.5rem;
     }
-    
+
     .subject-tag {
         background: rgba(148, 163, 184, 0.15);
         color: #cbd5e1;
@@ -184,7 +184,7 @@
         border: 1px solid rgba(148, 163, 184, 0.3);
         font-weight: 500;
     }
-    
+
     .contact-button {
         display: block;
         width: 100%;
@@ -198,14 +198,14 @@
         border: 1px solid rgba(59, 130, 246, 0.3);
         transition: all 0.2s ease;
     }
-    
+
     .contact-button:hover {
         background: rgba(59, 130, 246, 0.25);
         border-color: rgba(59, 130, 246, 0.5);
         color: #60a5fa;
         transform: translateY(-1px);
     }
-    
+
     .user-potential-matches {
         padding: 2rem;
         max-width: 1400px;
@@ -213,6 +213,7 @@
         color: #e2e8f0;
         min-height: 100vh;
     }
+
     .back-link {
         display: inline-flex;
         align-items: center;
@@ -222,10 +223,12 @@
         font-weight: 500;
         transition: color 0.2s;
     }
+
     .back-link:hover {
         color: #3b82f6;
         text-decoration: none;
     }
+
     .user-card {
         background: transparent;
         border: 1px solid rgba(148, 163, 184, 0.2);
@@ -233,6 +236,7 @@
         padding: 1.5rem;
         margin-bottom: 2rem;
     }
+
     .user-card h2 {
         margin-top: 0;
         color: #ffffff;
@@ -242,18 +246,21 @@
         padding-bottom: 0.75rem;
         margin-bottom: 1.5rem;
     }
+
     .info-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2rem;
     }
+
     .info-section {
         background: transparent;
         border: 1px solid rgba(148, 163, 184, 0.15);
         border-radius: 8px;
         padding: 1.25rem;
     }
+
     .info-section h3 {
         margin-top: 0;
         color: #94a3b8;
@@ -265,6 +272,7 @@
         margin-bottom: 1rem;
         font-weight: 600;
     }
+
     .badge {
         display: inline-block;
         padding: 0.375rem 0.75rem;
@@ -274,22 +282,26 @@
         margin-right: 0.5rem;
         margin-bottom: 0.5rem;
     }
+
     .badge-primary {
         background-color: rgba(59, 130, 246, 0.2);
         color: #60a5fa;
         border: 1px solid rgba(59, 130, 246, 0.3);
     }
+
     .badge-secondary {
         background-color: rgba(148, 163, 184, 0.15);
         color: #cbd5e1;
         border: 1px solid rgba(148, 163, 184, 0.3);
     }
+
     .matches-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         gap: 1.5rem;
         margin-top: 2rem;
     }
+
     .no-matches {
         text-align: center;
         padding: 4rem 2rem;
@@ -298,21 +310,25 @@
         border-radius: 12px;
         margin-top: 2rem;
     }
+
     .no-matches-icon {
         font-size: 3rem;
         color: #64748b;
         margin-bottom: 1rem;
     }
+
     .no-matches h3 {
         color: #94a3b8;
         font-size: 1.25rem;
         font-weight: 600;
         margin-bottom: 0.5rem;
     }
+
     .no-matches p {
         color: #64748b;
         font-size: 0.875rem;
     }
+
     .contact-button {
         display: inline-block;
         background: rgba(59, 130, 246, 0.15);
@@ -325,6 +341,7 @@
         border: 1px solid rgba(59, 130, 246, 0.3);
         transition: all 0.2s ease;
     }
+
     .contact-button:hover {
         background: rgba(59, 130, 246, 0.25);
         border-color: rgba(59, 130, 246, 0.5);
@@ -337,8 +354,17 @@
 
 {% block content %}
 <div class="user-potential-matches">
-    <a href="{% url 'users_admin:user_management' %}" class="back-link">← Back to User Management</a>
-    
+    <div class="mb-6">
+        <a href="{% url 'users_admin:user_management' %}"
+            class="inline-flex items-center px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition-all font-medium text-sm group">
+            <svg class="w-4 h-4 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to User Management
+        </a>
+    </div>
+
     <!-- Dashboard Header -->
     <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
@@ -391,19 +417,20 @@
             </div>
             <div class="dashboard-card-content">
                 {% if user.school %}
-                    <div class="mb-4">
-                        <div class="text-lg font-bold text-white mb-1">{{ user.school.name }}</div>
-                        <div class="text-sm text-gray-400">{{ user.school.ward }}, {{ user.school.constituency }}</div>
-                        <div class="text-xs text-gray-500 mt-1">{{ user.school.county }}</div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="px-3 py-1.5 bg-purple-500/20 text-purple-300 rounded-full text-sm font-medium border border-purple-500/30">
-                            <i class="fas fa-graduation-cap mr-1.5"></i>
-                            {{ user.school.level }}
-                        </span>
-                    </div>
+                <div class="mb-4">
+                    <div class="text-lg font-bold text-white mb-1">{{ user.school.name }}</div>
+                    <div class="text-sm text-gray-400">{{ user.school.ward }}, {{ user.school.constituency }}</div>
+                    <div class="text-xs text-gray-500 mt-1">{{ user.school.county }}</div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span
+                        class="px-3 py-1.5 bg-purple-500/20 text-purple-300 rounded-full text-sm font-medium border border-purple-500/30">
+                        <i class="fas fa-graduation-cap mr-1.5"></i>
+                        {{ user.school.level }}
+                    </span>
+                </div>
                 {% else %}
-                    <div class="text-gray-400 italic">No school information available</div>
+                <div class="text-gray-400 italic">No school information available</div>
                 {% endif %}
             </div>
         </div>
@@ -416,15 +443,15 @@
             </div>
             <div class="dashboard-card-content">
                 {% if user.subjects %}
-                    <div class="flex flex-wrap gap-2">
-                        {% for subject in user.subjects %}
-                            <span class="subject-tag">
-                                {{ subject }}
-                            </span>
-                        {% endfor %}
-                    </div>
+                <div class="flex flex-wrap gap-2">
+                    {% for subject in user.subjects %}
+                    <span class="subject-tag">
+                        {{ subject }}
+                    </span>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    <div class="text-gray-400 italic">No subjects listed</div>
+                <div class="text-gray-400 italic">No subjects listed</div>
                 {% endif %}
             </div>
         </div>
@@ -439,7 +466,8 @@
                 <div class="space-y-3">
                     <div>
                         <span class="dashboard-label block mb-1">Desired County</span>
-                        <span class="px-3 py-1.5 bg-green-500/20 text-green-300 rounded-full text-sm font-medium border border-green-500/30 inline-block">
+                        <span
+                            class="px-3 py-1.5 bg-green-500/20 text-green-300 rounded-full text-sm font-medium border border-green-500/30 inline-block">
                             {{ user.preferences.desired_county|default:"Any" }}
                         </span>
                     </div>
@@ -450,123 +478,215 @@
                     <div>
                         <span class="dashboard-label block mb-1">Open To All</span>
                         {% if user.preferences.open_to_all %}
-                            <span class="px-3 py-1.5 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium border border-blue-500/30 inline-block">
-                                {{ user.preferences.open_to_all }}
-                            </span>
+                        <span
+                            class="px-3 py-1.5 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium border border-blue-500/30 inline-block">
+                            {{ user.preferences.open_to_all }}
+                        </span>
                         {% else %}
-                            <span class="text-gray-400 italic text-sm">Not specified</span>
+                        <span class="text-gray-400 italic text-sm">Not specified</span>
                         {% endif %}
                     </div>
                     <div>
                         <span class="dashboard-label block mb-1">Hardship Preference</span>
                         {% if user.preferences.is_hardship %}
-                            <span class="badge badge-primary">
-                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                Hardship Area
-                            </span>
+                        <span class="badge badge-primary">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Hardship Area
+                        </span>
                         {% else %}
-                            <span class="badge badge-secondary">Non-Hardship</span>
+                        <span class="badge badge-secondary">Non-Hardship</span>
                         {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Potential Matches Section -->
     <div class="matches-section">
+        <!-- Mutual Swaps Header -->
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h2 class="text-2xl font-bold text-white mb-2">Potential Swap Matches</h2>
-                <p class="text-gray-400 text-sm">Teachers who match this user's preferences and location</p>
+                <h2 class="text-2xl font-bold text-white mb-2">Mutual Swaps (2-Way)</h2>
+                <p class="text-gray-400 text-sm">Direct swaps where two teachers exchange locations</p>
             </div>
             <div class="px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
                 <div class="text-xl font-bold text-blue-400">{{ potential_matches|length }}</div>
-                <div class="text-xs text-blue-300 uppercase tracking-wide">Total Matches</div>
+                <div class="text-xs text-blue-300 uppercase tracking-wide">Matches</div>
             </div>
         </div>
-        
-        {% if has_matches %}
-            <div class="matches-grid">
-                {% for match in potential_matches %}
-                    <div class="match-card">
-                        <div class="match-header">
-                            <div class="match-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
+
+        {% if has_mutual_matches %}
+        <div class="matches-grid">
+            {% for match in potential_matches %}
+            <div class="match-card">
+                <div class="match-header">
+                    <div class="match-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="match-name">{{ match.full_name }}</h3>
+                        <p class="match-email text-sm text-gray-400">{{ match.email }}</p>
+                        {% if match.phone and match.phone != '-' %}
+                        <p class="text-xs text-gray-500 mt-1 flex items-center">
+                            <i class="fas fa-phone-alt mr-1.5"></i>
+                            {{ match.phone }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="match-details space-y-3">
+                    {% if match.school %}
+                    <div class="bg-slate-800/30 rounded-lg p-3 border border-slate-700/30">
+                        <div class="flex items-start">
+                            <i class="fas fa-school text-blue-400 mr-2 mt-0.5"></i>
                             <div class="flex-1">
-                                <h3 class="match-name">{{ match.full_name }}</h3>
-                                <p class="match-email text-sm text-gray-400">{{ match.email }}</p>
-                                {% if match.phone and match.phone != '-' %}
-                                    <p class="text-xs text-gray-500 mt-1 flex items-center">
-                                        <i class="fas fa-phone-alt mr-1.5"></i> 
-                                        {{ match.phone }}
-                                    </p>
-                                {% endif %}
+                                <p class="match-school font-semibold text-white mb-1">{{ match.school.name }}</p>
+                                <p class="match-location text-xs text-gray-400 flex items-center">
+                                    <i class="fas fa-map-marker-alt mr-1.5 text-gray-500"></i>
+                                    {{ match.school.ward }}, {{ match.school.county }}
+                                </p>
                             </div>
-                        </div>
-                        
-                        <div class="match-details space-y-3">
-                            {% if match.school %}
-                                <div class="bg-slate-800/30 rounded-lg p-3 border border-slate-700/30">
-                                    <div class="flex items-start">
-                                        <i class="fas fa-school text-blue-400 mr-2 mt-0.5"></i>
-                                        <div class="flex-1">
-                                            <p class="match-school font-semibold text-white mb-1">{{ match.school.name }}</p>
-                                            <p class="match-location text-xs text-gray-400 flex items-center">
-                                                <i class="fas fa-map-marker-alt mr-1.5 text-gray-500"></i>
-                                                {{ match.school.ward }}, {{ match.school.county }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-center text-sm">
-                                    <span class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs font-medium border border-purple-500/30">
-                                        <i class="fas fa-graduation-cap mr-1.5"></i>
-                                        {{ match.school.level }}
-                                    </span>
-                                </div>
-                            {% endif %}
-                            
-                            {% if match.subjects %}
-                                <div>
-                                    <h4 class="text-xs uppercase tracking-wide text-gray-400 mb-2 flex items-center">
-                                        <i class="fas fa-book mr-1.5"></i>
-                                        Teaching Subjects
-                                    </h4>
-                                    <div class="match-subjects">
-                                        {% for subject in match.subjects|slice:":4" %}
-                                            <span class="subject-tag">{{ subject }}</span>
-                                        {% endfor %}
-                                        {% if match.subjects|length > 4 %}
-                                            <span class="subject-tag">+{{ match.subjects|length|add:"-4" }} more</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mt-4 pt-4 border-t border-slate-700/30">
-                            <a href="mailto:{{ match.email }}" class="contact-button">
-                                <i class="fas fa-envelope mr-2"></i> 
-                                Send Message
-                            </a>
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="no-matches">
-                <div class="no-matches-icon">
-                    <i class="fas fa-search"></i>
+
+                    <div class="flex items-center text-sm">
+                        <span
+                            class="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs font-medium border border-purple-500/30">
+                            <i class="fas fa-graduation-cap mr-1.5"></i>
+                            {{ match.school.level }}
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    {% if match.subjects %}
+                    <div>
+                        <h4 class="text-xs uppercase tracking-wide text-gray-400 mb-2 flex items-center">
+                            <i class="fas fa-book mr-1.5"></i>
+                            Teaching Subjects
+                        </h4>
+                        <div class="match-subjects">
+                            {% for subject in match.subjects|slice:":4" %}
+                            <span class="subject-tag">{{ subject }}</span>
+                            {% endfor %}
+                            {% if match.subjects|length > 4 %}
+                            <span class="subject-tag">+{{ match.subjects|length|add:"-4" }} more</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-                <h3>No Matches Found</h3>
-                <p>This user doesn't have any potential swap matches at the moment.</p>
-                <p class="text-xs text-gray-500 mt-2">Matches are based on location preferences and teaching subjects.</p>
+
+                <div class="mt-4 pt-4 border-t border-slate-700/30">
+                    <a href="mailto:{{ match.email }}" class="contact-button">
+                        <i class="fas fa-envelope mr-2"></i>
+                        Send Message
+                    </a>
+                </div>
             </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-matches mb-12">
+            <div class="no-matches-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3>No Mutual Matches Found</h3>
+            <p>No direct swaps available for this user's preferences.</p>
+        </div>
+        {% endif %}
+
+        <!-- Triangle Swaps Header -->
+        <div class="flex items-center justify-between mb-6 mt-12 border-t border-slate-700/50 pt-12">
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-2">Triangle Swaps (3-Way)</h2>
+                <p class="text-gray-400 text-sm">Circular swaps: User &rarr; Teacher B &rarr; Teacher C &rarr; User</p>
+            </div>
+            <div class="px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg">
+                <div class="text-xl font-bold text-purple-400">{{ triangle_matches|length }}</div>
+                <div class="text-xs text-purple-300 uppercase tracking-wide">Triangles</div>
+            </div>
+        </div>
+
+        {% if has_triangle_matches %}
+        <div class="space-y-6">
+            {% for triangle in triangle_matches %}
+            <div class="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6">
+                <div class="flex items-center mb-4 text-purple-400 font-semibold">
+                    <i class="fas fa-sync-alt mr-2"></i> Triangle Loop #{{ forloop.counter }}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                    <!-- User (You) -->
+                    <div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700 relative">
+                        <div class="absolute -right-3 top-1/2 -translate-y-1/2 z-10 hidden md:block text-purple-500">
+                            <i class="fas fa-arrow-right fa-lg"></i>
+                        </div>
+                        <div class="text-xs text-purple-400 mb-2 font-bold uppercase">YOU (Start)</div>
+                        <h4 class="font-bold text-white">{{ user.full_name }}</h4>
+                        <p class="text-sm text-gray-400 mb-2">{{ user.school.name|default:'No School' }}</p>
+                        <div class="text-xs text-gray-500">
+                            <i class="fas fa-map-marker-alt mr-1"></i> {{
+                            user.school.county|default:user.preferences.desired_county }}
+                        </div>
+                    </div>
+
+                    <!-- Teacher B -->
+                    {% with match=triangle.0 %}
+                    <div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700 relative">
+                        <div class="absolute -right-3 top-1/2 -translate-y-1/2 z-10 hidden md:block text-purple-500">
+                            <i class="fas fa-arrow-right fa-lg"></i>
+                        </div>
+                        <div class="text-xs text-purple-400 mb-2 font-bold uppercase">TEACHER B</div>
+                        <h4 class="font-bold text-white">{{ match.full_name }}</h4>
+                        <p class="text-sm text-gray-400 mb-2">{{ match.email }}</p>
+                        <p class="text-sm text-gray-300 mb-2">{{ match.school.name|default:'Unknown School' }}</p>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <i class="fas fa-map-marker-alt mr-1"></i> {{ match.school.county|default:'Unknown Location'
+                            }}
+                        </div>
+                        <div class="flex flex-wrap gap-1 mt-2">
+                            {% for subject in match.subjects|slice:":2" %}
+                            <span class="text-[10px] bg-slate-700 text-gray-300 px-2 py-0.5 rounded-full">{{ subject
+                                }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endwith %}
+
+                    <!-- Teacher C -->
+                    {% with match=triangle.1 %}
+                    <div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                        <div class="text-xs text-purple-400 mb-2 font-bold uppercase">TEACHER C</div>
+                        <h4 class="font-bold text-white">{{ match.full_name }}</h4>
+                        <p class="text-sm text-gray-400 mb-2">{{ match.email }}</p>
+                        <p class="text-sm text-gray-300 mb-2">{{ match.school.name|default:'Unknown School' }}</p>
+                        <div class="text-xs text-gray-500 mb-2">
+                            <i class="fas fa-map-marker-alt mr-1"></i> {{ match.school.county|default:'Unknown Location'
+                            }}
+                        </div>
+                        <div class="flex flex-wrap gap-1 mt-2">
+                            {% for subject in match.subjects|slice:":2" %}
+                            <span class="text-[10px] bg-slate-700 text-gray-300 px-2 py-0.5 rounded-full">{{ subject
+                                }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endwith %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-matches">
+            <div class="no-matches-icon">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+            <h3>No Triangle Swaps Found</h3>
+            <p>No 3-way circular swaps available at this time.</p>
+        </div>
         {% endif %}
     </div>
 </div>
 {% endblock %}
-

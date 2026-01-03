@@ -600,55 +600,14 @@ def dashboard(request):
         is_secondary = hasattr(user.profile.school, 'level') and ('secondary' in user.profile.school.level.name.lower() or 'high' in user.profile.school.level.name.lower())
         
         # Base queryset for potential matches
-        matches = MyUser.objects.filter(
-            ~Q(id=user.id), 
-            is_active=True,
-            profile__isnull=False,
-            profile__school__isnull=False
-        ).prefetch_related(
-            'profile__school__level',
-            'profile__school__ward__constituency__county',
-            'mysubject_set__subject'
-        )
-        
-        # Filter by subjects for secondary school teachers
-        if is_secondary and hasattr(user, 'mysubject_set'):
-            user_subjects = list(user.mysubject_set.values_list('subject__id', flat=True))
-            if user_subjects:
-                matches = matches.filter(
-                    mysubject__subject__in=user_subjects
-                )
+        from home.matching import find_matches
+        matches = find_matches(user)
         
         # Limit to 5 matches for the dashboard
         matches = matches.distinct()[:5]
         
-        # Prepare match data
-        for match in matches:
-            match_data = {
-                'id': match.id,
-                'email': match.email,
-                'full_name': match.get_full_name() or 'No Name',
-                'phone': match.profile.phone if hasattr(match, 'profile') and match.profile.phone else '-',
-                'school': None,
-                'subjects': []
-            }
-            
-            # Add school info
-            if hasattr(match, 'profile') and hasattr(match.profile, 'school') and match.profile.school:
-                school = match.profile.school
-                match_data['school'] = {
-                    'name': school.name,
-                    'ward': school.ward.name if school.ward else 'N/A',
-                    'constituency': school.ward.constituency.name if school.ward and school.ward.constituency else 'N/A',
-                    'county': school.ward.constituency.county.name if school.ward and school.ward.constituency and school.ward.constituency.county else 'N/A',
-                    'level': school.level.name if hasattr(school, 'level') and school.level else 'N/A'
-                }
-            
-            # Add subjects
-            if hasattr(match, 'mysubject_set'):
-                match_data['subjects'] = [ms.subject.name for ms in match.mysubject_set.all()]
-            
-            potential_matches.append(match_data)
+        # Assign directly - template expects User objects for match_card.html
+        potential_matches = matches
         
         # Set flags based on whether we found any matches
         has_potential_matches = len(potential_matches) > 0

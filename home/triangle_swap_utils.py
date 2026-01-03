@@ -59,11 +59,12 @@ def get_user_subjects(user):
     return set()
 
 
-def have_common_subjects(user1, user2):
-    """Check if two users have at least one common subject."""
+def have_same_subjects(user1, user2):
+    """Check if two users have exactly the same set of subjects."""
     subjects1 = get_user_subjects(user1)
     subjects2 = get_user_subjects(user2)
-    return len(subjects1.intersection(subjects2)) > 0
+    return subjects1 == subjects2
+
 
 
 def find_triangle_swaps_primary(teachers_queryset):
@@ -160,8 +161,9 @@ def find_triangle_swaps_primary(teachers_queryset):
 def find_triangle_swaps_secondary(teachers_queryset):
     """
     Find triangle swaps for SECONDARY level teachers.
+    Find triangle swaps for SECONDARY level teachers.
     Checks BOTH location AND subject matching.
-    All three teachers must have at least one common subject with each other.
+    All three teachers must have exactly the same subjects.
     
     Returns list of tuples: [(teacher_a, teacher_b, teacher_c), ...]
     """
@@ -205,8 +207,8 @@ def find_triangle_swaps_secondary(teachers_queryset):
                 if teacher_b.id == teacher_a.id:
                     continue
                 
-                # Check if Teacher A and Teacher B have common subjects
-                if not have_common_subjects(teacher_a, teacher_b):
+                # Check if Teacher A and Teacher B have same subjects
+                if not have_same_subjects(teacher_a, teacher_b):
                     continue
                 
                 county_b = get_current_county(teacher_b)
@@ -234,10 +236,8 @@ def find_triangle_swaps_secondary(teachers_queryset):
                         if teacher_c.id in [teacher_a.id, teacher_b.id]:
                             continue
                         
-                        # Check if Teacher C has common subjects with both A and B
-                        if not have_common_subjects(teacher_a, teacher_c):
-                            continue
-                        if not have_common_subjects(teacher_b, teacher_c):
+                        # Check if Teacher C has same subjects with A (Transitive property implies B is also same)
+                        if not have_same_subjects(teacher_a, teacher_c):
                             continue
                         
                         county_c = get_current_county(teacher_c)

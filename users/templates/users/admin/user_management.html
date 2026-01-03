@@ -12,12 +12,14 @@
         color: #e2e8f0;
         min-height: 100vh;
     }
+
     .stats-container {
         display: flex;
         gap: 1.5rem;
         margin-bottom: 2rem;
         flex-wrap: wrap;
     }
+
     .stat-card {
         background: transparent;
         border: 1px solid rgba(148, 163, 184, 0.2);
@@ -27,34 +29,41 @@
         min-width: 200px;
         color: #e2e8f0;
     }
+
     .stat-card h3 {
         margin-top: 0;
         color: #e2e8f0;
         font-size: 1rem;
         font-weight: 600;
     }
+
     .stat-card p {
         font-size: 2rem;
         font-weight: 700;
         margin: 0.5rem 0 0;
         color: #ffffff;
     }
+
     .table-container {
         background: transparent;
         border: 1px solid rgba(148, 163, 184, 0.2);
         border-radius: 8px;
         overflow: hidden;
     }
+
     .user-table {
         width: 100%;
         border-collapse: collapse;
     }
-    .user-table th, .user-table td {
+
+    .user-table th,
+    .user-table td {
         padding: 1rem;
         text-align: left;
         border-bottom: 1px solid rgba(148, 163, 184, 0.15);
         color: #e2e8f0;
     }
+
     .user-table th {
         background-color: transparent;
         color: #94a3b8;
@@ -64,17 +73,21 @@
         letter-spacing: 0.05em;
         border-bottom: 2px solid rgba(148, 163, 184, 0.2);
     }
+
     .user-table tr:hover {
         background-color: rgba(148, 163, 184, 0.05);
     }
+
     .status-active {
         color: #38a169;
         font-weight: 600;
     }
+
     .status-inactive {
         color: #e53e3e;
         font-weight: 600;
     }
+
     .badge {
         display: inline-block;
         padding: 0.25rem 0.5rem;
@@ -82,19 +95,23 @@
         font-size: 0.75rem;
         font-weight: 600;
     }
+
     .badge-primary {
         background-color: rgba(59, 130, 246, 0.2);
         color: #60a5fa;
         border: 1px solid rgba(59, 130, 246, 0.3);
     }
+
     .badge-secondary {
         background-color: rgba(148, 163, 184, 0.15);
         color: #cbd5e1;
         border: 1px solid rgba(148, 163, 184, 0.3);
     }
+
     .text-muted {
         color: #718096;
     }
+
     .action-buttons a {
         color: #63b3ed;
         text-decoration: none;
@@ -105,6 +122,7 @@
         border-radius: 4px;
         transition: background-color 0.2s;
     }
+
     .action-buttons a.btn-view-matches {
         background-color: rgba(59, 130, 246, 0.15);
         color: #60a5fa;
@@ -112,14 +130,17 @@
         border: 1px solid rgba(59, 130, 246, 0.3);
         transition: all 0.2s;
     }
+
     .action-buttons a.btn-view-matches:hover {
         background-color: rgba(59, 130, 246, 0.25);
         border-color: rgba(59, 130, 246, 0.5);
         text-decoration: none;
     }
+
     .action-buttons a:hover {
         text-decoration: underline;
     }
+
     @media (max-width: 1024px) {
         .user-table {
             display: block;
@@ -130,76 +151,176 @@
 {% endblock %}
 
 {% block content %}
-<div class="user-management">
-    <h1 class="text-3xl font-bold text-white mb-8">User Management</h1>
-    
-    <div class="stats-container">
-        <div class="stat-card">
-            <h3>Total Users</h3>
-            <p>{{ total_users }}</p>
+<div class="user-management" x-data="{ 
+    search: '', 
+    statusFilter: 'all',
+    users: [
+        {% for user in users %}
+        {
+            id: '{{ user.id }}',
+            full_name: '{{ user.full_name|escapejs }}',
+            email: '{{ user.email|escapejs }}',
+            phone: '{{ user.phone|default:'-' }}',
+            school_name: '{{ user.school.name|default:'-'|escapejs }}',
+            school_level: '{{ user.school.level|default:'-'|escapejs }}',
+            location: '{% if user.school %}{{ user.school.ward|escapejs }}, {{ user.school.constituency|escapejs }}{% else %}-{% endif %}',
+            triangle_swaps: {{ user.triangle_swaps }},
+            potential_matches: {{ user.potential_matches }},
+            is_active: {{ user.is_active|yesno:'true,false' }},
+            url: '{% url 'users_admin:user_potential_matches' user.id %}'
+        },
+        {% endfor %}
+    ],
+    get filteredUsers() {
+        return this.users.filter(user => {
+            const searchLower = this.search.toLowerCase();
+            const matchesSearch = user.full_name.toLowerCase().includes(searchLower) || 
+                                user.email.toLowerCase().includes(searchLower) || 
+                                user.school_name.toLowerCase().includes(searchLower);
+            
+            if (this.statusFilter === 'all') return matchesSearch;
+            if (this.statusFilter === 'matches') return matchesSearch && (user.potential_matches > 0 || user.triangle_swaps > 0);
+            return matchesSearch;
+        });
+    }
+}">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-white">User Management</h1>
+            <p class="text-gray-400 mt-1">Manage users and monitor swap opportunities</p>
         </div>
-        <div class="stat-card">
-            <h3>Active Users</h3>
-            <p>{{ active_users }}</p>
+
+        <!-- Search and Filter -->
+        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <div class="relative">
+                <input type="text" x-model="search" placeholder="Search users..."
+                    class="w-full md:w-64 bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500">
+                <svg class="w-4 h-4 text-gray-500 absolute left-3 top-2.5" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+
+            <select x-model="statusFilter"
+                class="bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="all">All Users</option>
+                <option value="matches">With Matches Only</option>
+            </select>
         </div>
     </div>
 
-    <div class="table-container">
-        <table class="user-table">
-            <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Contact</th>
-                    <th>Location</th>
-                    <th>Level</th>
-                    <th>Triangle Swaps</th>
-                    <th>Potential Matches</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>
-                        <div class="font-medium">{{ user.full_name }}</div>
-                        <div class="text-sm text-gray-400">ID: {{ user.id }}</div>
-                    </td>
-                    <td>
-                        <div>{{ user.email }}</div>
-                        <div class="text-sm text-gray-400">{{ user.phone|default:'' }}</div>
-                    </td>
-                    <td>
-                        {% if user.school %}
-                            {{ user.school.ward }}, {{ user.school.constituency }}
-                        {% else %}
-                            <span class="text-muted">-</span>
-                        {% endif %}
-                    </td>
-                    <td>{% if user.school %}{{ user.school.level }}{% else %}-{% endif %}</td>
-                    <td>
-                        {% if user.triangle_swaps > 0 %}
-                            <span class="badge badge-primary">{{ user.triangle_swaps }} triangle{{ user.triangle_swaps|pluralize }}</span>
-                        {% else %}
-                            <span class="text-muted">None</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if user.potential_matches > 0 %}
-                            <span class="badge badge-primary">{{ user.potential_matches }} matches</span>
-                        {% else %}
-                            <span class="text-muted">None</span>
-                        {% endif %}
-                    </td>
-                   
-                    <td class="action-buttons">
-                        <a href="{% url 'users_admin:user_potential_matches' user.id %}" class="btn-view-matches block w-full text-center rounded text-sm">
-                            View Matches
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Stats Cards -->
+    <div class="stats-container mb-8">
+        <div class="stat-card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider">Total Users</h3>
+            <p class="text-3xl font-bold text-white mt-2">{{ total_users }}</p>
+        </div>
+        <div class="stat-card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider">Active Users</h3>
+            <p class="text-3xl font-bold text-green-400 mt-2">{{ active_users }}</p>
+        </div>
+        <div class="stat-card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+            <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider">With Matches</h3>
+            <p class="text-3xl font-bold text-blue-400 mt-2"
+                x-text="users.filter(u => u.potential_matches > 0 || u.triangle_swaps > 0).length"></p>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-container bg-slate-800/30 border border-slate-700/50 rounded-xl overflow-hidden backdrop-blur-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr
+                        class="border-b border-slate-700/50 bg-slate-800/50 text-xs uppercase tracking-wider text-gray-400 font-semibold">
+                        <th class="p-4">User Details</th>
+                        <th class="p-4">Location & School</th>
+                        <th class="p-4">Swap Status</th>
+                        <th class="p-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-700/30">
+                    <template x-for="user in filteredUsers" :key="user.id">
+                        <tr class="hover:bg-slate-700/30 transition-colors">
+                            <td class="p-4">
+                                <div class="flex items-center">
+                                    <div
+                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm mr-3">
+                                        <span x-text="user.full_name.charAt(0)"></span>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-white" x-text="user.full_name"></div>
+                                        <div class="text-xs text-gray-400" x-text="user.email"></div>
+                                        <div class="text-xs text-gray-500 mt-0.5" x-text="'ID: ' + user.id"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <div class="text-sm">
+                                    <div class="text-gray-300" x-text="user.school_name"></div>
+                                    <div class="text-xs text-gray-500 mt-0.5" x-text="user.location"></div>
+                                    <span
+                                        class="inline-block mt-1 px-2 py-0.5 bg-slate-700 text-gray-300 text-xs rounded"
+                                        x-text="user.school_level"></span>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex flex-col gap-2">
+                                    <!-- Mutual Matches Badge -->
+                                    <div x-show="user.potential_matches > 0" class="inline-flex items-center">
+                                        <span
+                                            class="px-2.5 py-1 rounded-full text-xs font-medium bg-green-900/30 text-green-400 border border-green-500/20">
+                                            <span x-text="user.potential_matches"></span> Mutual Matches
+                                        </span>
+                                    </div>
+                                    <div x-show="user.potential_matches === 0" class="inline-flex items-center">
+                                        <span
+                                            class="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-700/30 text-gray-500 border border-slate-600/20">
+                                            No Mutual
+                                        </span>
+                                    </div>
+
+                                    <!-- Triangle Swaps Badge -->
+                                    <div x-show="user.triangle_swaps > 0" class="inline-flex items-center">
+                                        <span
+                                            class="px-2.5 py-1 rounded-full text-xs font-medium bg-purple-900/30 text-purple-400 border border-purple-500/20">
+                                            <span x-text="user.triangle_swaps"></span> Triangle Swaps
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-4 text-right">
+                                <a :href="user.url"
+                                    class="inline-flex items-center px-3 py-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-sm font-medium transition-all group">
+                                    <span>View Matches</span>
+                                    <svg class="w-4 h-4 ml-1.5 transform group-hover:translate-x-0.5 transition-transform"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </a>
+                            </td>
+                        </tr>
+                    </template>
+
+                    <!-- Empty State -->
+                    <tr x-show="filteredUsers.length === 0">
+                        <td colspan="4" class="p-8 text-center text-gray-500">
+                            <div class="flex flex-col items-center justify-center">
+                                <svg class="w-12 h-12 text-gray-600 mb-3" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                <p>No users found matching your search.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 {% endblock %}

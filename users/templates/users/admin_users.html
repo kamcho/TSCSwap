@@ -88,22 +88,31 @@
                                     </span>
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-white">
-                                        {% if user_data.profile %}
-                                            {% if user_data.profile.first_name %}
-                                                {{ user_data.profile.first_name }}
-                                                {% if user_data.profile.last_name %}
-                                                    {{ user_data.profile.last_name }}
-                                                {% endif %}
-                                                {% if user_data.profile.surname %}
-                                                    {{ user_data.profile.surname }}
+                                    <div class="flex items-center gap-2">
+                                        <div class="text-sm font-medium text-white">
+                                            {% if user_data.profile %}
+                                                {% if user_data.profile.first_name %}
+                                                    {{ user_data.profile.first_name }}
+                                                    {% if user_data.profile.last_name %}
+                                                        {{ user_data.profile.last_name }}
+                                                    {% endif %}
+                                                    {% if user_data.profile.surname %}
+                                                        {{ user_data.profile.surname }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    {{ user_data.user.email }}
                                                 {% endif %}
                                             {% else %}
                                                 {{ user_data.user.email }}
                                             {% endif %}
-                                        {% else %}
-                                            {{ user_data.user.email }}
-                                        {% endif %}
+                                        </div>
+                                        <a href="{% url 'users:manage_teacher_subjects' user_data.user.id %}" 
+                                           class="inline-flex items-center px-1.5 py-0.5 rounded text-xs text-orange-300 hover:text-orange-200 hover:bg-orange-900/30 transition-colors" 
+                                           title="Manage subjects">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                            </svg>
+                                        </a>
                                     </div>
                                     <div class="flex items-center mt-1 space-x-2">
                                         <span class="text-xs text-gray-400">ID: {{ user_data.user.id }}</span>
@@ -269,6 +278,14 @@
                         
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                             <a href="{% url 'users:admin_edit_user' user_data.user.id %}" class="text-blue-400 hover:text-blue-300">Edit</a>
+                            <a href="{% url 'users:manage_teacher_subjects' user_data.user.id %}" 
+                               class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium text-orange-300 bg-orange-900/30 hover:bg-orange-900/50 border border-orange-700/50 hover:border-orange-600 transition-colors" 
+                               title="Manage subjects and swap preferences">
+                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                                Subjects
+                            </a>
                             {% if user_data.whatsapp_url %}
                                 <a href="{{ user_data.whatsapp_url }}" 
                                    target="_blank" 
