@@ -53,15 +53,16 @@ class Command(BaseCommand):
                 data['current_county'] = None
             
             # Swap Preference
-            if hasattr(user, 'swappreference'):
+            try:
                 pref = user.swappreference
                 data['has_swappreference'] = True
                 data['desired_county'] = pref.desired_county.name if pref.desired_county else None
                 data['desired_county_id'] = pref.desired_county.id if pref.desired_county else None
                 data['open_to_all'] = pref.open_to_all
-            else:
+            except:
                 data['has_swappreference'] = False
                 data['desired_county'] = None
+                data['desired_county_id'] = None
                 data['open_to_all'] = None
             
             # Subjects (for secondary)
