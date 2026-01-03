@@ -7,7 +7,7 @@
 <style>
     .fast-swap-page {
         min-height: 100vh;
-        background: 
+        background:
             radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 50%),
             radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08), transparent 50%),
             #0f172a;
@@ -456,16 +456,16 @@
         .filter-form {
             flex-direction: column;
         }
-        
+
         .filter-group {
             width: 100%;
         }
-        
+
         .filter-actions {
             width: 100%;
             justify-content: space-between;
         }
-        
+
         .filter-btn {
             flex: 1;
         }
@@ -647,7 +647,8 @@
         color: #86efac;
     }
 
-    .level-pill-primary:hover, .level-pill-primary.active {
+    .level-pill-primary:hover,
+    .level-pill-primary.active {
         background: rgba(34, 197, 94, 0.25);
         border-color: rgba(34, 197, 94, 0.6);
     }
@@ -658,7 +659,8 @@
         color: #c4b5fd;
     }
 
-    .level-pill-secondary:hover, .level-pill-secondary.active {
+    .level-pill-secondary:hover,
+    .level-pill-secondary.active {
         background: rgba(168, 85, 247, 0.25);
         border-color: rgba(168, 85, 247, 0.6);
     }
@@ -669,7 +671,8 @@
         color: #67e8f9;
     }
 
-    .level-pill-all:hover, .level-pill-all.active {
+    .level-pill-all:hover,
+    .level-pill-all.active {
         background: rgba(34, 211, 238, 0.25);
         border-color: rgba(34, 211, 238, 0.6);
     }
@@ -684,27 +687,31 @@
         <div class="level-selector-modal">
             <h2 class="level-selector-title">Select Teaching Level</h2>
             <p class="level-selector-subtitle">Choose the level you want to browse swap listings for</p>
-            
+
             <div class="level-options">
                 <a href="?level=primary" class="level-option level-option-primary">
                     <div class="level-option-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                     </div>
                     <span class="level-option-name">Primary School</span>
                 </a>
-                
+
                 <a href="?level=secondary" class="level-option level-option-secondary">
                     <div class="level-option-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
                     <span class="level-option-name">Secondary/High School</span>
                 </a>
             </div>
-            
+
             <button class="view-all-link" @click="show = false">
                 Or view all listings without filter
             </button>
@@ -725,7 +732,7 @@
             <div class="mt-4 sm:mt-0">
                 <a href="{% url 'home:add_fast_swap' %}" class="add-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 5v14M5 12h14"/>
+                        <path d="M12 5v14M5 12h14" />
                     </svg>
                     Add FastSwap
                 </a>
@@ -735,20 +742,25 @@
 
         <!-- Level Filter Pills -->
         <div class="level-filter-pills">
-            <a href="{% url 'home:fast_swap_list' %}" class="level-pill level-pill-all {% if not selected_level %}active{% endif %}">
+            <a href="{% url 'home:fast_swap_list' %}"
+                class="level-pill level-pill-all {% if not selected_level %}active{% endif %}">
                 All Levels
             </a>
-            <a href="?level=primary{% if selected_county %}&county={{ selected_county }}{% endif %}{% if selected_constituency %}&constituency={{ selected_constituency }}{% endif %}{% if selected_ward %}&ward={{ selected_ward }}{% endif %}" 
-               class="level-pill level-pill-primary {% if selected_level == 'primary' %}active{% endif %}">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 4px;">
-                    <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            <a href="?level=primary{% if selected_county %}&county={{ selected_county }}{% endif %}{% if selected_constituency %}&constituency={{ selected_constituency }}{% endif %}{% if selected_ward %}&ward={{ selected_ward }}{% endif %}"
+                class="level-pill level-pill-primary {% if selected_level == 'primary' %}active{% endif %}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    style="display: inline; vertical-align: middle; margin-right: 4px;">
+                    <path
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
                 Primary
             </a>
-            <a href="?level=secondary{% if selected_county %}&county={{ selected_county }}{% endif %}{% if selected_constituency %}&constituency={{ selected_constituency }}{% endif %}{% if selected_ward %}&ward={{ selected_ward }}{% endif %}" 
-               class="level-pill level-pill-secondary {% if selected_level == 'secondary' %}active{% endif %}">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 4px;">
-                    <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            <a href="?level=secondary{% if selected_county %}&county={{ selected_county }}{% endif %}{% if selected_constituency %}&constituency={{ selected_constituency }}{% endif %}{% if selected_ward %}&ward={{ selected_ward }}{% endif %}"
+                class="level-pill level-pill-secondary {% if selected_level == 'secondary' %}active{% endif %}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    style="display: inline; vertical-align: middle; margin-right: 4px;">
+                    <path
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
                 Secondary
             </a>
@@ -756,11 +768,11 @@
 
         <!-- Messages -->
         {% if messages %}
-            {% for message in messages %}
-                <div class="message-alert {% if message.tags == 'error' %}message-error{% else %}message-success{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="message-alert {% if message.tags == 'error' %}message-error{% else %}message-success{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
         {% endif %}
 
         <!-- Filter Form -->
@@ -770,328 +782,361 @@
                 {% if selected_level %}
                 <input type="hidden" name="level" value="{{ selected_level }}">
                 {% endif %}
-                
+
                 <div class="filter-group">
                     <label for="county">County</label>
                     <select name="county" id="county" class="filter-select">
                         <option value="">All Counties</option>
                         {% for county in counties %}
-                            <option value="{{ county.id }}" {% if selected_county == county.id|stringformat:"i" %}selected{% endif %}>
-                                {{ county.name }}
-                            </option>
+                        <option value="{{ county.id }}" {% if selected_county==county.id|stringformat:"i" %}selected{%
+                            endif %}>
+                            {{ county.name }}
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
-                
+
                 <div class="filter-group">
                     <label for="constituency">Constituency</label>
                     <select name="constituency" id="constituency" class="filter-select">
                         <option value="">All Constituencies</option>
                         {% for constituency in constituencies %}
-                            <option value="{{ constituency.id }}" {% if selected_constituency == constituency.id|stringformat:"i" %}selected{% endif %}>
-                                {{ constituency.name }}
-                            </option>
+                        <option value="{{ constituency.id }}" {% if
+                            selected_constituency==constituency.id|stringformat:"i" %}selected{% endif %}>
+                            {{ constituency.name }}
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
-                
+
                 <div class="filter-group">
                     <label for="ward">Ward</label>
                     <select name="ward" id="ward" class="filter-select">
                         <option value="">All Wards</option>
                         {% for ward in wards %}
-                            <option value="{{ ward.id }}" {% if selected_ward == ward.id|stringformat:"i" %}selected{% endif %}>
-                                {{ ward.name }}
-                            </option>
+                        <option value="{{ ward.id }}" {% if selected_ward==ward.id|stringformat:"i" %}selected{% endif
+                            %}>
+                            {{ ward.name }}
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
-                
+
                 <div class="filter-actions">
                     <button type="submit" class="filter-btn">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <circle cx="11" cy="11" r="8"></circle>
                             <path d="m21 21-4.35-4.35"></path>
                         </svg>
                         Filter
                     </button>
-                    <a href="{% url 'home:fast_swap_list' %}{% if selected_level %}?level={{ selected_level }}{% endif %}" class="filter-reset">Reset Location</a>
+                    <a href="{% url 'home:fast_swap_list' %}{% if selected_level %}?level={{ selected_level }}{% endif %}"
+                        class="filter-reset">Reset Location</a>
                 </div>
             </form>
         </div>
 
         {% if fast_swaps %}
-            <!-- Stats Bar -->
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <span class="stat-value">{{ fast_swaps|length }}</span>
-                    <span class="stat-label">
-                        {% if selected_level == 'primary' %}Primary{% elif selected_level == 'secondary' %}Secondary{% else %}All{% endif %}
-                        {% if selected_county or selected_constituency or selected_ward %}Filtered Results{% else %}Listings{% endif %}
-                    </span>
-                </div>
-                {% if selected_level or selected_county or selected_constituency or selected_ward %}
-                <div class="stat-item" style="margin-left: auto;">
-                    <span style="color: #94a3b8; font-size: 0.875rem;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle; margin-right: 4px;">
-                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-                        </svg>
-                        {% if selected_level %}{{ selected_level|title }} level{% endif %}
-                        {% if selected_level and selected_county %} + {% endif %}
-                        {% if selected_county or selected_constituency or selected_ward %}location filter{% endif %}
-                    </span>
-                </div>
-                {% endif %}
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-value">{{ fast_swaps|length }}</span>
+                <span class="stat-label">
+                    {% if selected_level == 'primary' %}Primary{% elif selected_level == 'secondary' %}Secondary{% else
+                    %}All{% endif %}
+                    {% if selected_county or selected_constituency or selected_ward %}Filtered Results{% else
+                    %}Listings{% endif %}
+                </span>
             </div>
-
-            <!-- Cards Grid -->
-            <div class="cards-grid">
-                {% for swap in fast_swaps %}
-                    <div class="swap-card">
-                        <!-- Card Header -->
-                        <div class="card-header">
-                            {% if user.is_superuser or user.is_staff %}
-                                {# Full details for admin #}
-                                <h3 class="card-name">{{ swap.names }}</h3>
-                                <a href="tel:{{ swap.phone }}" class="card-phone">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-                                    </svg>
-                                    {{ swap.phone }}
-                                </a>
-                            {% else %}
-                                {# Name only for regular users - no phone number #}
-                                <h3 class="card-name">{{ swap.names|slice:":3" }}***</h3>
-                            {% endif %}
-                        </div>
-
-                        <!-- Card Body -->
-                        <div class="card-body">
-                            <!-- Location Section -->
-                            <div class="location-section">
-                                <div class="location-block">
-                                    <div class="location-label">Current Location</div>
-                                    {% if swap.current_county %}
-                                        <div class="location-value">{{ swap.current_county.name }}</div>
-                                        {% if swap.current_constituency %}
-                                            <div class="location-sub">{{ swap.current_constituency.name }}{% if swap.current_ward %}, {{ swap.current_ward.name }}{% endif %}</div>
-                                        {% endif %}
-                                    {% elif swap.school %}
-                                        <div class="location-value">{{ swap.school.name }}</div>
-                                    {% else %}
-                                        <div class="location-value" style="color: #64748b;">Not specified</div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="swap-arrow">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                                    </svg>
-                                </div>
-
-                                <div class="location-block">
-                                    <div class="location-label">Preferred</div>
-                                    {% if swap.most_preferred %}
-                                        <div class="location-value">{{ swap.most_preferred.name }}</div>
-                                    {% else %}
-                                        <div class="location-value" style="color: #64748b;">Any County</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <!-- Acceptable Counties -->
-                            {% if swap.acceptable_county.all %}
-                            <div class="acceptable-section">
-                                <div class="acceptable-label">Also Acceptable</div>
-                                <div class="acceptable-list">
-                                    {% for county in swap.acceptable_county.all|slice:":5" %}
-                                        {{ county.name }}{% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
-                                    {% if swap.acceptable_county.count > 5 %}
-                                        <span style="color: #64748b;">+{{ swap.acceptable_county.count|add:"-5" }} more</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endif %}
-
-                            <!-- Subjects (for Secondary) -->
-                            {% if swap.subjects.all %}
-                            <div class="subjects-section">
-                                <div class="subjects-label">Subjects</div>
-                                <div class="subjects-tags">
-                                    {% for subject in swap.subjects.all|slice:":4" %}
-                                        <span class="subject-tag">{{ subject.name }}</span>
-                                    {% endfor %}
-                                    {% if swap.subjects.count > 4 %}
-                                        <span class="more-subjects">+{{ swap.subjects.count|add:"-4" }} more</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Card Footer -->
-                        <div class="card-footer">
-                            <span class="level-badge {% if 'Primary' in swap.level.name %}level-primary{% else %}level-secondary{% endif %}">
-                                {% if 'Primary' in swap.level.name %}
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                                    </svg>
-                                {% else %}
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                    </svg>
-                                {% endif %}
-                                {{ swap.level.name }}
-                            </span>
-                            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span class="card-date">{{ swap.created_at|date:"M d, Y" }}</span>
-                                <a href="{% url 'home:fast_swap_detail' fastswap_id=swap.id %}" class="view-detail-link">
-                                    View
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                                    </svg>
-                                </a>
-                                {% if user.is_authenticated %}
-                                <button class="bookmark-btn {% if swap.id in bookmarked_ids %}active{% endif %}" 
-                                        data-fastswap-id="{{ swap.id }}"
-                                        onclick="toggleFastSwapBookmark({{ swap.id }}, this)"
-                                        title="{% if swap.id in bookmarked_ids %}Remove from wishlist{% else %}Add to wishlist{% endif %}">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="{% if swap.id in bookmarked_ids %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2">
-                                        <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-                                    </svg>
-                                </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
+            {% if selected_level or selected_county or selected_constituency or selected_ward %}
+            <div class="stat-item" style="margin-left: auto;">
+                <span style="color: #94a3b8; font-size: 0.875rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="display: inline; vertical-align: middle; margin-right: 4px;">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                    </svg>
+                    {% if selected_level %}{{ selected_level|title }} level{% endif %}
+                    {% if selected_level and selected_county %} + {% endif %}
+                    {% if selected_county or selected_constituency or selected_ward %}location filter{% endif %}
+                </span>
             </div>
-        {% else %}
-            <!-- Empty State -->
-            <div class="empty-state">
-                <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                </svg>
-                {% if selected_level or selected_county or selected_constituency or selected_ward %}
-                    <h3 class="empty-title">No results for this filter</h3>
-                    <p class="empty-text">
-                        {% if selected_level %}No {{ selected_level }} level listings found{% endif %}
-                        {% if selected_level and selected_county %} in the selected location{% elif selected_county %} for the selected location{% endif %}.
-                        {% if not selected_level and not selected_county %}Try adjusting your filter criteria.{% endif %}
-                    </p>
-                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;">
-                        {% if selected_level %}
-                        <a href="{% url 'home:fast_swap_list' %}" class="filter-btn" style="display: inline-flex;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/>
-                                <path d="M3 3v5h5"/>
-                            </svg>
-                            Try Different Level
+            {% endif %}
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="cards-grid">
+            {% for swap in fast_swaps %}
+            <div class="swap-card">
+                <!-- Card Header -->
+                <div class="card-header">
+                    {% if user.is_superuser or user.is_staff %}
+                    {# Full details for admin #}
+                    <h3 class="card-name">
+                        <a href="{% url 'home:fast_swap_detail' fastswap_id=swap.id %}"
+                            class="hover:text-cyan-400 transition-colors">
+                            {{ swap.names }}
                         </a>
-                        {% endif %}
-                        {% if selected_county or selected_constituency or selected_ward %}
-                        <a href="{% url 'home:fast_swap_list' %}{% if selected_level %}?level={{ selected_level }}{% endif %}" class="filter-reset" style="padding: 0.75rem 1.5rem; border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 10px;">
-                            Reset Location Filter
-                        </a>
-                        {% endif %}
-                    </div>
-                {% else %}
-                    <h3 class="empty-title">No FastSwap entries yet</h3>
-                    <p class="empty-text">There are no FastSwap entries available at the moment.</p>
-                    {% if user.is_superuser %}
-                    <a href="{% url 'home:add_fast_swap' %}" class="add-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14M5 12h14"/>
+                    </h3>
+                    <a href="tel:{{ swap.phone }}" class="card-phone">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
                         </svg>
-                        Create First FastSwap
+                        {{ swap.phone }}
                     </a>
+                    {% else %}
+                    {# Name only for regular users - no phone number #}
+                    <h3 class="card-name">
+                        <a href="{% url 'home:fast_swap_detail' fastswap_id=swap.id %}"
+                            class="hover:text-cyan-400 transition-colors">
+                            {{ swap.names|slice:":3" }}***
+                        </a>
+                    </h3>
                     {% endif %}
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+                    <!-- Location Section -->
+                    <div class="location-section">
+                        <div class="location-block">
+                            <div class="location-label">Current Location</div>
+                            {% if swap.current_county %}
+                            <div class="location-value">{{ swap.current_county.name }}</div>
+                            {% if swap.current_constituency %}
+                            <div class="location-sub">{{ swap.current_constituency.name }}{% if swap.current_ward %}, {{
+                                swap.current_ward.name }}{% endif %}</div>
+                            {% endif %}
+                            {% elif swap.school %}
+                            <div class="location-value">{{ swap.school.name }}</div>
+                            {% else %}
+                            <div class="location-value" style="color: #64748b;">Not specified</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="swap-arrow">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </div>
+
+                        <div class="location-block">
+                            <div class="location-label">Preferred</div>
+                            {% if swap.most_preferred %}
+                            <div class="location-value">{{ swap.most_preferred.name }}</div>
+                            {% else %}
+                            <div class="location-value" style="color: #64748b;">Any County</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Acceptable Counties -->
+                    {% if swap.acceptable_county.all %}
+                    <div class="acceptable-section">
+                        <div class="acceptable-label">Also Acceptable</div>
+                        <div class="acceptable-list">
+                            {% for county in swap.acceptable_county.all|slice:":5" %}
+                            {{ county.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                            {% if swap.acceptable_county.count > 5 %}
+                            <span style="color: #64748b;">+{{ swap.acceptable_county.count|add:"-5" }} more</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Subjects (for Secondary) -->
+                    {% if swap.subjects.all %}
+                    <div class="subjects-section">
+                        <div class="subjects-label">Subjects</div>
+                        <div class="subjects-tags">
+                            {% for subject in swap.subjects.all|slice:":4" %}
+                            <span class="subject-tag">{{ subject.name }}</span>
+                            {% endfor %}
+                            {% if swap.subjects.count > 4 %}
+                            <span class="more-subjects">+{{ swap.subjects.count|add:"-4" }} more</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Card Footer -->
+                <div class="card-footer">
+                    <span
+                        class="level-badge {% if 'Primary' in swap.level.name %}level-primary{% else %}level-secondary{% endif %}">
+                        {% if 'Primary' in swap.level.name %}
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        {% else %}
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        {% endif %}
+                        {{ swap.level.name }}
+                    </span>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span class="card-date">{{ swap.created_at|date:"M d, Y" }}</span>
+                        <a href="{% url 'home:fast_swap_detail' fastswap_id=swap.id %}" class="view-detail-link">
+                            View
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                        {% if user.is_authenticated %}
+                        <button class="bookmark-btn {% if swap.id in bookmarked_ids %}active{% endif %}"
+                            data-fastswap-id="{{ swap.id }}" onclick="toggleFastSwapBookmark({{ swap.id }}, this)"
+                            title="{% if swap.id in bookmarked_ids %}Remove from wishlist{% else %}Add to wishlist{% endif %}">
+                            <svg width="18" height="18" viewBox="0 0 24 24"
+                                fill="{% if swap.id in bookmarked_ids %}currentColor{% else %}none{% endif %}"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            </svg>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <svg class="empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            </svg>
+            {% if selected_level or selected_county or selected_constituency or selected_ward %}
+            <h3 class="empty-title">No results for this filter</h3>
+            <p class="empty-text">
+                {% if selected_level %}No {{ selected_level }} level listings found{% endif %}
+                {% if selected_level and selected_county %} in the selected location{% elif selected_county %} for the
+                selected location{% endif %}.
+                {% if not selected_level and not selected_county %}Try adjusting your filter criteria.{% endif %}
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;">
+                {% if selected_level %}
+                <a href="{% url 'home:fast_swap_list' %}" class="filter-btn" style="display: inline-flex;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" />
+                        <path d="M3 3v5h5" />
+                    </svg>
+                    Try Different Level
+                </a>
+                {% endif %}
+                {% if selected_county or selected_constituency or selected_ward %}
+                <a href="{% url 'home:fast_swap_list' %}{% if selected_level %}?level={{ selected_level }}{% endif %}"
+                    class="filter-reset"
+                    style="padding: 0.75rem 1.5rem; border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 10px;">
+                    Reset Location Filter
+                </a>
                 {% endif %}
             </div>
+            {% else %}
+            <h3 class="empty-title">No FastSwap entries yet</h3>
+            <p class="empty-text">There are no FastSwap entries available at the moment.</p>
+            {% if user.is_superuser %}
+            <a href="{% url 'home:add_fast_swap' %}" class="add-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+                Create First FastSwap
+            </a>
+            {% endif %}
+            {% endif %}
+        </div>
         {% endif %}
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const countySelect = document.getElementById('county');
-    const constituencySelect = document.getElementById('constituency');
-    const wardSelect = document.getElementById('ward');
+    document.addEventListener('DOMContentLoaded', function () {
+        const countySelect = document.getElementById('county');
+        const constituencySelect = document.getElementById('constituency');
+        const wardSelect = document.getElementById('ward');
 
-    // Handle county change - load constituencies
-    countySelect.addEventListener('change', function() {
-        const countyId = this.value;
-        
-        // Reset dependent dropdowns
-        constituencySelect.innerHTML = '<option value="">All Constituencies</option>';
-        wardSelect.innerHTML = '<option value="">All Wards</option>';
-        
-        if (countyId) {
-            fetch(`/api/constituencies/?county=${countyId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(constituency => {
-                        const option = document.createElement('option');
-                        option.value = constituency.id;
-                        option.textContent = constituency.name;
-                        constituencySelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error loading constituencies:', error));
-        }
-    });
+        // Handle county change - load constituencies
+        countySelect.addEventListener('change', function () {
+            const countyId = this.value;
 
-    // Handle constituency change - load wards
-    constituencySelect.addEventListener('change', function() {
-        const constituencyId = this.value;
-        
-        // Reset ward dropdown
-        wardSelect.innerHTML = '<option value="">All Wards</option>';
-        
-        if (constituencyId) {
-            fetch(`/api/wards/?constituency=${constituencyId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(ward => {
-                        const option = document.createElement('option');
-                        option.value = ward.id;
-                        option.textContent = ward.name;
-                        wardSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error loading wards:', error));
-        }
-    });
-});
+            // Reset dependent dropdowns
+            constituencySelect.innerHTML = '<option value="">All Constituencies</option>';
+            wardSelect.innerHTML = '<option value="">All Wards</option>';
 
-// Toggle FastSwap bookmark
-function toggleFastSwapBookmark(fastswapId, button) {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-    fetch(`/bookmarks/toggle/fastswap/${fastswapId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrfToken,
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const svg = button.querySelector('svg');
-            if (data.action === 'added') {
-                button.classList.add('active');
-                svg.setAttribute('fill', 'currentColor');
-                button.title = 'Remove from wishlist';
-            } else {
-                button.classList.remove('active');
-                svg.setAttribute('fill', 'none');
-                button.title = 'Add to wishlist';
+            if (countyId) {
+                fetch(`/api/constituencies/?county=${countyId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(constituency => {
+                            const option = document.createElement('option');
+                            option.value = constituency.id;
+                            option.textContent = constituency.name;
+                            constituencySelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error loading constituencies:', error));
             }
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
+        });
+
+        // Handle constituency change - load wards
+        constituencySelect.addEventListener('change', function () {
+            const constituencyId = this.value;
+
+            // Reset ward dropdown
+            wardSelect.innerHTML = '<option value="">All Wards</option>';
+
+            if (constituencyId) {
+                fetch(`/api/wards/?constituency=${constituencyId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(ward => {
+                            const option = document.createElement('option');
+                            option.value = ward.id;
+                            option.textContent = ward.name;
+                            wardSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error loading wards:', error));
+            }
+        });
+    });
+
+    // Toggle FastSwap bookmark
+    function toggleFastSwapBookmark(fastswapId, button) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch(`/bookmarks/toggle/fastswap/${fastswapId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const svg = button.querySelector('svg');
+                    if (data.action === 'added') {
+                        button.classList.add('active');
+                        svg.setAttribute('fill', 'currentColor');
+                        button.title = 'Remove from wishlist';
+                    } else {
+                        button.classList.remove('active');
+                        svg.setAttribute('fill', 'none');
+                        button.title = 'Add to wishlist';
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
 </script>
 {% endblock %}

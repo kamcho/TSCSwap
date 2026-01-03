@@ -1082,6 +1082,11 @@ def fast_swap_detail(request, fastswap_id):
             fast_swap=fast_swap,
             bookmark_type='fastswap'
         ).exists()
+
+    # Find matches and triangles
+    from .fast_swap_utils import find_mutual_matches_for_fast_swap, find_triangle_matches_for_fast_swap
+    matches = find_mutual_matches_for_fast_swap(fast_swap)
+    triangles = find_triangle_matches_for_fast_swap(fast_swap)
     
     context = {
         'fast_swap': fast_swap,
@@ -1092,6 +1097,9 @@ def fast_swap_detail(request, fastswap_id):
         'subjects': subjects,
         'is_bookmarked': is_bookmarked,
         'has_active_subscription': has_active_subscription,
+        'mutual_matches_fs': matches['fast_swaps'],
+        'mutual_matches_users': matches['users'],
+        'triangle_swaps': triangles,
     }
     
     return render(request, 'home/fast_swap_detail.html', context)
@@ -1378,7 +1386,7 @@ def add_fast_swap(request):
                 fast_swap.save()
                 form.save_m2m()  # Save many-to-many fields
                 messages.success(request, 'FastSwap entry added successfully!')
-                return redirect('home:fast_swap_list')
+                return redirect('home:fast_swap_detail', fastswap_id=fast_swap.id)
             except Exception as e:
                 messages.error(request, f'Error saving FastSwap: {str(e)}')
         else:
